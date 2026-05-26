@@ -28,6 +28,14 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   const [announcements, setAnnouncements] = useState<AnnouncementType[]>(initialAnnouncements);
   const [banners, setBanners] = useState<BannerType[]>([]);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [bgError, setBgError] = useState(false);
+  const [prevBgImage, setPrevBgImage] = useState(settings.backgroundImage);
+
+  // Reset background error status in render phase if the image URL changes to avoid cascading renders
+  if (settings.backgroundImage !== prevBgImage) {
+    setPrevBgImage(settings.backgroundImage);
+    setBgError(false);
+  }
 
   // Signage Layout States which toggles between normal Clocks and dynamic Poster Banners
   const [viewMode, setViewMode] = useState<'CLOCK' | 'BANNER'>('CLOCK');
@@ -61,9 +69,21 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     };
 
     fetchLatestData(); // immediate load triggers
-    const poller = setInterval(fetchLatestData, 10 * 1000); // Poll every 10 seconds for real-time responsiveness
+    const poller = setInterval(fetchLatestData, 2 * 1000); // Poll every 2 seconds for real-time responsiveness
     return () => clearInterval(poller);
   }, []);
+
+  // Instantly transition to BANNER mode when new active banners are added/activated
+  const activeBannersCount = banners.filter(b => b.active).length;
+  const [prevActiveCount, setPrevActiveCount] = useState(0);
+
+  useEffect(() => {
+    if (activeBannersCount > prevActiveCount) {
+      setViewMode('BANNER');
+      setBgBannerIndex(activeBannersCount - 1); // Show the latest activated/added banner
+    }
+    setPrevActiveCount(activeBannersCount);
+  }, [activeBannersCount, prevActiveCount]);
 
   // Delegate core clock ticking, next prayer calculation, timing difference, Hijri computation and active Stage (Adzan/Iqomah/Praying) state machine to domain hook
   const {
@@ -92,19 +112,29 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
   // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
   useEffect(() => {
+    console.log("TvDisplay clock-to-banner timer effect triggered!", { 
+      prayerStage, 
+      viewMode, 
+      activeBannersCount: banners.filter(b => b.active).length 
+    });
+
     if (prayerStage !== 'NORMAL' || viewMode !== 'CLOCK') return;
 
     const activeBanners = banners.filter(b => b.active);
     if (activeBanners.length === 0) return;
 
-    // Show clock for 45 seconds, then trigger banner rotation
+    // Show clock for 15 seconds, then trigger banner rotation (shorter duration for high-reactivity digital signage)
     const clockTimer = setTimeout(() => {
+      console.log("TvDisplay clockTimer FIRED! Toggling to BANNER mode.");
       setBgBannerIndex(0);
       setViewMode('BANNER');
-    }, 45 * 1000);
+    }, 15 * 1000);
 
-    return () => clearTimeout(clockTimer);
-  }, [prayerStage, viewMode, banners]);
+    return () => {
+      console.log("TvDisplay clock-to-banner timer effect CLEANED UP!");
+      clearTimeout(clockTimer);
+    };
+  }, [prayerStage, viewMode, banners.filter(b => b.active).length]);
 
   const handleBannerComplete = useCallback(() => {
     const activeBanners = banners.filter(b => b.active);
@@ -233,20 +263,30 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   }
 
   // Otherwise, default layout
+  const hasValidBg = settings.backgroundActive && settings.backgroundImage && !bgError;
+
   return (
     <>
-      <div className={`h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 ${settings.backgroundActive && settings.backgroundImage ? 'bg-black' : 'bg-[#051109]'}`}>
+      <div className={`h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 ${hasValidBg ? 'bg-black' : 'bg-[#051109]'}`}>
         
-        {settings.backgroundActive && settings.backgroundImage && (
+        {hasValidBg ? (
           <div className="absolute inset-0 -z-10 select-none pointer-events-none">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src={settings.backgroundImage} 
+              src={settings.backgroundImage!} 
               alt="Background" 
               className="w-full h-full object-cover opacity-45 brightness-75"
+              onError={() => setBgError(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#051109]/80 via-transparent to-[#051109]/90"></div>
           </div>
+        ) : (
+          /* Premium dynamic gradient fallback if background active but image fails to load */
+          settings.backgroundActive && (
+            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#021308] via-[#051109] to-[#010904] select-none pointer-events-none">
+              <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)]"></div>
+            </div>
+          )
         )}
 
         {/* Header Section */}

@@ -27,22 +27,21 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const getAll = searchParams.get('all') === 'true';
 
-  if (!process.env.DATABASE_URL) {
-    return NextResponse.json(getAll ? FALLBACK_BANNERS : FALLBACK_BANNERS.filter(b => b.active));
-  }
-
   try {
     const banners = await prisma.banner.findMany({
-      where: getAll ? undefined : { active: true },
       orderBy: { createdAt: 'desc' }
     });
     
-    // Fallback if empty
-    if (!getAll && banners.length === 0) {
-      return NextResponse.json(FALLBACK_BANNERS);
+    // If the database has no banners at all (unseeded), return the mock fallback banners
+    if (banners.length === 0) {
+      return NextResponse.json(getAll ? FALLBACK_BANNERS : FALLBACK_BANNERS.filter(b => b.active));
     }
     
-    return NextResponse.json(banners);
+    if (getAll) {
+      return NextResponse.json(banners);
+    }
+    
+    return NextResponse.json(banners.filter(b => b.active));
   } catch (error) {
     console.error("Failed to fetch banners", error);
     return NextResponse.json(FALLBACK_BANNERS);
@@ -54,26 +53,24 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { id, title, imageUrl, description, active, autoHideAfter } = body;
 
-    if (!title || !imageUrl) {
-      return NextResponse.json({ error: "Title and Image URL are required" }, { status: 400 });
-    }
-
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: "No DATABASE_URL configured. DB is read-only." }, { status: 400 });
+    // Enforce required fields ONLY on creation
+    if (!id && (!title || !imageUrl)) {
+      return NextResponse.json({ error: "Title and Image URL are required for new banners" }, { status: 400 });
     }
 
     let result;
     if (id) {
-      // Update
+      // Safe partial Update: only pass values that are defined to avoid writing NULL/undefined to NOT NULL columns
+      const data: any = {};
+      if (title !== undefined) data.title = title;
+      if (imageUrl !== undefined) data.imageUrl = imageUrl;
+      if (description !== undefined) data.description = description;
+      if (active !== undefined) data.active = Boolean(active);
+      if (autoHideAfter !== undefined) data.autoHideAfter = parseInt(autoHideAfter);
+
       result = await prisma.banner.update({
         where: { id },
-        data: {
-          title,
-          imageUrl,
-          description: description ?? "",
-          active: active !== undefined ? Boolean(active) : undefined,
-          autoHideAfter: autoHideAfter !== undefined ? parseInt(autoHideAfter) : undefined
-        }
+        data
       });
     } else {
       // Create
@@ -102,10 +99,6 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: "Missing banner ID" }, { status: 400 });
-    }
-
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: "No DATABASE_URL configured. DB is read-only." }, { status: 400 });
     }
 
     await prisma.banner.delete({

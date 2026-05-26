@@ -15,14 +15,16 @@ export async function GET(req: NextRequest) {
   }
 
   // Admin wants ALL announcements (active & inactive)
-  if (!process.env.DATABASE_URL) {
-    return NextResponse.json(FALLBACK_ANNOUNCEMENTS);
-  }
-
   try {
     const data = await prisma.announcement.findMany({
       orderBy: { createdAt: 'desc' },
     });
+    
+    // If the database is completely empty (unseeded), show fallback announcements for demo
+    if (data.length === 0) {
+      return NextResponse.json(FALLBACK_ANNOUNCEMENTS);
+    }
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error("DB Error retrieving all announcements:", error);
@@ -39,19 +41,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing announcement text or id" }, { status: 400 });
     }
 
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: "No DATABASE_URL configured. DB is read-only." }, { status: 400 });
-    }
-
     let result;
     if (id) {
-      // Update
+      // Safe partial Update: only pass values that are defined to avoid writing NULL/undefined to NOT NULL columns
+      const data: any = {};
+      if (text !== undefined) data.text = text;
+      if (active !== undefined) data.active = Boolean(active);
+
       result = await prisma.announcement.update({
         where: { id },
-        data: {
-          text: text !== undefined ? text : undefined,
-          active: active !== undefined ? Boolean(active) : undefined,
-        },
+        data,
       });
     } else {
       // Create
@@ -77,10 +76,6 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: "Missing announcement ID" }, { status: 400 });
-    }
-
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: "No DATABASE_URL configured. DB is read-only." }, { status: 400 });
     }
 
     await prisma.announcement.delete({

@@ -2,18 +2,16 @@ import { prisma } from '@/shared/lib/db';
 import { FALLBACK_ANNOUNCEMENTS, AnnouncementType } from '@/shared/types';
 
 export async function getAnnouncementsService(): Promise<AnnouncementType[]> {
-  if (!process.env.DATABASE_URL) {
-    return FALLBACK_ANNOUNCEMENTS;
-  }
-  
   try {
-    const announcements = await prisma.announcement.findMany({
-      where: { active: true },
+    const allAnnouncements = await prisma.announcement.findMany({
       orderBy: { createdAt: 'desc' }
     });
     
-    if (!announcements.length) return FALLBACK_ANNOUNCEMENTS;
-    return announcements;
+    if (allAnnouncements.length === 0) {
+      return FALLBACK_ANNOUNCEMENTS;
+    }
+    
+    return allAnnouncements.filter(a => a.active);
   } catch (error: any) {
     // P2021: Table does not exist in the current database
     // P1001: Can't reach database server

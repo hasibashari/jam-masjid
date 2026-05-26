@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
       sandboxTime,
       sandboxStage,
       sandboxSpeed,
+      backgroundImage,
+      backgroundActive,
     } = body;
 
     const currentSettings = await prisma.settings.findFirst();
@@ -51,6 +53,8 @@ export async function POST(req: NextRequest) {
           sandboxTime: sandboxTime !== undefined ? sandboxTime : currentSettings.sandboxTime,
           sandboxStage: sandboxStage ?? currentSettings.sandboxStage,
           sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : currentSettings.sandboxSpeed,
+          backgroundImage: backgroundImage !== undefined ? backgroundImage : undefined,
+          backgroundActive: backgroundActive !== undefined ? Boolean(backgroundActive) : undefined,
         },
       });
     } else {
@@ -70,6 +74,8 @@ export async function POST(req: NextRequest) {
           sandboxTime: sandboxTime ?? null,
           sandboxStage: sandboxStage ?? 'AUTO',
           sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : 1.0,
+          backgroundImage: backgroundImage ?? null,
+          backgroundActive: backgroundActive !== undefined ? Boolean(backgroundActive) : false,
         },
       });
     }

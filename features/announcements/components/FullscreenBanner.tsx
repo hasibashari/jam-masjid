@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BannerType } from '@/shared/types';
 import Image from 'next/image';
+import { Megaphone } from 'lucide-react';
 
 interface FullscreenBannerProps {
   banner: BannerType;
@@ -11,7 +12,22 @@ interface FullscreenBannerProps {
 
 export default function FullscreenBanner({ banner, onComplete }: FullscreenBannerProps) {
   const [progress, setProgress] = useState(100);
+  const [imgError, setImgError] = useState(false);
+  const [prevBannerId, setPrevBannerId] = useState(banner.id);
   const duration = banner.autoHideAfter * 1000; // in milliseconds
+
+  // Reset image error state in render phase when banner changes to avoid cascading renders
+  if (banner.id !== prevBannerId) {
+    setPrevBannerId(banner.id);
+    setImgError(false);
+  }
+
+  // Create a ref for the callback to prevent HMR and poller updates from resetting the timer
+  const onCompleteRef = useRef(onComplete);
+  
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -22,67 +38,57 @@ export default function FullscreenBanner({ banner, onComplete }: FullscreenBanne
 
       if (elapsed >= duration) {
         clearInterval(interval);
-        onComplete();
+        onCompleteRef.current();
       }
     }, 50); // Tick every 50ms for buttery progression
 
     return () => clearInterval(interval);
-  }, [banner, duration, onComplete]);
+  }, [banner.id, duration]); // Rely strictly on banner.id to avoid resetting when poller refreshes object reference
 
   return (
     <div className="fixed inset-0 z-40 bg-black flex items-center justify-center select-none animate-fade-in overflow-hidden">
+      
       {/* Background Ambience Blurred Poster */}
-      <div className="absolute inset-0 scale-110 filter blur-xl opacity-40 pointer-events-none">
-        <Image
-          src={banner.imageUrl}
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-
-      {/* Main Fullscreen Poster Image */}
-      <div className="relative w-full h-full max-w-7xl max-h-[90vh] flex items-center justify-center z-10 px-8 py-4">
-        <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-zinc-950/20">
+      {!imgError ? (
+        <div className="absolute inset-0 scale-110 filter blur-xl opacity-40 pointer-events-none">
           <Image
             src={banner.imageUrl}
-            alt={banner.title}
+            alt=""
             fill
-            sizes="(max-width: 1280px) 100vw, 1280px"
-            className="object-contain"
+            sizes="100vw"
+            className="object-cover"
             referrerPolicy="no-referrer"
-            priority
           />
         </div>
-      </div>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#051109] to-zinc-950 opacity-80"></div>
+      )}
 
-      {/* Bottom informational bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-32 pb-12 px-16 flex flex-col gap-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div className="flex-1 text-left">
-            <span className="text-emerald-400 text-xs font-black tracking-[0.3em] uppercase block mb-2">PENGUMUMAN MASJID</span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#D4AF37] tracking-tight uppercase leading-tight mb-3">
-              {banner.title}
-            </h1>
-            {banner.description && (
-              <p className="text-zinc-300 text-xl font-medium max-w-4xl line-clamp-2 leading-relaxed">
-                {banner.description}
-              </p>
-            )}
-          </div>
-          <div className="text-right flex flex-col items-end gap-1 shrink-0">
-            <span className="text-zinc-500 text-[10px] font-mono tracking-widest uppercase">AUTO NEXT</span>
-            <div className="w-24 h-1 bg-zinc-800 rounded-full overflow-hidden mt-1">
-              <div 
-                className="h-full bg-emerald-500 transition-all duration-75" 
-                style={{ width: `${progress}%` }}
-              ></div>
+      {/* Main Fullscreen Poster Image (Zero padding, full viewport container) */}
+      <div className="relative w-screen h-screen flex items-center justify-center z-10">
+        {imgError ? (
+          <div className="flex flex-col items-center justify-center text-center p-12 bg-gradient-to-br from-[#0c2415] via-[#051109] to-zinc-950 w-full h-full border border-emerald-500/20">
+            <div className="w-24 h-24 rounded-full bg-emerald-950/80 border border-emerald-500/20 flex items-center justify-center mb-8 shadow-inner animate-pulse">
+              <Megaphone className="w-10 h-10 text-[#D4AF37]" />
             </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight max-w-3xl mb-6 leading-tight font-sans">
+              Poster Informasi
+            </h2>
           </div>
-        </div>
+        ) : (
+          <Image
+            src={banner.imageUrl}
+            alt="Poster Banner"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            referrerPolicy="no-referrer"
+            priority
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
+      
     </div>
   );
 }

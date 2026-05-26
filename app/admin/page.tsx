@@ -17,7 +17,8 @@ import {
   Upload, 
   X,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Edit
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { AppSettings, AnnouncementType, BannerType, FALLBACK_SETTINGS } from '@/shared/types';
@@ -73,9 +74,14 @@ export default function AdminDashboard() {
   // Form states - New Announcement
   const [newAnnouncementText, setNewAnnouncementText] = useState("");
 
+  // Editing states
+  const [editingAnnId, setEditingAnnId] = useState<string | null>(null);
+  const [editingAnnText, setEditingAnnText] = useState("");
+  const [editingBanner, setEditingBanner] = useState<BannerType | null>(null);
+
   // Form states - New Banner
   const [newBanner, setNewBanner] = useState({
-    title: '',
+    title: 'Poster',
     description: '',
     imageUrl: '',
     active: true,
@@ -342,7 +348,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(newBanner)
       });
       if (res.ok) {
-        setNewBanner({ title: '', description: '', imageUrl: '', active: true, autoHideAfter: 15 });
+        setNewBanner({ title: 'Poster', description: '', imageUrl: '', active: true, autoHideAfter: 15 });
         showAlert('success', 'Banner informasi berhasil ditambahkan!');
         // Reload list
         const bannersRes = await fetch('/api/banners?all=true');
@@ -364,29 +370,63 @@ export default function AdminDashboard() {
       const res = await fetch('/api/banners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, title: 'Temporary', imageUrl: 'temp', active: !currentActive }) // standard fields are updated if matched
-      });
-      
-      const updatedBanner = banners.find(b => b.id === id);
-      if (!updatedBanner) return;
-
-      const resReal = await fetch('/api/banners', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id, 
-          title: updatedBanner.title, 
-          imageUrl: updatedBanner.imageUrl, 
-          active: !currentActive 
-        })
+        body: JSON.stringify({ id, active: !currentActive })
       });
 
-      if (resReal.ok) {
+      if (res.ok) {
         setBanners(prev => prev.map(b => b.id === id ? { ...b, active: !currentActive } : b));
         showAlert('success', 'Status banner informasi berhasil diperbarui!');
+      } else {
+        showAlert('error', 'Gagal memperbarui status banner.');
       }
     } catch (err) {
       showAlert('error', 'Gagal memperbarui status banner.');
+    }
+  };
+
+  const handleSaveEditAnnouncement = async (id: string) => {
+    if (!editingAnnText.trim()) return;
+    try {
+      const res = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, text: editingAnnText })
+      });
+      if (res.ok) {
+        setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, text: editingAnnText } : a));
+        setEditingAnnId(null);
+        showAlert('success', 'Pengumuman berhasil diperbarui!');
+      } else {
+        showAlert('error', 'Gagal memperbarui pengumuman.');
+      }
+    } catch (err) {
+      showAlert('error', 'Koneksi gagal.');
+    }
+  };
+
+  const handleSaveEditBanner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBanner || !editingBanner.title || !editingBanner.imageUrl) return;
+
+    setSaveLoading(true);
+    try {
+      const res = await fetch('/api/banners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingBanner)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setBanners(prev => prev.map(b => b.id === editingBanner.id ? updated : b));
+        setEditingBanner(null);
+        showAlert('success', 'Banner informasi berhasil diperbarui!');
+      } else {
+        showAlert('error', 'Gagal memperbarui banner.');
+      }
+    } catch (err) {
+      showAlert('error', 'Koneksi gagal.');
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -637,33 +677,58 @@ export default function AdminDashboard() {
               {/* Card 3: Main Background Image */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
                 <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-emerald-500" /> Background Utama Aplikasi
+                  <ImageIcon className="w-5 h-5 text-emerald-500" /> Background Utama Layar TV
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                   
-                  {/* Upload Area */}
+                  {/* Upload & URL Input Area */}
                   <div className="flex flex-col gap-4">
-                    <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Unggah Background</label>
-                    <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors h-48">
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={handleMainBgUpload}
-                        disabled={mainBgUploading}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
-                      />
-                      {mainBgUploading ? (
-                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-zinc-500" />
-                          <div>
-                            <span className="text-xs font-bold text-emerald-500">Klik / Seret Gambar</span>
-                            <p className="text-[10px] text-zinc-500 mt-1">Maks 5MB. Aspek rasio 16:9 disarankan.</p>
-                          </div>
-                        </>
-                      )}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Unggah File Background</label>
+                      <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors h-36">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleMainBgUpload}
+                          disabled={mainBgUploading}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
+                        />
+                        {mainBgUploading ? (
+                          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-zinc-500" />
+                            <div>
+                              <span className="text-xs font-bold text-emerald-500">Klik / Seret Gambar</span>
+                              <p className="text-[10px] text-zinc-500 mt-1">Maks 5MB. Aspek rasio 16:9 disarankan.</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Atau Tempel URL Background Gambar</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="url"
+                          value={settings.backgroundImage || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, backgroundImage: e.target.value || null }))}
+                          className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold flex-1"
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                        {settings.backgroundImage && (
+                          <button
+                            type="button"
+                            onClick={() => setSettings(prev => ({ ...prev, backgroundImage: null }))}
+                            className="p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
+                            title="Hapus URL"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -828,35 +893,77 @@ export default function AdminDashboard() {
                   {announcements.map((ann) => (
                     <div 
                       key={ann.id} 
-                      className={`flex justify-between items-start gap-6 p-5 rounded-2xl border transition-all ${
+                      className={`flex justify-between items-center gap-6 p-5 rounded-2xl border transition-all ${
                         ann.active ? 'bg-zinc-950/40 border-emerald-500/20' : 'bg-transparent border-zinc-800 opacity-60'
                       }`}
                     >
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium leading-relaxed">{ann.text}</p>
-                        <span className="text-[10px] text-zinc-500 mt-2 block font-mono">ID: {ann.id}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 shrink-0">
-                        <button
-                          onClick={() => handleToggleAnnouncement(ann.id, ann.active)}
-                          title={`${ann.active ? 'Nonaktifkan' : 'Aktifkan'}`}
-                          className={`p-2.5 rounded-lg border transition-colors ${
-                            ann.active 
-                              ? 'bg-emerald-900/30 border-emerald-500/20 text-emerald-400 hover:bg-emerald-900/50' 
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
-                          }`}
-                        >
-                          <Power className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteAnnouncement(ann.id)}
-                          title="Hapus Pengumuman"
-                          className="p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {editingAnnId === ann.id ? (
+                        <div className="flex-1 flex flex-col gap-3">
+                          <textarea
+                            value={editingAnnText}
+                            onChange={(e) => setEditingAnnText(e.target.value)}
+                            className="bg-zinc-950 border border-zinc-850 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold leading-relaxed w-full"
+                            rows={2}
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setEditingAnnId(null)}
+                              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-bold transition-all"
+                            >
+                              Batal
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEditAnnouncement(ann.id)}
+                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all"
+                            >
+                              Simpan
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex-1 text-left">
+                            <p className="text-sm font-medium leading-relaxed">{ann.text}</p>
+                            <span className="text-[10px] text-zinc-500 mt-2 block font-mono">ID: {ann.id}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingAnnId(ann.id);
+                                setEditingAnnText(ann.text);
+                              }}
+                              title="Edit Pengumuman"
+                              className="p-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white rounded-lg transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleAnnouncement(ann.id, ann.active)}
+                              title={`${ann.active ? 'Nonaktifkan' : 'Aktifkan'}`}
+                              className={`p-2.5 rounded-lg border transition-colors ${
+                                ann.active 
+                                  ? 'bg-emerald-900/30 border-emerald-500/20 text-emerald-400 hover:bg-emerald-900/50' 
+                                  : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
+                              }`}
+                            >
+                              <Power className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAnnouncement(ann.id)}
+                              title="Hapus Pengumuman"
+                              className="p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -878,40 +985,6 @@ export default function AdminDashboard() {
 
               <form onSubmit={handleAddBanner} className="flex flex-col gap-5">
                 
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Judul Poster</label>
-                  <input 
-                    type="text"
-                    value={newBanner.title}
-                    onChange={(e) => setNewBanner(prev => ({ ...prev, title: e.target.value }))}
-                    required
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
-                    placeholder="Contoh: Poster Kajian..."
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Deskripsi Singkat (Opsional)</label>
-                  <textarea 
-                    value={newBanner.description}
-                    onChange={(e) => setNewBanner(prev => ({ ...prev, description: e.target.value }))}
-                    rows={2}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold leading-relaxed"
-                    placeholder="Berikan info tambahan untuk ticker bawah..."
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Durasi Tampil Display (Detik)</label>
-                  <input 
-                    type="number"
-                    value={newBanner.autoHideAfter}
-                    onChange={(e) => setNewBanner(prev => ({ ...prev, autoHideAfter: parseInt(e.target.value) || 15 }))}
-                    required
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-mono w-24 text-center font-bold"
-                  />
-                </div>
-
                 {/* Upload Section */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Desain Poster Gambar</label>
@@ -1026,39 +1099,46 @@ export default function AdminDashboard() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={ban.imageUrl} 
-                          alt={ban.title} 
+                          alt="Poster Preview" 
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute top-3 right-3 flex gap-2">
                           <button
+                            type="button"
+                            onClick={() => setEditingBanner(ban)}
+                            className="p-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white backdrop-blur rounded-xl transition-colors"
+                            title="Edit Poster Banner"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleToggleBanner(ban.id, ban.active)}
                             className={`p-2 rounded-xl backdrop-blur transition-colors border ${
                               ban.active 
                                 ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/90' 
                                 : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:bg-zinc-800'
                             }`}
+                            title={ban.active ? 'Nonaktifkan Banner' : 'Aktifkan Banner'}
                           >
                             <Power className="w-4 h-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteBanner(ban.id)}
                             className="p-2 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-500/30 text-rose-400 backdrop-blur rounded-xl transition-colors"
+                            title="Hapus Banner"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                        <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold text-[#D4AF37]">
-                          TAMPIL: {ban.autoHideAfter} DESEK
-                        </div>
                       </div>
 
-                      <div className="p-5 flex-1 flex flex-col justify-between text-left">
+                      <div className="p-4 flex-1 flex flex-col justify-between text-left border-t border-zinc-800 bg-zinc-950/30">
                         <div>
-                          <h4 className="font-extrabold text-[#D4AF37] text-base leading-tight mb-2 truncate uppercase">{ban.title}</h4>
-                          <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">{ban.description || 'Tidak ada deskripsi poster.'}</p>
+                          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider font-mono">ID: {ban.id}</span>
                         </div>
-                        <span className="text-[9px] text-zinc-600 mt-4 block font-mono">ID: {ban.id}</span>
                       </div>
                     </div>
                   ))}
@@ -1289,6 +1369,84 @@ export default function AdminDashboard() {
         )}
 
       </main>
+
+      {editingBanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] text-white">
+            
+            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+              <h2 className="text-xl font-bold font-sans text-[#D4AF37]">Edit Poster Banner</h2>
+              <button 
+                type="button"
+                onClick={() => setEditingBanner(null)} 
+                className="p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditBanner} className="p-6 flex-1 overflow-y-auto flex flex-col gap-5 text-left">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampil</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditingBanner(prev => prev ? ({ ...prev, active: !prev.active }) : null)}
+                    className={`w-12 h-6 rounded-full transition-all relative flex items-center p-1 ${
+                      editingBanner.active ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                    }`}
+                  >
+                    <div className="w-4 h-4 bg-white rounded-full shadow-lg"></div>
+                  </button>
+                  <span className="text-xs text-zinc-300 font-semibold">
+                    {editingBanner.active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">URL Gambar Poster</label>
+                <input 
+                  type="url"
+                  value={editingBanner.imageUrl}
+                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, imageUrl: e.target.value }) : null)}
+                  required
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
+                />
+              </div>
+
+              <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-800 mt-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={editingBanner.imageUrl} 
+                  alt="Edit Preview" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800';
+                  }}
+                />
+              </div>
+
+              <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-zinc-800">
+                <button 
+                  type="button"
+                  onClick={() => setEditingBanner(null)}
+                  className="px-6 py-3 rounded-lg text-sm font-medium hover:bg-zinc-800 text-white transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  disabled={saveLoading}
+                  className="px-8 py-3 bg-[#D4AF37] text-zinc-950 rounded-lg text-sm font-bold hover:bg-[#FBE18D] transition-colors"
+                >
+                  {saveLoading ? <Loader2 className="w-4 h-4 animate-spin text-zinc-950" /> : 'Simpan Perubahan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

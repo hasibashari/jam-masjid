@@ -88,6 +88,13 @@ function toDbData(data: any) {
   if ('displayActive' in copy && typeof copy.displayActive === 'boolean') copy.displayActive = copy.displayActive ? 1 : 0;
   if ('backgroundActive' in copy && typeof copy.backgroundActive === 'boolean') copy.backgroundActive = copy.backgroundActive ? 1 : 0;
   if ('sandboxActive' in copy && typeof copy.sandboxActive === 'boolean') copy.sandboxActive = copy.sandboxActive ? 1 : 0;
+  
+  // Strip out undefined values to support partial updates correctly without setting them to NULL
+  for (const key of Object.keys(copy)) {
+    if (copy[key] === undefined) {
+      delete copy[key];
+    }
+  }
   return copy;
 }
 
