@@ -63,6 +63,7 @@ export default function AdminDashboard() {
 
   // Form states - Settings
   const [settings, setSettings] = useState<AppSettings>(FALLBACK_SETTINGS);
+  const [prayerTimings, setPrayerTimings] = useState<any>(null);
   
   // Location states
   const [mapCenter, setMapCenter] = useState({ lat: FALLBACK_SETTINGS.latitude, lng: FALLBACK_SETTINGS.longitude });
@@ -93,8 +94,45 @@ export default function AdminDashboard() {
   // Status prompt
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+  // Calculate dynamic simulation times relative to computed Dhuhr prayer time
+  const getSimulatedTimes = () => {
+    const dhuhrStr = (prayerTimings?.Dhuhr || "12:00").split(" ")[0];
+    const [hours, minutes] = dhuhrStr.split(":").map(Number);
+    
+    // Adzan simulation: 1 minute before Dhuhr
+    const adzanSimDate = new Date();
+    adzanSimDate.setHours(hours, minutes, 0, 0);
+    adzanSimDate.setMinutes(adzanSimDate.getMinutes() - 1);
+    
+    // Iqomah simulation: Dhuhr + adzanDuration + 10 seconds
+    const iqomahSimDate = new Date();
+    iqomahSimDate.setHours(hours, minutes, 0, 0);
+    iqomahSimDate.setSeconds(iqomahSimDate.getSeconds() + (settings.adzanDuration || 180) + 10);
+    
+    // Sholat simulation: Dhuhr + adzanDuration + iqomahDuration + 10 seconds
+    const sholatSimDate = new Date();
+    sholatSimDate.setHours(hours, minutes, 0, 0);
+    sholatSimDate.setSeconds(sholatSimDate.getSeconds() + (settings.adzanDuration || 180) + (settings.iqomahDuration || 600) + 10);
+    
+    const formatTimeStr = (d: Date) => {
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    };
+    
+    return {
+      adzan: { date: adzanSimDate, str: formatTimeStr(adzanSimDate) },
+      iqomah: { date: iqomahSimDate, str: formatTimeStr(iqomahSimDate) },
+      sholat: { date: sholatSimDate, str: formatTimeStr(sholatSimDate) }
+    };
+  };
+
+  const simTimes = getSimulatedTimes();
+
   // Fetch all starting parameters
   useEffect(() => {
+
     const loadAllData = async () => {
       setLoading(true);
       try {
@@ -108,6 +146,15 @@ export default function AdminDashboard() {
           const s = await settingsRes.json();
           setSettings(s);
           setMapCenter({ lat: s.latitude, lng: s.longitude });
+          try {
+            const ptRes = await fetch(`/api/prayer-times?lat=${s.latitude}&lng=${s.longitude}&method=${s.calculationMethod}`);
+            if (ptRes.ok) {
+              const ptData = await ptRes.json();
+              setPrayerTimings(ptData.timings);
+            }
+          } catch (e) {
+            console.error("Failed to load prayer times for sandbox", e);
+          }
         }
         if (announcementsRes.ok) {
           const a = await announcementsRes.json();
@@ -1215,7 +1262,7 @@ export default function AdminDashboard() {
                     <option value="NORMAL">Normal (Tampilan Jam & Jadwal)</option>
                     <option value="ADZAN">Adzan (Hitung Mundur Adzan)</option>
                     <option value="IQOMAH">Iqomah (Hitung Mundur Iqomah)</option>
-                    <option value="PRAYING">Praying (Fase Silent Ibadah)</option>
+                    <option value="PRAYING">Sholat (Fase Silent Ibadah)</option>
                   </select>
                 </div>
 
@@ -1297,10 +1344,7 @@ export default function AdminDashboard() {
                       type="button"
                       disabled={!settings.sandboxActive}
                       onClick={async () => {
-                        // Let's travel virtual time to Zuhur minus 1 minute
-                        const today = new Date();
-                        today.setHours(11, 59, 0, 0);
-                        const isoStr = today.toISOString();
+                        const isoStr = simTimes.adzan.date.toISOString();
                         
                         setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
                         await fetch('/api/settings', {
@@ -1308,24 +1352,18 @@ export default function AdminDashboard() {
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
                         });
-                        showAlert('success', 'Waktu disetel ke 1 menit sebelum Zuhur (11:59). Sempurna untuk menguji transisi Adzan!');
+                        showAlert('success', `Waktu disetel ke 1 menit sebelum Zuhur (${simTimes.adzan.str.substring(0, 5)}). Sempurna untuk menguji transisi Adzan!`);
                       }}
-                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
                     >
-                      <span>1 Menit Sebelum Adzan Zuhur (11:59)</span>
-                      <span className="text-[#D4AF37] font-bold uppercase tracking-wider text-[10px]">Populer</span>
+                      <span>Simulasikan Fase Adzan Zuhur ({simTimes.adzan.str.substring(0, 5)} - Menjelang Adzan)</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={!settings.sandboxActive}
                       onClick={async () => {
-                        // Zuhur is 12:00, Adzan is 180 seconds.
-                        // Iqomah starts at 12:03:00.
-                        // Travel to 12:03:10 for Iqomah countdown testing.
-                        const today = new Date();
-                        today.setHours(12, 3, 10, 0);
-                        const isoStr = today.toISOString();
+                        const isoStr = simTimes.iqomah.date.toISOString();
                         
                         setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
                         await fetch('/api/settings', {
@@ -1333,11 +1371,30 @@ export default function AdminDashboard() {
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
                         });
-                        showAlert('success', 'Waktu disetel ke 12:03:10 (Awal Iqomah Zuhur). Sempurna untuk menguji Iqomah!');
+                        showAlert('success', `Waktu disetel ke ${simTimes.iqomah.str} (Awal Iqomah Zuhur). Sempurna untuk menguji hitung mundur Iqomah!`);
                       }}
-                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
                     >
-                      <span>Simulasikan Hitung Mundur Iqomah Zuhur (12:03)</span>
+                      <span>Simulasikan Hitung Mundur Iqomah Zuhur ({simTimes.iqomah.str} - Adzan Selesai)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={!settings.sandboxActive}
+                      onClick={async () => {
+                        const isoStr = simTimes.sholat.date.toISOString();
+                        
+                        setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
+                        });
+                        showAlert('success', `Waktu disetel ke ${simTimes.sholat.str} (Awal Fase Shalat Zuhur). Sempurna untuk menguji Fase Shalat!`);
+                      }}
+                      className="w-full py-3 bg-[#0d2e1a] border border-emerald-500/20 hover:bg-[#124225] disabled:opacity-50 text-emerald-400 rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
+                    >
+                      <span>Simulasikan Fase Shalat Zuhur ({simTimes.sholat.str} - Shalat Berjamaah)</span>
                     </button>
 
                     <button
@@ -1357,7 +1414,7 @@ export default function AdminDashboard() {
                         });
                         showAlert('success', 'Waktu disetel ke 23:30. Tampilan TV akan masuk ke Mode Hemat Energi / Istirahat.');
                       }}
-                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
                     >
                       <span>Simulasikan Jam Istirahat Tampilan / Standby (23:30)</span>
                     </button>

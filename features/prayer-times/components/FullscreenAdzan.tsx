@@ -40,7 +40,7 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
           </div>
         </div>
 
-        <span className="text-emerald-500 text-xl font-bold tracking-[0.4em] uppercase mb-4 animate-pulse">SAATNYA MEMASUKI WAKTU</span>
+        <span className="text-emerald-400 text-2xl font-black tracking-[0.4em] uppercase mb-4 animate-pulse">ADZAN SEDANG BERKUMANDANG</span>
         <h1 className="text-8xl md:text-9xl font-black text-[#D4AF37] tracking-tighter uppercase drop-shadow-[0_5px_15px_rgba(3,78,38,0.5)] mb-8">
           {prayerName}
         </h1>
@@ -52,8 +52,8 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
 
       {/* Bottom timer / Next stage */}
       <div className="w-full max-w-3xl flex flex-col items-center select-none bg-emerald-950/40 border border-emerald-500/20 rounded-3xl p-8 backdrop-blur shadow-2xl">
-        <span className="text-emerald-400 text-xs font-black tracking-[0.3em] uppercase mb-2">COUNTDOWN MENUJU IQOMAH</span>
-        <div className="text-7xl font-mono font-black text-rose-500 tracking-wider tabular-nums">
+        <span className="text-emerald-400 text-xs font-black tracking-[0.3em] uppercase mb-2">DURASI ADZAN BERLANGSUNG</span>
+        <div className="text-7xl font-mono font-black text-emerald-400 tracking-wider tabular-nums">
           {timerStr}
         </div>
         <div className="mt-4 flex gap-4 text-xs text-zinc-400 font-sans tracking-wide">

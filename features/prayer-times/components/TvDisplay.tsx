@@ -291,14 +291,8 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
         {/* Header Section */}
         <header className="flex-none h-[140px] flex items-center justify-between px-16 border-b border-white/5 bg-gradient-to-b from-black/20 to-transparent">
-          <div className="flex items-center gap-4 mb-1 relative group cursor-pointer" onClick={() => setShowLocationPicker(true)}>
-            <div className="w-10 h-10 bg-[#D4AF37] rounded-lg flex items-center justify-center relative">
-              <div className="w-6 h-6 border-2 border-[#051109]"></div>
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
-                 <SettingsIcon className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase group-hover:text-emerald-400 transition-colors">
+          <div className="flex items-center mb-1">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase">
               {settings.mosqueName}
             </h1>
           </div>
