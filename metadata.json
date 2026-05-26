@@ -1,0 +1,6 @@
+{
+  "name": "Jam Masjid Digital",
+  "description": "Modern Digital Mosque TV Display System with real-time prayer times, countdowns, and running text announcements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
