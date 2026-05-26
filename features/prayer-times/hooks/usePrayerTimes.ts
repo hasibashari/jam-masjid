@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { differenceInMilliseconds, parse, addSeconds } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PrayerTimesState, PrayerItem } from '../types';
@@ -12,6 +12,10 @@ interface UsePrayerTimesProps {
   adzanDuration: number; // in seconds
   iqomahDuration: number; // in seconds
   prayerDuration: number; // in seconds
+  sandboxActive?: boolean;
+  sandboxTime?: string | null;
+  sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
+  sandboxSpeed?: number;
 }
 
 export type PrayerStage = 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
@@ -22,7 +26,11 @@ export function usePrayerTimes({
   calculationMethod,
   adzanDuration,
   iqomahDuration,
-  prayerDuration
+  prayerDuration,
+  sandboxActive,
+  sandboxTime,
+  sandboxStage,
+  sandboxSpeed
 }: UsePrayerTimesProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimesState | null>(null);
@@ -49,20 +57,52 @@ export function usePrayerTimes({
     return () => clearInterval(refreshTimer);
   }, [latitude, longitude, calculationMethod]);
 
-  // Update clock every second, taking into account timezone
+  // Local ref for virtual clock tracking
+  const virtualTimeBaseRef = useRef<Date | null>(null);
+  const realTimeBaseRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (sandboxActive && sandboxTime) {
+      const parsed = new Date(sandboxTime);
+      if (!isNaN(parsed.getTime())) {
+        virtualTimeBaseRef.current = parsed;
+        realTimeBaseRef.current = Date.now();
+      }
+    } else {
+      virtualTimeBaseRef.current = null;
+      realTimeBaseRef.current = null;
+    }
+  }, [sandboxActive, sandboxTime]);
+
+  // Update clock every second, taking into account timezone and sandbox settings
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
+      let activeTime = now;
+
+      if (sandboxActive) {
+        if (virtualTimeBaseRef.current && realTimeBaseRef.current) {
+          const elapsedReal = Date.now() - realTimeBaseRef.current;
+          const elapsedVirtual = elapsedReal * (sandboxSpeed || 1.0);
+          activeTime = new Date(virtualTimeBaseRef.current.getTime() + elapsedVirtual);
+        } else if (sandboxTime) {
+          const parsed = new Date(sandboxTime);
+          if (!isNaN(parsed.getTime())) {
+            activeTime = parsed;
+          }
+        }
+      }
+
       if (timezone) {
-        setCurrentTime(toZonedTime(now, timezone));
+        setCurrentTime(toZonedTime(activeTime, timezone));
       } else {
-        setCurrentTime(now);
+        setCurrentTime(activeTime);
       }
     };
     updateTime();
     const clock = setInterval(updateTime, 1000);
     return () => clearInterval(clock);
-  }, [timezone]);
+  }, [timezone, sandboxActive, sandboxTime, sandboxSpeed]);
 
   // If we haven't mounted or loaded the times yet, return default loaders values
   if (!currentTime || !prayerTimes) {
@@ -107,28 +147,34 @@ export function usePrayerTimes({
   let activePrayerName: string | null = null;
   let stageSecondsLeft = 0;
 
-  for (const item of timelineValid) {
-    const prayerTime = item.time;
-    // End times calculations relative to start
-    const adzanEndTime = addSeconds(prayerTime, adzanDuration);
-    const iqomahEndTime = addSeconds(adzanEndTime, iqomahDuration);
-    const prayerEndTime = addSeconds(iqomahEndTime, prayerDuration);
+  if (sandboxActive && sandboxStage && sandboxStage !== 'AUTO') {
+    prayerStage = sandboxStage;
+    activePrayerName = 'Dhuhr'; // mock prayer name for sandbox visual testing
+    stageSecondsLeft = 300; // mock time left (5 mins)
+  } else {
+    for (const item of timelineValid) {
+      const prayerTime = item.time;
+      // End times calculations relative to start
+      const adzanEndTime = addSeconds(prayerTime, adzanDuration);
+      const iqomahEndTime = addSeconds(adzanEndTime, iqomahDuration);
+      const prayerEndTime = addSeconds(iqomahEndTime, prayerDuration);
 
-    if (currentTime >= prayerTime && currentTime < adzanEndTime) {
-      prayerStage = 'ADZAN';
-      activePrayerName = item.name;
-      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(adzanEndTime, currentTime) / 1000));
-      break;
-    } else if (currentTime >= adzanEndTime && currentTime < iqomahEndTime) {
-      prayerStage = 'IQOMAH';
-      activePrayerName = item.name;
-      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(iqomahEndTime, currentTime) / 1000));
-      break;
-    } else if (currentTime >= iqomahEndTime && currentTime < prayerEndTime) {
-      prayerStage = 'PRAYING';
-      activePrayerName = item.name;
-      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(prayerEndTime, currentTime) / 1000));
-      break;
+      if (currentTime >= prayerTime && currentTime < adzanEndTime) {
+        prayerStage = 'ADZAN';
+        activePrayerName = item.name;
+        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(adzanEndTime, currentTime) / 1000));
+        break;
+      } else if (currentTime >= adzanEndTime && currentTime < iqomahEndTime) {
+        prayerStage = 'IQOMAH';
+        activePrayerName = item.name;
+        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(iqomahEndTime, currentTime) / 1000));
+        break;
+      } else if (currentTime >= iqomahEndTime && currentTime < prayerEndTime) {
+        prayerStage = 'PRAYING';
+        activePrayerName = item.name;
+        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(prayerEndTime, currentTime) / 1000));
+        break;
+      }
     }
   }
 

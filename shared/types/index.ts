@@ -12,6 +12,10 @@ export interface AppSettings {
   displayEnd: string;
   backgroundImage?: string | null;
   backgroundActive?: boolean;
+  sandboxActive?: boolean;
+  sandboxTime?: string | null;
+  sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
+  sandboxSpeed?: number;
 }
 
 export interface AnnouncementType {
@@ -42,7 +46,11 @@ export const FALLBACK_SETTINGS: AppSettings = {
   displayStart: "03:00",
   displayEnd: "23:00",
   backgroundImage: null,
-  backgroundActive: false
+  backgroundActive: false,
+  sandboxActive: false,
+  sandboxTime: null,
+  sandboxStage: "AUTO",
+  sandboxSpeed: 1.0
 };
 
 export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [

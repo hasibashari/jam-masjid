@@ -24,6 +24,10 @@ export async function POST(req: NextRequest) {
       displayActive,
       displayStart,
       displayEnd,
+      sandboxActive,
+      sandboxTime,
+      sandboxStage,
+      sandboxSpeed,
     } = body;
 
     const currentSettings = await prisma.settings.findFirst();
@@ -43,6 +47,10 @@ export async function POST(req: NextRequest) {
           displayActive: displayActive !== undefined ? Boolean(displayActive) : currentSettings.displayActive,
           displayStart: displayStart ?? currentSettings.displayStart,
           displayEnd: displayEnd ?? currentSettings.displayEnd,
+          sandboxActive: sandboxActive !== undefined ? Boolean(sandboxActive) : currentSettings.sandboxActive,
+          sandboxTime: sandboxTime !== undefined ? sandboxTime : currentSettings.sandboxTime,
+          sandboxStage: sandboxStage ?? currentSettings.sandboxStage,
+          sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : currentSettings.sandboxSpeed,
         },
       });
     } else {
@@ -58,6 +66,10 @@ export async function POST(req: NextRequest) {
           displayActive: displayActive !== undefined ? Boolean(displayActive) : FALLBACK_SETTINGS.displayActive,
           displayStart: displayStart ?? FALLBACK_SETTINGS.displayStart,
           displayEnd: displayEnd ?? FALLBACK_SETTINGS.displayEnd,
+          sandboxActive: sandboxActive !== undefined ? Boolean(sandboxActive) : false,
+          sandboxTime: sandboxTime ?? null,
+          sandboxStage: sandboxStage ?? 'AUTO',
+          sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : 1.0,
         },
       });
     }

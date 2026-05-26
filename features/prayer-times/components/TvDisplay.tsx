@@ -83,7 +83,11 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     calculationMethod: settings.calculationMethod,
     adzanDuration: settings.adzanDuration,
     iqomahDuration: settings.iqomahDuration,
-    prayerDuration: settings.prayerDuration
+    prayerDuration: settings.prayerDuration,
+    sandboxActive: settings.sandboxActive,
+    sandboxTime: settings.sandboxTime,
+    sandboxStage: settings.sandboxStage,
+    sandboxSpeed: settings.sandboxSpeed
   });
 
   // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
@@ -219,7 +223,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
   // Render Full Banners Rotation if scheduled normal layout is toggled
   const activeBannersList = banners.filter(b => b.active);
-  if (viewMode === 'BANNER' && activeBannersList.length > 0) {
+  if (viewMode === 'BANNER' && activeBannersList.length > 0 && activeBannersList[bgBannerIndex]) {
     return (
       <FullscreenBanner 
         banner={activeBannersList[bgBannerIndex]} 
@@ -235,6 +239,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         
         {settings.backgroundActive && settings.backgroundImage && (
           <div className="absolute inset-0 -z-10 select-none pointer-events-none">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={settings.backgroundImage} 
               alt="Background" 

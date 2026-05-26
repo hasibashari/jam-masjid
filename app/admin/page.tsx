@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings as SettingsIcon, 
   MapPin, 
@@ -56,7 +56,7 @@ const BANNER_PRESETS = [
 ];
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'sandbox'>('settings');
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -489,6 +489,18 @@ export default function AdminDashboard() {
             <ImageIcon className="w-4 h-4" />
             <span>Full Poster Banners</span>
           </button>
+
+          <button 
+            onClick={() => setActiveTab('sandbox')}
+            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'sandbox' 
+                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            <span>Dev Sandbox Simulator</span>
+          </button>
         </div>
 
         {/* Tab Contet 1: Settings */}
@@ -677,6 +689,7 @@ export default function AdminDashboard() {
 
                     <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
                       {settings.backgroundImage ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img 
                           src={settings.backgroundImage} 
                           alt="Background" 
@@ -963,6 +976,7 @@ export default function AdminDashboard() {
                   <div className="mt-4 flex flex-col gap-2 border-t border-zinc-800 pt-4">
                     <span className="text-[10px] text-zinc-500 font-bold uppercase">PREVIEW GAMBAR</span>
                     <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black border border-zinc-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={newBanner.imageUrl} 
                         alt="Preview" 
@@ -1009,6 +1023,7 @@ export default function AdminDashboard() {
                       }`}
                     >
                       <div className="relative aspect-video bg-black">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={ban.imageUrl} 
                           alt={ban.title} 
@@ -1051,6 +1066,225 @@ export default function AdminDashboard() {
               )}
             </div>
 
+          </div>
+        )}
+
+        {/* Tab Content 4: Dev Sandbox */}
+        {activeTab === 'sandbox' && (
+          <div className="max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-left">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#D4AF37]">Dev Sandbox & Simulators</h3>
+                <p className="text-xs text-zinc-400">Manipulasi waktu, simulasi percepatan, dan force override untuk menguji transisi fase Jam Masjid.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Column: Sandbox Config */}
+              <div className="flex flex-col gap-6">
+                <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-sm font-bold text-white uppercase tracking-wide">Mode Sandbox</span>
+                      <p className="text-[10px] text-zinc-500">Aktifkan manipulasi waktu virtual aplikasi.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const nextActive = !settings.sandboxActive;
+                        setSettings(prev => ({ ...prev, sandboxActive: nextActive }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxActive: nextActive })
+                        });
+                        showAlert('success', nextActive ? 'Mode Sandbox diaktifkan!' : 'Mode Sandbox dinonaktifkan.');
+                      }}
+                      className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${
+                        settings.sandboxActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                      }`}
+                    >
+                      <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+                  <span className="text-sm font-bold text-white uppercase tracking-wide">Simulasi Force Stage</span>
+                  <p className="text-[10px] text-zinc-500">Paksa tampilan TV Display untuk masuk ke fase tertentu secara instan.</p>
+                  
+                  <select
+                    value={settings.sandboxStage || 'AUTO'}
+                    disabled={!settings.sandboxActive}
+                    onChange={async (e) => {
+                      const val = e.target.value;
+                      setSettings(prev => ({ ...prev, sandboxStage: val as any }));
+                      await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sandboxStage: val })
+                      });
+                      showAlert('success', `Simulasi fase diubah ke ${val}`);
+                    }}
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="AUTO">Otomatis (Ikuti Waktu)</option>
+                    <option value="NORMAL">Normal (Tampilan Jam & Jadwal)</option>
+                    <option value="ADZAN">Adzan (Hitung Mundur Adzan)</option>
+                    <option value="IQOMAH">Iqomah (Hitung Mundur Iqomah)</option>
+                    <option value="PRAYING">Praying (Fase Silent Ibadah)</option>
+                  </select>
+                </div>
+
+                <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+                  <span className="text-sm font-bold text-white uppercase tracking-wide">Faktor Percepatan Waktu</span>
+                  <p className="text-[10px] text-zinc-500">Mempercepat jalannya waktu virtual sholat (sangat berguna untuk menguji transisi countdown).</p>
+                  
+                  <select
+                    value={settings.sandboxSpeed || 1.0}
+                    disabled={!settings.sandboxActive}
+                    onChange={async (e) => {
+                      const val = parseFloat(e.target.value);
+                      setSettings(prev => ({ ...prev, sandboxSpeed: val }));
+                      await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sandboxSpeed: val })
+                      });
+                      showAlert('success', `Percepatan waktu diubah ke ${val}x`);
+                    }}
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value={1.0}>1x (Waktu Normal)</option>
+                    <option value={5.0}>5x (5 Detik Virtual per Detik Nyata)</option>
+                    <option value={10.0}>10x</option>
+                    <option value={60.0}>60x (1 Menit Virtual per Detik Nyata)</option>
+                    <option value={300.0}>300x (5 Menit Virtual per Detik Nyata)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Right Column: Time Travel Quick Presets */}
+              <div className="flex flex-col gap-6">
+                <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+                  <span className="text-sm font-bold text-white uppercase tracking-wide">Time Travel / Set Waktu Virtual</span>
+                  <p className="text-[10px] text-zinc-500">Atur waktu virtual ke jam, menit, dan detik tertentu.</p>
+                  
+                  <div className="flex gap-3">
+                    <input
+                      type="datetime-local"
+                      disabled={!settings.sandboxActive}
+                      value={settings.sandboxTime ? new Date(new Date(settings.sandboxTime).getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substring(0, 16) : ""}
+                      onChange={async (e) => {
+                        const isoStr = e.target.value ? new Date(e.target.value).toISOString() : null;
+                        setSettings(prev => ({ ...prev, sandboxTime: isoStr }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: isoStr })
+                        });
+                      }}
+                      className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <button
+                      type="button"
+                      disabled={!settings.sandboxActive}
+                      onClick={async () => {
+                        setSettings(prev => ({ ...prev, sandboxTime: null }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: null })
+                        });
+                        showAlert('success', 'Waktu virtual direset ke waktu sekarang.');
+                      }}
+                      className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+                  <span className="text-sm font-bold text-white uppercase tracking-wide">Aksi Cepat Simulasi Fase</span>
+                  <p className="text-[10px] text-zinc-500">Atur waktu virtual secara otomatis mendekati fase sholat terdekat (misal sholat Zuhur jam 12:00).</p>
+                  
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button
+                      type="button"
+                      disabled={!settings.sandboxActive}
+                      onClick={async () => {
+                        // Let's travel virtual time to Zuhur minus 1 minute
+                        const today = new Date();
+                        today.setHours(11, 59, 0, 0);
+                        const isoStr = today.toISOString();
+                        
+                        setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
+                        });
+                        showAlert('success', 'Waktu disetel ke 1 menit sebelum Zuhur (11:59). Sempurna untuk menguji transisi Adzan!');
+                      }}
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                    >
+                      <span>1 Menit Sebelum Adzan Zuhur (11:59)</span>
+                      <span className="text-[#D4AF37] font-bold uppercase tracking-wider text-[10px]">Populer</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={!settings.sandboxActive}
+                      onClick={async () => {
+                        // Zuhur is 12:00, Adzan is 180 seconds.
+                        // Iqomah starts at 12:03:00.
+                        // Travel to 12:03:10 for Iqomah countdown testing.
+                        const today = new Date();
+                        today.setHours(12, 3, 10, 0);
+                        const isoStr = today.toISOString();
+                        
+                        setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
+                        });
+                        showAlert('success', 'Waktu disetel ke 12:03:10 (Awal Iqomah Zuhur). Sempurna untuk menguji Iqomah!');
+                      }}
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                    >
+                      <span>Simulasikan Hitung Mundur Iqomah Zuhur (12:03)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={!settings.sandboxActive}
+                      onClick={async () => {
+                        // Night time travel for sleep mode testing (e.g. 23:30)
+                        const today = new Date();
+                        today.setHours(23, 30, 0, 0);
+                        const isoStr = today.toISOString();
+                        
+                        setSettings(prev => ({ ...prev, sandboxTime: isoStr, sandboxStage: 'AUTO' }));
+                        await fetch('/api/settings', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ sandboxTime: isoStr, sandboxStage: 'AUTO' })
+                        });
+                        showAlert('success', 'Waktu disetel ke 23:30. Tampilan TV akan masuk ke Mode Hemat Energi / Istirahat.');
+                      }}
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 flex justify-between items-center transition-all animate-none"
+                    >
+                      <span>Simulasikan Jam Istirahat Tampilan / Standby (23:30)</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
