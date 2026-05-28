@@ -72,13 +72,13 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   return (
     <section className="flex-grow flex flex-col items-center justify-center relative w-full h-full">
       {/* 1. Centered Clock Container (Independent, perfectly stable height) */}
-      <div className="z-10 flex flex-col items-center justify-center -mt-16 md:-mt-20 lg:-mt-24 select-none pointer-events-none">
+      <div className="z-10 flex flex-col items-center justify-center -mt-12 md:-mt-16 lg:-mt-20 select-none pointer-events-none">
         {/* Massive Digital Time Display - Highly scalable up to 75" TV screens */}
         <div className="flex items-end">
-          <span className="text-[6.5rem] sm:text-[140px] md:text-[180px] lg:text-[230px] xl:text-[280px] 2xl:text-[330px] min-[1800px]:text-[370px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] transition-all duration-500">
+          <span className="text-[5.5rem] sm:text-[120px] md:text-[150px] lg:text-[195px] xl:text-[240px] 2xl:text-[280px] min-[1800px]:text-[320px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] transition-all duration-500">
             {format(currentTime, 'HH:mm')}
           </span>
-          <span className="text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-emerald-400/55 font-medium tabular-nums tracking-wide mb-[0.6vw] sm:mb-[0.8vw] md:mb-[1vw] lg:mb-[1.4vw] xl:mb-[1.7vw] 2xl:mb-[2vw] ml-3 md:ml-4 lg:ml-6 xl:ml-8 transition-all duration-500">
+          <span className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl min-[1800px]:text-5xl text-emerald-400/55 font-medium tabular-nums tracking-wide mb-[0.5vw] sm:mb-[0.7vw] md:mb-[0.9vw] lg:mb-[1.2vw] xl:mb-[1.5vw] 2xl:mb-[1.8vw] ml-3 md:ml-4 lg:ml-6 xl:ml-8 transition-all duration-500">
             {format(currentTime, 'ss')}
           </span>
         </div>
