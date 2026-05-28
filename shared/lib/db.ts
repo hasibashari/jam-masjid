@@ -1,158 +1,134 @@
-import Database from 'better-sqlite3';
-import { join } from 'path';
+import { Pool } from 'pg';
 
-const dbPath = join(process.cwd(), 'sqlite.db');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-// Instantiate global connection to avoid opening too many connections in Next.js HMR dev mode
-const globalForSqlite = globalThis as unknown as {
-  db: Database.Database | undefined;
+// Enable automatic schema initialization
+const initDb = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS Announcement (
+        id TEXT PRIMARY KEY,
+        text TEXT NOT NULL,
+        active INT NOT NULL DEFAULT 1,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS Settings (
+        id TEXT PRIMARY KEY,
+        mosqueName TEXT NOT NULL DEFAULT 'Jam Masjid',
+        mosqueAddress TEXT NOT NULL DEFAULT '',
+        latitude DOUBLE PRECISION NOT NULL DEFAULT 21.4225,
+        longitude DOUBLE PRECISION NOT NULL DEFAULT 39.8262,
+        calculationMethod INT NOT NULL DEFAULT 4,
+        adzanDuration INT NOT NULL DEFAULT 180,
+        iqomahDuration INT NOT NULL DEFAULT 600,
+        prayerDuration INT NOT NULL DEFAULT 900,
+        displayActive INT NOT NULL DEFAULT 1,
+        displayStart TEXT NOT NULL DEFAULT '03:00',
+        displayEnd TEXT NOT NULL DEFAULT '23:00',
+        backgroundImage TEXT,
+        backgroundActive INT NOT NULL DEFAULT 0,
+        sandboxActive INT NOT NULL DEFAULT 0,
+        sandboxTime TEXT,
+        sandboxStage TEXT NOT NULL DEFAULT 'AUTO',
+        sandboxSpeed DOUBLE PRECISION NOT NULL DEFAULT 1.0,
+        iqomahFajr INT NOT NULL DEFAULT 600,
+        iqomahDhuhr INT NOT NULL DEFAULT 480,
+        iqomahAsr INT NOT NULL DEFAULT 480,
+        iqomahMaghrib INT NOT NULL DEFAULT 420,
+        iqomahIsha INT NOT NULL DEFAULT 600,
+        adzanAudioActive INT NOT NULL DEFAULT 1,
+        adzanAudioUrl TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3',
+        adzanAudioVolume DOUBLE PRECISION NOT NULL DEFAULT 0.8
+      );
+
+      CREATE TABLE IF NOT EXISTS Banner (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        imageUrl TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        active INT NOT NULL DEFAULT 1,
+        autoHideAfter INT NOT NULL DEFAULT 10,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS PrayerTimesCache (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS "User" (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'admin',
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS Quote (
+        id TEXT PRIMARY KEY,
+        text TEXT NOT NULL,
+        source TEXT NOT NULL,
+        active INT NOT NULL DEFAULT 1,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Seed default settings row if empty
+    const countRow = await pool.query("SELECT COUNT(*) as count FROM Settings");
+    if (parseInt(countRow.rows[0].count, 10) === 0) {
+      await pool.query(`
+        INSERT INTO Settings (
+          id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
+          adzanDuration, iqomahDuration, prayerDuration, displayActive, 
+          displayStart, displayEnd, backgroundActive, sandboxActive, 
+          sandboxTime, sandboxStage, sandboxSpeed,
+          iqomahFajr, iqomahDhuhr, iqomahAsr, iqomahMaghrib, iqomahIsha,
+          adzanAudioActive, adzanAudioUrl, adzanAudioVolume
+        ) VALUES (
+          'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
+          180, 600, 900, 1, 
+          '03:00', '23:00', 0, 0, 
+          NULL, 'AUTO', 1.0,
+          600, 480, 480, 420, 600,
+          1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
+        )
+      `);
+    }
+
+    // Seed default quotes if empty
+    const countQuotes = await pool.query("SELECT COUNT(*) as count FROM Quote");
+    if (parseInt(countQuotes.rows[0].count, 10) === 0) {
+      const defaultQuotes = [
+        { text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.", source: "QS. Al-Ankabut: 45" },
+        { text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.", source: "HR. Bukhari & Muslim" },
+        { text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.", source: "QS. Al-Baqarah: 45" },
+        { text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.", source: "HR. Bukhari & Muslim" },
+        { text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.", source: "HR. Bukhari & Muslim" },
+        { text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.", source: "HR. Muslim" },
+        { text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.", source: "HR. Bukhari & Muslim" },
+        { text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.", source: "HR. Al-Baihaqi" }
+      ];
+
+      for (let i = 0; i < defaultQuotes.length; i++) {
+        const q = defaultQuotes[i];
+        await pool.query("INSERT INTO Quote (id, text, source, active) VALUES ($1, $2, $3, 1)", [
+          `quote-${i + 1}`, q.text, q.source
+        ]);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to initialize database schema", err);
+  }
 };
 
-export const db = globalForSqlite.db ?? new Database(dbPath);
+// Fire and forget init, so we don't block exports but it will run.
+initDb();
 
-if (process.env.NODE_ENV !== 'production') globalForSqlite.db = db;
-
-// Enable SQLite performance optimizations
-db.pragma('journal_mode = WAL');
-db.pragma('synchronous = NORMAL');
-db.pragma('temp_store = MEMORY');
-db.pragma('busy_timeout = 5000');
-
-// Initialize tables and seed default settings if they do not exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS Announcement (
-    id TEXT PRIMARY KEY,
-    text TEXT NOT NULL,
-    active INTEGER NOT NULL DEFAULT 1,
-    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS Settings (
-    id TEXT PRIMARY KEY,
-    mosqueName TEXT NOT NULL DEFAULT 'Jam Masjid',
-    mosqueAddress TEXT NOT NULL DEFAULT '',
-    latitude REAL NOT NULL DEFAULT 21.4225,
-    longitude REAL NOT NULL DEFAULT 39.8262,
-    calculationMethod INTEGER NOT NULL DEFAULT 4,
-    adzanDuration INTEGER NOT NULL DEFAULT 180,
-    iqomahDuration INTEGER NOT NULL DEFAULT 600,
-    prayerDuration INTEGER NOT NULL DEFAULT 900,
-    displayActive INTEGER NOT NULL DEFAULT 1,
-    displayStart TEXT NOT NULL DEFAULT '03:00',
-    displayEnd TEXT NOT NULL DEFAULT '23:00',
-    backgroundImage TEXT,
-    backgroundActive INTEGER NOT NULL DEFAULT 0,
-    sandboxActive INTEGER NOT NULL DEFAULT 0,
-    sandboxTime TEXT,
-    sandboxStage TEXT NOT NULL DEFAULT 'AUTO',
-    sandboxSpeed REAL NOT NULL DEFAULT 1.0
-  );
-
-  CREATE TABLE IF NOT EXISTS Banner (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    imageUrl TEXT NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
-    active INTEGER NOT NULL DEFAULT 1,
-    autoHideAfter INTEGER NOT NULL DEFAULT 10,
-    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS PrayerTimesCache (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL,
-    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS User (
-    id TEXT PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'admin',
-    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS Quote (
-    id TEXT PRIMARY KEY,
-    text TEXT NOT NULL,
-    source TEXT NOT NULL,
-    active INTEGER NOT NULL DEFAULT 1,
-    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`);
-
-// Safe Migration: Add column dynamically for existing SQLite files
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN mosqueAddress TEXT NOT NULL DEFAULT ''");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN iqomahFajr INTEGER NOT NULL DEFAULT 600");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN iqomahDhuhr INTEGER NOT NULL DEFAULT 480");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN iqomahAsr INTEGER NOT NULL DEFAULT 480");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN iqomahMaghrib INTEGER NOT NULL DEFAULT 420");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN iqomahIsha INTEGER NOT NULL DEFAULT 600");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioActive INTEGER NOT NULL DEFAULT 1");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioUrl TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3'");
-} catch (e) {}
-try {
-  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioVolume REAL NOT NULL DEFAULT 0.8");
-} catch (e) {}
-
-// Seed default settings row if empty
-const countRow = db.prepare("SELECT COUNT(*) as count FROM Settings").get() as { count: number };
-if (countRow.count === 0) {
-  db.prepare(`
-    INSERT INTO Settings (
-      id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
-      adzanDuration, iqomahDuration, prayerDuration, displayActive, 
-      displayStart, displayEnd, backgroundActive, sandboxActive, 
-      sandboxTime, sandboxStage, sandboxSpeed,
-      iqomahFajr, iqomahDhuhr, iqomahAsr, iqomahMaghrib, iqomahIsha,
-      adzanAudioActive, adzanAudioUrl, adzanAudioVolume
-    ) VALUES (
-      'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
-      180, 600, 900, 1, 
-      '03:00', '23:00', 0, 0, 
-      NULL, 'AUTO', 1.0,
-      600, 480, 480, 420, 600,
-      1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
-    )
-  `).run();
-}
-
-// Seed default quotes if empty
-const countQuotes = db.prepare("SELECT COUNT(*) as count FROM Quote").get() as { count: number };
-if (countQuotes.count === 0) {
-  const defaultQuotes = [
-    { text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.", source: "QS. Al-Ankabut: 45" },
-    { text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.", source: "HR. Bukhari & Muslim" },
-    { text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.", source: "QS. Al-Baqarah: 45" },
-    { text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.", source: "HR. Bukhari & Muslim" },
-    { text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.", source: "HR. Bukhari & Muslim" },
-    { text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.", source: "HR. Muslim" },
-    { text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.", source: "HR. Bukhari & Muslim" },
-    { text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.", source: "HR. Al-Baihaqi" }
-  ];
-
-  const insertQuote = db.prepare("INSERT INTO Quote (id, text, source, active) VALUES (?, ?, ?, 1)");
-  defaultQuotes.forEach((q, idx) => {
-    insertQuote.run(`quote-${idx + 1}`, q.text, q.source);
-  });
-}
-
-// Convert row data from SQLite representation to JS types (e.g. converting 1/0 to true/false)
+// Convert row data from Postgres representation to JS types
 function fromDbRow(row: any) {
   if (!row) return row;
   const copy = { ...row };
@@ -164,7 +140,7 @@ function fromDbRow(row: any) {
   return copy;
 }
 
-// Convert JS data to SQLite representation (e.g. converting true/false to 1/0)
+// Convert JS data to Postgres representation (e.g. converting true/false to 1/0)
 function toDbData(data: any) {
   const copy = { ...data };
   if ('active' in copy && typeof copy.active === 'boolean') copy.active = copy.active ? 1 : 0;
@@ -173,7 +149,7 @@ function toDbData(data: any) {
   if ('sandboxActive' in copy && typeof copy.sandboxActive === 'boolean') copy.sandboxActive = copy.sandboxActive ? 1 : 0;
   if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
   
-  // Strip out undefined values to support partial updates correctly without setting them to NULL
+  // Strip out undefined values to support partial updates correctly
   for (const key of Object.keys(copy)) {
     if (copy[key] === undefined) {
       delete copy[key];
@@ -182,30 +158,28 @@ function toDbData(data: any) {
   return copy;
 }
 
-// Transparent SQLite CRUD Helper Modules replacing the old Prisma mock adapter
 export const settingsDb = {
   findFirst: async () => {
-    const row = db.prepare("SELECT * FROM Settings LIMIT 1").get();
-    return fromDbRow(row);
+    const res = await pool.query("SELECT * FROM Settings LIMIT 1");
+    return fromDbRow(res.rows[0]);
   },
   create: async ({ data }: { data: any }) => {
     const dbData = toDbData(data);
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const query = `INSERT INTO Settings (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-    db.prepare(query).run(...vals);
-    const row = db.prepare("SELECT * FROM Settings ORDER BY rowid DESC LIMIT 1").get();
-    return fromDbRow(row);
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `INSERT INTO Settings (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(query, vals);
+    return fromDbRow(res.rows[0]);
   },
   update: async ({ where, data }: { where: { id: string }, data: any }) => {
     const dbData = toDbData(data);
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const setClause = keys.map(k => `${k} = ?`).join(', ');
-    const query = `UPDATE Settings SET ${setClause} WHERE id = ?`;
-    db.prepare(query).run(...vals, where.id);
-    const row = db.prepare("SELECT * FROM Settings WHERE id = ?").get(where.id);
-    return fromDbRow(row);
+    const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
+    const query = `UPDATE Settings SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const res = await pool.query(query, [...vals, where.id]);
+    return fromDbRow(res.rows[0]);
   }
 };
 
@@ -217,7 +191,7 @@ export const announcementsDb = {
       const clauses: string[] = [];
       for (const [k, v] of Object.entries(args.where)) {
         if (v !== undefined) {
-          clauses.push(`${k} = ?`);
+          clauses.push(`"${k}" = $${clauses.length + 1}`);
           params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
         }
       }
@@ -228,34 +202,33 @@ export const announcementsDb = {
     if (args?.orderBy) {
       const orderKeys = Object.keys(args.orderBy);
       if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
       }
     }
-    const rows = db.prepare(query).all(...params);
-    return rows.map(fromDbRow);
+    const res = await pool.query(query, params);
+    return res.rows.map(fromDbRow);
   },
   create: async ({ data }: { data: any }) => {
     const dbData = toDbData(data);
     if (!dbData.id) dbData.id = `ann-${Math.random().toString(36).substr(2, 9)}`;
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const query = `INSERT INTO Announcement (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-    db.prepare(query).run(...vals);
-    const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(dbData.id);
-    return fromDbRow(row);
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `INSERT INTO Announcement (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(query, vals);
+    return fromDbRow(res.rows[0]);
   },
   update: async ({ where, data }: { where: { id: string }, data: any }) => {
     const dbData = toDbData(data);
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const setClause = keys.map(k => `${k} = ?`).join(', ');
-    const query = `UPDATE Announcement SET ${setClause} WHERE id = ?`;
-    db.prepare(query).run(...vals, where.id);
-    const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(where.id);
-    return fromDbRow(row);
+    const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
+    const query = `UPDATE Announcement SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const res = await pool.query(query, [...vals, where.id]);
+    return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    db.prepare("DELETE FROM Announcement WHERE id = ?").run(where.id);
+    await pool.query("DELETE FROM Announcement WHERE id = $1", [where.id]);
     return { id: where.id };
   }
 };
@@ -268,7 +241,7 @@ export const bannersDb = {
       const clauses: string[] = [];
       for (const [k, v] of Object.entries(args.where)) {
         if (v !== undefined) {
-          clauses.push(`${k} = ?`);
+          clauses.push(`"${k}" = $${clauses.length + 1}`);
           params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
         }
       }
@@ -279,60 +252,59 @@ export const bannersDb = {
     if (args?.orderBy) {
       const orderKeys = Object.keys(args.orderBy);
       if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
       }
     }
-    const rows = db.prepare(query).all(...params);
-    return rows.map(fromDbRow);
+    const res = await pool.query(query, params);
+    return res.rows.map(fromDbRow);
   },
   create: async ({ data }: { data: any }) => {
     const dbData = toDbData(data);
     if (!dbData.id) dbData.id = `ban-${Math.random().toString(36).substr(2, 9)}`;
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const query = `INSERT INTO Banner (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-    db.prepare(query).run(...vals);
-    const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(dbData.id);
-    return fromDbRow(row);
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `INSERT INTO Banner (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(query, vals);
+    return fromDbRow(res.rows[0]);
   },
   update: async ({ where, data }: { where: { id: string }, data: any }) => {
     const dbData = toDbData(data);
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const setClause = keys.map(k => `${k} = ?`).join(', ');
-    const query = `UPDATE Banner SET ${setClause} WHERE id = ?`;
-    db.prepare(query).run(...vals, where.id);
-    const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(where.id);
-    return fromDbRow(row);
+    const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
+    const query = `UPDATE Banner SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const res = await pool.query(query, [...vals, where.id]);
+    return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    db.prepare("DELETE FROM Banner WHERE id = ?").run(where.id);
+    await pool.query("DELETE FROM Banner WHERE id = $1", [where.id]);
     return { id: where.id };
   }
 };
 
 export const userDb = {
   findFirst: async () => {
-    const row = db.prepare("SELECT * FROM User LIMIT 1").get();
-    return row;
+    const res = await pool.query('SELECT * FROM "User" LIMIT 1');
+    return res.rows[0];
   },
   findByEmail: async (email: string) => {
-    const row = db.prepare("SELECT * FROM User WHERE email = ?").get(email);
-    return row;
+    const res = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
+    return res.rows[0];
   },
   count: async () => {
-    const row = db.prepare("SELECT COUNT(*) as count FROM User").get() as { count: number };
-    return row.count;
+    const res = await pool.query('SELECT COUNT(*) as count FROM "User"');
+    return parseInt(res.rows[0].count, 10);
   },
   create: async ({ data }: { data: any }) => {
     const dbData = { ...data };
     if (!dbData.id) dbData.id = `usr-${Math.random().toString(36).substr(2, 9)}`;
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const query = `INSERT INTO User (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-    db.prepare(query).run(...vals);
-    const row = db.prepare("SELECT * FROM User WHERE id = ?").get(dbData.id);
-    return row;
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `INSERT INTO "User" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(query, vals);
+    return res.rows[0];
   }
 };
 
@@ -344,7 +316,7 @@ export const quotesDb = {
       const clauses: string[] = [];
       for (const [k, v] of Object.entries(args.where)) {
         if (v !== undefined) {
-          clauses.push(`${k} = ?`);
+          clauses.push(`"${k}" = $${clauses.length + 1}`);
           params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
         }
       }
@@ -355,35 +327,33 @@ export const quotesDb = {
     if (args?.orderBy) {
       const orderKeys = Object.keys(args.orderBy);
       if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
       }
     }
-    const rows = db.prepare(query).all(...params);
-    return rows.map(fromDbRow);
+    const res = await pool.query(query, params);
+    return res.rows.map(fromDbRow);
   },
   create: async ({ data }: { data: any }) => {
     const dbData = toDbData(data);
     if (!dbData.id) dbData.id = `qot-${Math.random().toString(36).substr(2, 9)}`;
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const query = `INSERT INTO Quote (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-    db.prepare(query).run(...vals);
-    const row = db.prepare("SELECT * FROM Quote WHERE id = ?").get(dbData.id);
-    return fromDbRow(row);
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `INSERT INTO Quote (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(query, vals);
+    return fromDbRow(res.rows[0]);
   },
   update: async ({ where, data }: { where: { id: string }, data: any }) => {
     const dbData = toDbData(data);
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
-    const setClause = keys.map(k => `${k} = ?`).join(', ');
-    const query = `UPDATE Quote SET ${setClause} WHERE id = ?`;
-    db.prepare(query).run(...vals, where.id);
-    const row = db.prepare("SELECT * FROM Quote WHERE id = ?").get(where.id);
-    return fromDbRow(row);
+    const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
+    const query = `UPDATE Quote SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const res = await pool.query(query, [...vals, where.id]);
+    return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    db.prepare("DELETE FROM Quote WHERE id = ?").run(where.id);
+    await pool.query("DELETE FROM Quote WHERE id = $1", [where.id]);
     return { id: where.id };
   }
 };
-
