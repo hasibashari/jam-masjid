@@ -41,15 +41,15 @@ export default function AnnouncementsTab({
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
       
       {/* Form to add */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 h-fit">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 h-fit">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-          <Plus className="w-5 h-5 text-emerald-500" /> Tulis Ticker Pengumuman
+          <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Tulis Ticker Pengumuman
         </h3>
         
-        <form onSubmit={handleAddAnnouncement} className="flex flex-col gap-6">
+        <form onSubmit={handleAddAnnouncement} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Isi Teks Pengumuman</label>
             <textarea 
@@ -73,7 +73,7 @@ export default function AnnouncementsTab({
       </div>
 
       {/* List announcements */}
-      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37]">Daftar Pengumuman Aktif</h3>
         
         {announcements.length === 0 ? (
@@ -85,12 +85,12 @@ export default function AnnouncementsTab({
             {announcements.map((ann) => (
               <div 
                 key={ann.id} 
-                className={`flex justify-between items-center gap-6 p-5 rounded-2xl border transition-all ${
+                className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border transition-all ${
                   ann.active ? 'bg-zinc-950/40 border-emerald-500/20' : 'bg-transparent border-zinc-800 opacity-60'
                 }`}
               >
                 {editingAnnId === ann.id ? (
-                  <div className="flex-1 flex flex-col gap-3">
+                  <div className="flex-1 flex flex-col gap-3 w-full">
                     <textarea
                       value={editingAnnText}
                       onChange={(e) => setEditingAnnText(e.target.value)}
@@ -118,10 +118,10 @@ export default function AnnouncementsTab({
                   <>
                     <div className="flex-1 text-left">
                       <p className="text-sm font-medium leading-relaxed">{ann.text}</p>
-                      <span className="text-[10px] text-zinc-500 mt-2 block font-mono">ID: {ann.id}</span>
+                      <span className="text-[10px] text-zinc-500 mt-1 block font-mono">ID: {ann.id}</span>
                     </div>
                     
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center justify-end gap-2.5 sm:gap-3 shrink-0 mt-2 sm:mt-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -129,7 +129,7 @@ export default function AnnouncementsTab({
                           setEditingAnnText(ann.text);
                         }}
                         title="Edit Pengumuman"
-                        className="p-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white rounded-lg transition-colors"
+                        className="p-3 sm:p-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white rounded-lg transition-colors cursor-pointer"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
@@ -137,7 +137,7 @@ export default function AnnouncementsTab({
                         type="button"
                         onClick={() => handleToggleAnnouncement(ann.id, ann.active)}
                         title={`${ann.active ? 'Nonaktifkan' : 'Aktifkan'}`}
-                        className={`p-2.5 rounded-lg border transition-colors ${
+                        className={`p-3 sm:p-2.5 rounded-lg border transition-colors cursor-pointer ${
                           ann.active 
                             ? 'bg-emerald-900/30 border-emerald-500/20 text-emerald-400 hover:bg-emerald-900/50' 
                             : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
@@ -149,7 +149,7 @@ export default function AnnouncementsTab({
                         type="button"
                         onClick={() => handleDeleteAnnouncement(ann.id)}
                         title="Hapus Pengumuman"
-                        className="p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors"
+                        className="p-3 sm:p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

@@ -131,114 +131,117 @@ export default function AdminDashboardClient() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans antialiased pb-24">
-      {/* Alert Banner floats */}
+      {/* Alert Banner floats - Centered at the top on mobile, right on desktop */}
       {alertMsg && (
-        <div className={`fixed top-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl transition-all duration-300 animate-slide-in border ${
+        <div className={`fixed top-4 left-4 right-4 md:left-auto md:right-8 md:top-8 z-50 flex items-center gap-3 px-5 md:px-6 py-3.5 md:py-4 rounded-xl shadow-2xl transition-all duration-300 animate-slide-in border ${
           alertMsg.type === 'success' 
             ? 'bg-emerald-950 border-emerald-500/30 text-emerald-400' 
             : 'bg-rose-950 border-rose-500/30 text-rose-400'
         }`}>
           {alertMsg.type === 'success' ? <Check className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
-          <span className="text-sm font-medium">{alertMsg.text}</span>
+          <span className="text-xs md:text-sm font-semibold leading-relaxed">{alertMsg.text}</span>
         </div>
       )}
 
-      {/* Admin Navbar */}
-      <header className="bg-zinc-900 border-b border-zinc-800 py-6 px-12 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#D4AF37] rounded-xl flex items-center justify-center">
-            <SettingsIcon className="w-6 h-6 text-zinc-950" />
+      {/* Admin Navbar - Stacked on mobile, side-by-side on desktop */}
+      <header className="bg-zinc-900 border-b border-zinc-800 py-5 md:py-6 px-4 sm:px-8 md:px-12 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-0">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-[#D4AF37] rounded-xl flex items-center justify-center shrink-0">
+            <SettingsIcon className="w-5.5 h-5.5 md:w-6 md:h-6 text-zinc-950" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight font-sans">PANEL KONTROL DIGITAL</h1>
-            <p className="text-xs text-zinc-400">Kelola informasi masjid, parameter hitung mundur adzan & iqomah, serta poster display TV.</p>
+            <h1 className="text-xl md:text-2xl font-black tracking-tight font-sans leading-none uppercase">PANEL KONTROL DIGITAL</h1>
+            <p className="text-[10px] md:text-xs text-zinc-400 mt-1 max-w-[280px] sm:max-w-md">Kelola informasi masjid, parameter hitung mundur adzan & iqomah, serta poster display TV.</p>
           </div>
         </div>
-        <div className="flex gap-4">
+        
+        <div className="flex gap-2 sm:gap-4 w-full md:w-auto justify-end">
           <a 
             href="/" 
             target="_blank" 
-            className="flex items-center gap-2 px-5 py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm font-bold transition-all"
+            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-xs md:text-sm font-bold transition-all flex-1 md:flex-initial"
           >
-            <span>Buka Display TV</span>
-            <ExternalLink className="w-4 h-4" />
+            <span>Buka TV</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </a>
           
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 px-5 py-3 bg-rose-950 hover:bg-rose-900 border border-rose-500/20 text-rose-400 rounded-xl text-sm font-bold transition-all cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-rose-950 hover:bg-rose-900 border border-rose-500/20 text-rose-400 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer flex-1 md:flex-initial"
           >
             <span>Keluar</span>
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-8 mt-10">
+      {/* Main Container - Optimized paddings for mobile */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 mt-6 md:mt-10">
         
-        {/* Nav tabs */}
-        <nav className="flex gap-2 border-b border-zinc-900 pb-3 mb-10 select-none">
-          <button 
-            onClick={() => setActiveTab('settings')}
-            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'settings' 
-                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
-                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
-            }`}
-          >
-            <SettingsIcon className="w-4 h-4" />
-            <span>Settings Masjid & Durasi</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('announcements')}
-            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'announcements' 
-                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
-                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
-            }`}
-          >
-            <Megaphone className="w-4 h-4" />
-            <span>Pengumuman Text Ticker</span>
-          </button>
+        {/* Touch-Friendly horizontal scrollable navigation tab bar */}
+        <div className="relative border-b border-zinc-900 mb-6 md:mb-10 select-none">
+          <nav className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-none snap-x -mb-[1px]">
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                activeTab === 'settings' 
+                  ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+              }`}
+            >
+              <SettingsIcon className="w-4 h-4 shrink-0" />
+              <span>Settings Masjid & Durasi</span>
+            </button>
+            
+            <button 
+              onClick={() => setActiveTab('announcements')}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                activeTab === 'announcements' 
+                  ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+              }`}
+            >
+              <Megaphone className="w-4 h-4 shrink-0" />
+              <span>Pengumuman Text Ticker</span>
+            </button>
 
-          <button 
-            onClick={() => setActiveTab('banners')}
-            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'banners' 
-                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
-                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
-            }`}
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span>Full Poster Banners</span>
-          </button>
+            <button 
+              onClick={() => setActiveTab('banners')}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                activeTab === 'banners' 
+                  ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+              }`}
+            >
+              <ImageIcon className="w-4 h-4 shrink-0" />
+              <span>Full Poster Banners</span>
+            </button>
 
-          <button 
-            onClick={() => setActiveTab('quotes')}
-            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'quotes' 
-                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
-                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
-            }`}
-          >
-            <QuoteIcon className="w-4 h-4" />
-            <span>Kata Motivasi / Quotes</span>
-          </button>
+            <button 
+              onClick={() => setActiveTab('quotes')}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                activeTab === 'quotes' 
+                  ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+              }`}
+            >
+              <QuoteIcon className="w-4 h-4 shrink-0" />
+              <span>Kata Motivasi / Quotes</span>
+            </button>
 
-          <button 
-            onClick={() => setActiveTab('sandbox')}
-            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
-              activeTab === 'sandbox' 
-                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
-                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            <span>Dev Sandbox Simulator</span>
-          </button>
-        </nav>
+            <button 
+              onClick={() => setActiveTab('sandbox')}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                activeTab === 'sandbox' 
+                  ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+              }`}
+            >
+              <Clock className="w-4 h-4 shrink-0" />
+              <span>Dev Sandbox Simulator</span>
+            </button>
+          </nav>
+        </div>
 
         {/* Render Active Tab Component */}
         <div className="transition-opacity duration-300">

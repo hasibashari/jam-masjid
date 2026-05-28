@@ -45,12 +45,12 @@ export default function QuotesTab({
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
       
       {/* Form to add Quote */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 h-fit">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 h-fit">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-          <Plus className="w-5 h-5 text-emerald-500" /> Tulis Kata Motivasi / Quotes
+          <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Tulis Kata Motivasi / Quotes
         </h3>
         
         <form onSubmit={handleAddQuote} className="flex flex-col gap-5">
@@ -88,7 +88,7 @@ export default function QuotesTab({
       </div>
 
       {/* List Quotes */}
-      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37]">Daftar Kata Motivasi / Quotes Aktif</h3>
         
         {quotes.length === 0 ? (
@@ -100,12 +100,12 @@ export default function QuotesTab({
             {quotes.map((q) => (
               <div 
                 key={q.id} 
-                className={`flex justify-between items-center gap-6 p-5 rounded-2xl border transition-all ${
+                className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border transition-all ${
                   q.active ? 'bg-zinc-950/40 border-emerald-500/20' : 'bg-transparent border-zinc-800 opacity-60'
                 }`}
               >
                 {editingQuoteId === q.id ? (
-                  <div className="flex-1 flex flex-col gap-3">
+                  <div className="flex-1 flex flex-col gap-3 w-full">
                     <textarea
                       value={editingQuoteText}
                       onChange={(e) => setEditingQuoteText(e.target.value)}
@@ -144,7 +144,7 @@ export default function QuotesTab({
                       <span className="text-[10px] text-zinc-500 mt-1 block font-mono">ID: {q.id}</span>
                     </div>
                     
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center justify-end gap-2.5 sm:gap-3 shrink-0 mt-2 sm:mt-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -153,7 +153,7 @@ export default function QuotesTab({
                           setEditingQuoteSource(q.source);
                         }}
                         title="Edit Quote"
-                        className="p-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white rounded-lg transition-colors"
+                        className="p-3 sm:p-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white rounded-lg transition-colors cursor-pointer"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
@@ -161,7 +161,7 @@ export default function QuotesTab({
                         type="button"
                         onClick={() => handleToggleQuote(q.id, q.active)}
                         title={`${q.active ? 'Nonaktifkan' : 'Aktifkan'}`}
-                        className={`p-2.5 rounded-lg border transition-colors ${
+                        className={`p-3 sm:p-2.5 rounded-lg border transition-colors cursor-pointer ${
                           q.active 
                             ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/50' 
                             : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
@@ -173,7 +173,7 @@ export default function QuotesTab({
                         type="button"
                         onClick={() => handleDeleteQuote(q.id)}
                         title="Hapus Quote"
-                        className="p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors"
+                        className="p-3 sm:p-2.5 bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-950/60 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

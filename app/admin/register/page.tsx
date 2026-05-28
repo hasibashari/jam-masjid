@@ -86,7 +86,7 @@ export default function AdminRegisterPage() {
   if (isLocked) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 relative overflow-hidden select-none animate-fade-in">
-        <div className="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-10 shadow-2xl backdrop-blur-md relative z-10 text-center">
+        <div className="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md relative z-10 text-center">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-rose-500 rounded-t-3xl"></div>
           
           <div className="w-16 h-16 bg-rose-950 border border-rose-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner animate-pulse">
@@ -118,7 +118,7 @@ export default function AdminRegisterPage() {
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-950/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-emerald-900/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-10 shadow-2xl backdrop-blur-md relative z-10">
+      <div className="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md relative z-10">
         
         {/* Top gold-emerald line */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-[#D4AF37] to-emerald-500 rounded-t-3xl"></div>

@@ -65,12 +65,12 @@ export default function BannersTab({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
       
       {/* Create Banner Form */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 h-fit">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 h-fit">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-          <Plus className="w-5 h-5 text-emerald-500" /> Unggah Poster Banner Baru
+          <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Unggah Poster Banner Baru
         </h3>
 
         <form onSubmit={handleAddBanner} className="flex flex-col gap-5">
@@ -79,7 +79,7 @@ export default function BannersTab({
           <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Desain Poster Gambar</label>
             
-            <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors">
+            <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-4 sm:p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors">
               <input 
                 type="file" 
                 accept="image/*"
@@ -125,7 +125,7 @@ export default function BannersTab({
                     active: true,
                     autoHideAfter: preset.autoHideAfter
                   })}
-                  className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-2.5 py-1.5 rounded"
+                  className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-2.5 py-1.5 rounded cursor-pointer"
                 >
                   {preset.title.substring(0, 18)}...
                 </button>
@@ -148,7 +148,7 @@ export default function BannersTab({
                 <button 
                   type="button" 
                   onClick={() => setNewBanner(prev => ({ ...prev, imageUrl: '' }))}
-                  className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black/90"
+                  className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black/90 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -168,7 +168,7 @@ export default function BannersTab({
       </div>
 
       {/* Existing Banners Grid List */}
-      <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+      <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
         <h3 className="text-lg font-bold mb-6 text-[#D4AF37]">Daftar Poster Informasi Aktif</h3>
 
         {banners.length === 0 ? (
@@ -176,7 +176,7 @@ export default function BannersTab({
             Belum ada poster Fullscreen yang diunggah. Tambahkan di panel kiri untuk memulai!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
             {banners.map((ban) => (
               <div 
                 key={ban.id}
@@ -196,7 +196,7 @@ export default function BannersTab({
                     <button
                       type="button"
                       onClick={() => setEditingBanner(ban)}
-                      className="p-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white backdrop-blur rounded-xl transition-colors"
+                      className="p-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white backdrop-blur rounded-xl transition-colors cursor-pointer"
                       title="Edit Poster Banner"
                     >
                       <Edit className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function BannersTab({
                     <button
                       type="button"
                       onClick={() => handleToggleBanner(ban.id, ban.active)}
-                      className={`p-2 rounded-xl backdrop-blur transition-colors border ${
+                      className={`p-2 rounded-xl backdrop-blur transition-colors border cursor-pointer ${
                         ban.active 
                           ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/90' 
                           : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:bg-zinc-800'
@@ -216,7 +216,7 @@ export default function BannersTab({
                     <button
                       type="button"
                       onClick={() => handleDeleteBanner(ban.id)}
-                      className="p-2 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-500/30 text-rose-400 backdrop-blur rounded-xl transition-colors"
+                      className="p-2 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-500/30 text-rose-400 backdrop-blur rounded-xl transition-colors cursor-pointer"
                       title="Hapus Banner"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -238,27 +238,27 @@ export default function BannersTab({
       {/* Edit Banner Modal */}
       {editingBanner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] text-white">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] text-white">
             
-            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-              <h2 className="text-xl font-bold font-sans text-[#D4AF37]">Edit Poster Banner</h2>
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-800">
+              <h2 className="text-lg sm:text-xl font-bold font-sans text-[#D4AF37]">Edit Poster Banner</h2>
               <button 
                 type="button"
                 onClick={() => setEditingBanner(null)} 
-                className="p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors"
+                className="p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditBanner} className="p-6 flex-1 overflow-y-auto flex flex-col gap-5 text-left">
+            <form onSubmit={handleSaveEditBanner} className="p-4 sm:p-6 flex-1 overflow-y-auto flex flex-col gap-4 sm:gap-5 text-left">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampil</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setEditingBanner(prev => prev ? ({ ...prev, active: !prev.active }) : null)}
-                    className={`w-12 h-6 rounded-full transition-all relative flex items-center p-1 ${
+                    className={`w-12 h-6 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
                       editingBanner.active ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
                     }`}
                   >
@@ -293,18 +293,18 @@ export default function BannersTab({
                 />
               </div>
 
-              <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-zinc-800">
+              <div className="flex justify-end gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t border-zinc-800">
                 <button 
                   type="button"
                   onClick={() => setEditingBanner(null)}
-                  className="px-6 py-3 rounded-lg text-sm font-medium hover:bg-zinc-800 text-white transition-colors"
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium hover:bg-zinc-800 text-white transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button 
                   type="submit"
                   disabled={saveLoading}
-                  className="px-8 py-3 bg-[#D4AF37] text-zinc-950 rounded-lg text-sm font-bold hover:bg-[#FBE18D] transition-colors"
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-[#D4AF37] text-zinc-950 rounded-lg text-xs sm:text-sm font-bold hover:bg-[#FBE18D] transition-colors cursor-pointer"
                 >
                   {saveLoading ? <Loader2 className="w-4 h-4 animate-spin text-zinc-950" /> : 'Simpan Perubahan'}
                 </button>

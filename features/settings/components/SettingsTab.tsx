@@ -48,18 +48,18 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
   });
 
   return (
-    <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
       
       {/* Left panels: Identity & Timings */}
-      <div className="lg:col-span-2 flex flex-col gap-8">
+      <div className="lg:col-span-2 flex flex-col gap-6 md:gap-8">
         
         {/* Card 1: Identity */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
           <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-emerald-500" /> Identitas Masjid & Jadwal Aktif
+            <Volume2 className="w-5 h-5 text-emerald-500 shrink-0" /> Identitas Masjid & Jadwal Aktif
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Nama Masjid</label>
               <input 
@@ -71,8 +71,8 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 placeholder="Masukkan nama masjid..."
               />
             </div>
-
-            <div className="flex flex-col gap-2 md:col-span-2">
+ 
+            <div className="flex flex-col gap-2 sm:col-span-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Alamat Masjid</label>
               <input 
                 type="text" 
@@ -82,25 +82,25 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 placeholder="Masukkan alamat masjid..."
               />
             </div>
-
+ 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampilan Layar</label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 py-1">
                 <button
                   type="button"
                   onClick={() => setSettings(prev => ({ ...prev, displayActive: !prev.displayActive }))}
-                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${
+                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
                     settings.displayActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
                   }`}
                 >
                   <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
                 </button>
-                <span className="text-sm text-zinc-300 font-semibold md:mb-0">
-                  {settings.displayActive ? 'Layar Display Aktif' : 'Layar Display Non-Aktif / Standby'}
+                <span className="text-xs sm:text-sm text-zinc-300 font-semibold leading-tight">
+                  {settings.displayActive ? 'Layar Display Aktif' : 'Layar Display Standby'}
                 </span>
               </div>
             </div>
-
+ 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Mulai Operasi</label>
               <input 
@@ -112,7 +112,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 placeholder="03:00"
               />
             </div>
-
+ 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Akhir Operasi</label>
               <input 
@@ -126,17 +126,17 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
             </div>
           </div>
         </div>
-
+ 
         {/* Card 2: Sholat state timing parameters */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
           <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-            <Clock className="w-5 h-5 text-emerald-500" /> Konfigurasi Fase Durasi Ibadah
+            <Clock className="w-5 h-5 text-emerald-500 shrink-0" /> Konfigurasi Fase Durasi Ibadah
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 mb-6 sm:mb-8">
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 1. Adzan</label>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi memutar audio/alert adzan berkumandang.</span>
+              <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Durasi memutar audio/alert adzan berkumandang.</span>
               <div className="flex items-center gap-2">
                 <input 
                   type="number" 
@@ -149,9 +149,9 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
               </div>
             </div>
             
-            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 3. Durasi Shalat</label>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi ibadah hening shalat berjamaah berlangsung.</span>
+              <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Durasi ibadah hening shalat berjamaah berlangsung.</span>
               <div className="flex items-center gap-2">
                 <input 
                   type="number" 
@@ -164,11 +164,11 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
               </div>
             </div>
           </div>
-
-          <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl flex flex-col">
+ 
+          <div className="bg-zinc-950 border border-zinc-800 p-4 sm:p-6 rounded-2xl flex flex-col">
             <label className="text-xs font-black uppercase text-[#D4AF37] tracking-wider mb-2">Fase 2. Jeda Iqomah (Per Waktu Sholat)</label>
-            <span className="text-[10px] text-zinc-500 mb-6 leading-relaxed">Atur jeda hitung mundur iqomah secara spesifik untuk masing-masing waktu sholat (dalam menit).</span>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <span className="text-[10px] text-zinc-500 mb-4 leading-relaxed">Atur jeda hitung mundur iqomah secara spesifik untuk masing-masing waktu sholat (dalam menit).</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
               {[
                 { key: 'iqomahFajr', label: 'Subuh' },
                 { key: 'iqomahDhuhr', label: 'Dzuhur' },
@@ -176,7 +176,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 { key: 'iqomahMaghrib', label: 'Maghrib' },
                 { key: 'iqomahIsha', label: 'Isya' }
               ].map((item) => (
-                <div key={item.key} className="flex flex-col gap-2 bg-zinc-900/60 border border-zinc-800 p-3.5 rounded-xl items-center">
+                <div key={item.key} className="flex flex-col gap-2 bg-zinc-900/60 border border-zinc-800 p-3 rounded-xl items-center">
                   <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{item.label}</span>
                   <div className="flex items-center gap-1.5 mt-1">
                     <input 
@@ -187,7 +187,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                         setSettings(prev => ({ ...prev, [item.key]: mins * 60 }));
                       }}
                       required
-                      className="bg-zinc-950 border border-zinc-800 rounded-md px-2 py-1.5 outline-none text-white focus:border-emerald-500 text-xs w-14 text-center font-bold font-mono"
+                      className="bg-zinc-950 border border-zinc-800 rounded-md px-2 py-1.5 outline-none text-white focus:border-emerald-500 text-xs w-12 text-center font-bold font-mono"
                     />
                     <span className="text-[10px] text-zinc-400 font-semibold">menit</span>
                   </div>
@@ -196,37 +196,37 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
             </div>
           </div>
         </div>
-
+ 
         {/* Card 2.5: Audio & Adzan Settings */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
           <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-emerald-500" /> Pengaturan Audio & Alarm Adzan
+            <Volume2 className="w-5 h-5 text-emerald-500 shrink-0" /> Pengaturan Audio & Alarm Adzan
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-start">
             
-            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl md:col-span-1">
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl md:col-span-1">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Suara Adzan</label>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Putar rekaman suara adzan secara otomatis ketika waktu sholat masuk.</span>
-              <div className="flex items-center gap-3">
+              <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Putar rekaman suara adzan secara otomatis ketika waktu sholat masuk.</span>
+              <div className="flex items-center gap-3 py-1">
                 <button
                   type="button"
                   onClick={() => setSettings(prev => ({ ...prev, adzanAudioActive: !prev.adzanAudioActive }))}
-                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${
+                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
                     settings.adzanAudioActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
                   }`}
                 >
                   <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
                 </button>
-                <span className="text-sm text-zinc-300 font-semibold">
+                <span className="text-xs sm:text-sm text-zinc-300 font-semibold">
                   {settings.adzanAudioActive ? 'Audio Aktif' : 'Mute / Hening'}
                 </span>
               </div>
             </div>
-
-            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl md:col-span-2">
+ 
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl md:col-span-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Suara Muadzin / URL Audio</label>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Pilih salah satu preset rekaman adzan berkualitas tinggi atau masukkan URL .mp3 kustom Anda sendiri.</span>
+              <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Pilih salah satu preset rekaman adzan berkualitas tinggi atau masukkan URL .mp3 kustom Anda sendiri.</span>
               <div className="flex flex-col gap-3">
                 <select
                   value={
@@ -247,7 +247,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   <option value="https://www.islamcan.com/audio/adhan/azan3.mp3">Preset 3. Adzan Masjid Al-Aqsa (Tradisional)</option>
                   <option value="custom">-- Masukkan URL Audio Kustom (.mp3) --</option>
                 </select>
-
+ 
                 {(settings.adzanAudioUrl && !['https://www.islamcan.com/audio/adhan/azan1.mp3', 'https://www.islamcan.com/audio/adhan/azan2.mp3', 'https://www.islamcan.com/audio/adhan/azan3.mp3'].includes(settings.adzanAudioUrl) || 
                   ['https://www.islamcan.com/audio/adhan/azan1.mp3', 'https://www.islamcan.com/audio/adhan/azan2.mp3', 'https://www.islamcan.com/audio/adhan/azan3.mp3'].includes(settings.adzanAudioUrl) === false) && (
                   <input
@@ -278,20 +278,20 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
             </div>
           </div>
         </div>
-
+ 
         {/* Card 3: Main Background Image */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
           <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-emerald-500" /> Background Utama Layar TV
+            <ImageIcon className="w-5 h-5 text-emerald-500 shrink-0" /> Background Utama Layar TV
           </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+ 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
             
             {/* Upload & URL Input Area */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Unggah File Background</label>
-                <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors h-36">
+                <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-4 sm:p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors h-36">
                   <input 
                     type="file" 
                     accept="image/*"
@@ -312,7 +312,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   )}
                 </div>
               </div>
-
+ 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Atau Tempel URL Background Gambar</label>
                 <div className="flex gap-2">
@@ -327,7 +327,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     <button
                       type="button"
                       onClick={() => setSettings(prev => ({ ...prev, backgroundImage: null }))}
-                      className="p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
+                      className="p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all shrink-0"
                       title="Hapus URL"
                     >
                       <X className="w-4 h-4" />
@@ -336,7 +336,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 </div>
               </div>
             </div>
-
+ 
             {/* Preview Area */}
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center">
@@ -347,7 +347,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                       <button
                         type="button"
                         onClick={handleToggleMainBg}
-                        className={`w-10 h-5 rounded-full transition-all relative flex items-center p-1 ${
+                        className={`w-10 h-5 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
                           settings.backgroundActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
                         }`}
                       >
@@ -356,7 +356,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     </div>
                  )}
               </div>
-
+ 
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
                 {settings.backgroundImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -373,23 +373,23 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
             
           </div>
         </div>
-
+ 
       </div>
-
+ 
       {/* Right panel: Locations */}
-      <div className="flex flex-col gap-8">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 flex flex-col h-full justify-between">
+      <div className="flex flex-col gap-6 md:gap-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 flex flex-col h-full justify-between">
           <div>
             <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-emerald-500" /> Penyelaras Lokasi & Kiblat
+              <MapPin className="w-5 h-5 text-emerald-500 shrink-0" /> Penyelaras Lokasi & Kiblat
             </h3>
-
+ 
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pencarian Tempat / Kota</span>
                 <NominatimSearch onPlaceSelect={handlePlaceSelect} />
               </div>
-
+ 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <span className="text-xs text-zinc-400 uppercase font-black tracking-wider">Latitude</span>
@@ -412,7 +412,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   />
                 </div>
               </div>
-
+ 
               <div className="flex flex-col gap-2 mt-2">
                 <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">Metode Perhitungan Adhan</span>
                 <select
@@ -429,26 +429,26 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 </select>
               </div>
             </div>
-
-            {/* Leaflet Dynamic Picker map */}
-            <div className="w-full h-48 border border-zinc-800 rounded-2xl overflow-hidden mb-6 z-0">
+ 
+            {/* Leaflet Dynamic Picker map with responsive heights */}
+            <div className="w-full h-40 sm:h-48 md:h-64 border border-zinc-800 rounded-2xl overflow-hidden mb-6 z-0">
               <DynamicMapPicker 
                 center={mapCenter} 
                 onLocationSelect={handleMapClick} 
               />
             </div>
           </div>
-
+ 
           <button
             type="submit"
             disabled={saveLoading}
-            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase"
+            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase mt-2"
           >
             {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-zinc-950" /> : 'Simpan Semua Konfigurasi'}
           </button>
         </div>
       </div>
-
+ 
     </form>
   );
 }
