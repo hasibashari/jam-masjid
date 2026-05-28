@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 
 interface PrayerTimesGridProps {
   timelineObj: {
+    Imsak: Date;
     Fajr: Date;
     Sunrise: Date;
     Dhuhr: Date;

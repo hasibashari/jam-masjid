@@ -1,6 +1,7 @@
 export interface AppSettings {
   id?: string;
   mosqueName: string;
+  mosqueAddress: string;
   latitude: number;
   longitude: number;
   calculationMethod: number;
@@ -36,6 +37,7 @@ export interface BannerType {
 
 export const FALLBACK_SETTINGS: AppSettings = {
   mosqueName: "Jam Masjid Al-Hikmah",
+  mosqueAddress: "Jl. Jenderal Sudirman No. 1, Jakarta",
   latitude: -6.2088, // Default Jakarta (more suitable for ID user context)
   longitude: 106.8456,
   calculationMethod: 20, // Kemenag (Kementerian Agama RI) Indonesian default
@@ -60,6 +62,7 @@ export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [
 ];
 
 export const PRAYER_TRANSLATIONS: Record<string, string> = {
+  Imsak: 'Imsak',
   Fajr: 'Subuh',
   Sunrise: 'Syuruq',
   Dhuhr: 'Dzuhur',

@@ -1,4 +1,5 @@
 export interface PrayerTimesState {
+  Imsak: string;
   Fajr: string;
   Sunrise: string;
   Dhuhr: string;

@@ -14,7 +14,7 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
   const translatedNextPrayerName = PRAYER_TRANSLATIONS[nextPrayerName] || nextPrayerName;
 
   return (
-    <main className="flex-grow flex flex-col items-center justify-center relative">
+    <section className="flex-grow flex flex-col items-center justify-center relative">
       {/* Background aesthetic circular shapes */}
       <div className="absolute inset-0 opacity-5 flex items-center justify-center pointer-events-none">
         <div className="w-[500px] h-[500px] border-[40px] border-white rounded-full"></div>
@@ -41,6 +41,6 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
           </div>
         </div>
       </div>
-    </main>
+    </section>
   );
 }

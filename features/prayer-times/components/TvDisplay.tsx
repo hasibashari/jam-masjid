@@ -296,10 +296,15 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
         {/* Header Section */}
         <header className="flex-none h-[140px] flex items-center justify-between px-16 border-b border-white/5 bg-gradient-to-b from-black/20 to-transparent">
-          <div className="flex items-center mb-1">
+          <div className="flex flex-col text-left justify-center mb-1">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase">
               {settings.mosqueName}
             </h1>
+            {settings.mosqueAddress && (
+              <p className="text-sm md:text-base text-emerald-400 font-semibold tracking-wide mt-1 uppercase opacity-85">
+                {settings.mosqueAddress}
+              </p>
+            )}
           </div>
           
           <div className="text-right flex flex-col justify-center">
@@ -312,19 +317,22 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
           </div>
         </header>
 
-        {/* Central Display Visualizer */}
-        <ClockSection 
-          currentTime={currentTime} 
-          nextPrayerName={nextPrayer.name} 
-          countdownStr={countdownStr} 
-          timezone={timezoneLabel} 
-        />
+        {/* Main Content Area */}
+        <main className="flex-grow flex flex-col justify-between relative z-10">
+          {/* Central Display Visualizer */}
+          <ClockSection 
+            currentTime={currentTime} 
+            nextPrayerName={nextPrayer.name} 
+            countdownStr={countdownStr} 
+            timezone={timezoneLabel} 
+          />
 
-        {/* Dynamic Prayer Times Grid Bottom Sheet */}
-        <PrayerTimesGrid 
-          timelineObj={timelineObj} 
-          nextPrayerName={nextPrayer.name} 
-        />
+          {/* Dynamic Prayer Times Grid Bottom Sheet */}
+          <PrayerTimesGrid 
+            timelineObj={timelineObj} 
+            nextPrayerName={nextPrayer.name} 
+          />
+        </main>
 
         {/* Running Announcement Banner */}
         <RunningAnnouncements announcements={announcements} />

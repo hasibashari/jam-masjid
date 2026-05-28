@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       mosqueName,
+      mosqueAddress,
       latitude,
       longitude,
       calculationMethod,
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
         where: { id: currentSettings.id },
         data: {
           mosqueName: mosqueName ?? currentSettings.mosqueName,
+          mosqueAddress: mosqueAddress ?? currentSettings.mosqueAddress,
           latitude: latitude !== undefined ? parseFloat(latitude) : currentSettings.latitude,
           longitude: longitude !== undefined ? parseFloat(longitude) : currentSettings.longitude,
           calculationMethod: calculationMethod !== undefined ? parseInt(calculationMethod) : currentSettings.calculationMethod,
@@ -61,6 +63,7 @@ export async function POST(req: NextRequest) {
       savedSettings = await settingsDb.create({
         data: {
           mosqueName: mosqueName ?? FALLBACK_SETTINGS.mosqueName,
+          mosqueAddress: mosqueAddress ?? FALLBACK_SETTINGS.mosqueAddress,
           latitude: latitude !== undefined ? parseFloat(latitude) : FALLBACK_SETTINGS.latitude,
           longitude: longitude !== undefined ? parseFloat(longitude) : FALLBACK_SETTINGS.longitude,
           calculationMethod: calculationMethod !== undefined ? parseInt(calculationMethod) : FALLBACK_SETTINGS.calculationMethod,

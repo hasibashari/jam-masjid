@@ -30,6 +30,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS Settings (
     id TEXT PRIMARY KEY,
     mosqueName TEXT NOT NULL DEFAULT 'Jam Masjid',
+    mosqueAddress TEXT NOT NULL DEFAULT '',
     latitude REAL NOT NULL DEFAULT 21.4225,
     longitude REAL NOT NULL DEFAULT 39.8262,
     calculationMethod INTEGER NOT NULL DEFAULT 4,
@@ -64,17 +65,24 @@ db.exec(`
   );
 `);
 
+// Safe Migration: Add column dynamically for existing SQLite files
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN mosqueAddress TEXT NOT NULL DEFAULT ''");
+} catch (e) {
+  // Column already exists, safe to ignore
+}
+
 // Seed default settings row if empty
 const countRow = db.prepare("SELECT COUNT(*) as count FROM Settings").get() as { count: number };
 if (countRow.count === 0) {
   db.prepare(`
     INSERT INTO Settings (
-      id, mosqueName, latitude, longitude, calculationMethod, 
+      id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
       adzanDuration, iqomahDuration, prayerDuration, displayActive, 
       displayStart, displayEnd, backgroundActive, sandboxActive, 
       sandboxTime, sandboxStage, sandboxSpeed
     ) VALUES (
-      'default', 'Jam Masjid Al-Hikmah', -6.2088, 106.8456, 20, 
+      'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
       180, 600, 900, 1, 
       '03:00', '23:00', 0, 0, 
       NULL, 'AUTO', 1.0

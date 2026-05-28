@@ -125,6 +125,7 @@ export function usePrayerTimes({
   const parseTime = (timeStr: string) => parse(timeStr.split(" ")[0], "HH:mm", currentTime);
 
   const timelineObj = {
+    Imsak: parseTime(prayerTimes.Imsak || "04:10"),
     Fajr: parseTime(prayerTimes.Fajr),
     Sunrise: parseTime(prayerTimes.Sunrise),
     Dhuhr: parseTime(prayerTimes.Dhuhr),
@@ -180,8 +181,9 @@ export function usePrayerTimes({
   }
 
   // Regular next prayer countdown logic (excluding sunrise for calculation of NEXT, or we can include Sunrise if it's there but typically we only count down to standard workflow)
-  // Let's count down to any active schedule
+  // Let's count down to any active schedule, including Imsak
   const normalCountdownTimeline = [
+    { name: 'Imsak', time: timelineObj.Imsak },
     { name: 'Fajr', time: timelineObj.Fajr },
     { name: 'Sunrise', time: timelineObj.Sunrise },
     { name: 'Dhuhr', time: timelineObj.Dhuhr },
@@ -193,9 +195,9 @@ export function usePrayerTimes({
   let nextPrayer = normalCountdownTimeline.find(p => p.time > currentTime);
   
   if (!nextPrayer) {
-    const tomorrowFajr = new Date(timelineObj.Fajr);
-    tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
-    nextPrayer = { name: 'Fajr', time: tomorrowFajr };
+    const tomorrowImsak = new Date(timelineObj.Imsak);
+    tomorrowImsak.setDate(tomorrowImsak.getDate() + 1);
+    nextPrayer = { name: 'Imsak', time: tomorrowImsak };
   }
 
   const msToNext = differenceInMilliseconds(nextPrayer.time, currentTime);

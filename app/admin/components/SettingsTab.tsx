@@ -1,0 +1,464 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { 
+  Volume2, 
+  Clock, 
+  Image as ImageIcon, 
+  MapPin, 
+  Loader2, 
+  Upload, 
+  X 
+} from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { AppSettings } from '@/shared/types';
+import NominatimSearch from '@/features/location/components/NominatimSearch';
+
+const DynamicMapPicker = dynamic(() => import('@/features/location/components/MapPicker'), { 
+  ssr: false, 
+  loading: () => (
+    <div className="w-full h-64 flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 gap-2 rounded-xl">
+      <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      <span className="text-sm font-medium">Memuat Peta...</span>
+    </div>
+  )
+});
+
+interface SettingsTabProps {
+  settings: AppSettings;
+  setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
+  showAlert: (type: 'success' | 'error', text: string) => void;
+}
+
+export default function SettingsTab({ settings, setSettings, showAlert }: SettingsTabProps) {
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [mainBgUploading, setMainBgUploading] = useState(false);
+  const [mapCenter, setMapCenter] = useState({ lat: settings.latitude, lng: settings.longitude });
+
+  // Sync map center if settings lat/lng changes from external source (e.g. database reload)
+  useEffect(() => {
+    setMapCenter({ lat: settings.latitude, lng: settings.longitude });
+  }, [settings.latitude, settings.longitude]);
+
+  // Update Settings handler
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveLoading(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSettings(updated);
+        showAlert('success', 'Konfigurasi settings masjid berhasil disimpan!');
+      } else {
+        const errData = await res.json();
+        showAlert('error', errData.error || 'Gagal menyimpan settings.');
+      }
+    } catch (err: any) {
+      showAlert('error', err.message || 'Koneksi error ke server.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  // Background Image Handlers
+  const handleMainBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showAlert('error', 'File harus berupa gambar.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      showAlert('error', 'Ukuran gambar maksimal 5MB.');
+      return;
+    }
+
+    setMainBgUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('action', 'upload');
+
+    try {
+      const res = await fetch('/api/settings/background', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSettings(updated);
+        showAlert('success', 'Background utama berhasil diperbarui!');
+      } else {
+        const err = await res.json();
+        showAlert('error', err.error || 'Gagal mengunggah background.');
+      }
+    } catch (err) {
+      showAlert('error', 'Error mengunggah gambar.');
+    } finally {
+      setMainBgUploading(false);
+    }
+  };
+
+  const handleToggleMainBg = async () => {
+    const newActive = !settings.backgroundActive;
+    setSettings(prev => ({ ...prev, backgroundActive: newActive }));
+    
+    const formData = new FormData();
+    formData.append('action', 'toggle');
+    formData.append('active', String(newActive));
+    
+    try {
+      const res = await fetch('/api/settings/background', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        setSettings(prev => ({ ...prev, backgroundActive: !newActive }));
+        showAlert('error', 'Gagal diperbarui status background.');
+      } else {
+        showAlert('success', 'Status background diperbarui.');
+      }
+    } catch {
+      setSettings(prev => ({ ...prev, backgroundActive: !newActive }));
+      showAlert('error', 'Error mengubah status.');
+    }
+  };
+
+  const handlePlaceSelect = (lat: number, lng: number, placeName: string) => {
+    setSettings(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      mosqueName: placeName || prev.mosqueName
+    }));
+    setMapCenter({ lat, lng });
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setSettings(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng
+    }));
+    setMapCenter({ lat, lng });
+  };
+
+  return (
+    <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      {/* Left panels: Identity & Timings */}
+      <div className="lg:col-span-2 flex flex-col gap-8">
+        
+        {/* Card 1: Identity */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-emerald-500" /> Identitas Masjid & Jadwal Aktif
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Nama Masjid</label>
+              <input 
+                type="text" 
+                value={settings.mosqueName}
+                onChange={(e) => setSettings(prev => ({ ...prev, mosqueName: e.target.value }))}
+                required
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
+                placeholder="Masukkan nama masjid..."
+              />
+            </div>
+
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Alamat Masjid</label>
+              <input 
+                type="text" 
+                value={settings.mosqueAddress || ''}
+                onChange={(e) => setSettings(prev => ({ ...prev, mosqueAddress: e.target.value }))}
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
+                placeholder="Masukkan alamat masjid..."
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampilan Layar</label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, displayActive: !prev.displayActive }))}
+                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${
+                    settings.displayActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                  }`}
+                >
+                  <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
+                </button>
+                <span className="text-sm text-zinc-300 font-semibold md:mb-0">
+                  {settings.displayActive ? 'Layar Display Aktif' : 'Layar Display Non-Aktif / Standby'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Mulai Operasi</label>
+              <input 
+                type="text" 
+                value={settings.displayStart}
+                onChange={(e) => setSettings(prev => ({ ...prev, displayStart: e.target.value }))}
+                required
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-mono"
+                placeholder="03:00"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Akhir Operasi</label>
+              <input 
+                type="text" 
+                value={settings.displayEnd}
+                onChange={(e) => setSettings(prev => ({ ...prev, displayEnd: e.target.value }))}
+                required
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-mono"
+                placeholder="23:00"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Sholat state timing parameters */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+            <Clock className="w-5 h-5 text-emerald-500" /> Konfigurasi Fase Durasi Ibadah
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 1. Adzan</label>
+              </div>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi memutar audio/alert adzan berkumandang.</span>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  value={settings.adzanDuration}
+                  onChange={(e) => setSettings(prev => ({ ...prev, adzanDuration: parseInt(e.target.value) || 0 }))}
+                  required
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
+                />
+                <span className="text-xs text-zinc-300 font-medium">detik</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 2. Iqomah</label>
+              </div>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Hitung mundur iqomah mempersiapkan shaf jamaah.</span>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  value={settings.iqomahDuration}
+                  onChange={(e) => setSettings(prev => ({ ...prev, iqomahDuration: parseInt(e.target.value) || 0 }))}
+                  required
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
+                />
+                <span className="text-xs text-zinc-300 font-medium">detik</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 3. Shalat</label>
+              </div>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi ibadah silent shalat berjamaah berlangsung.</span>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  value={settings.prayerDuration}
+                  onChange={(e) => setSettings(prev => ({ ...prev, prayerDuration: parseInt(e.target.value) || 0 }))}
+                  required
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
+                />
+                <span className="text-xs text-zinc-300 font-medium">detik</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Main Background Image */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-emerald-500" /> Background Utama Layar TV
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            
+            {/* Upload & URL Input Area */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Unggah File Background</label>
+                <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors h-36">
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleMainBgUpload}
+                    disabled={mainBgUploading}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
+                  />
+                  {mainBgUploading ? (
+                    <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-zinc-500" />
+                      <div>
+                        <span className="text-xs font-bold text-emerald-500">Klik / Seret Gambar</span>
+                        <p className="text-[10px] text-zinc-500 mt-1">Maks 5MB. Aspek rasio 16:9 disarankan.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Atau Tempel URL Background Gambar</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="url"
+                    value={settings.backgroundImage || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, backgroundImage: e.target.value || null }))}
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold flex-1"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  {settings.backgroundImage && (
+                    <button
+                      type="button"
+                      onClick={() => setSettings(prev => ({ ...prev, backgroundImage: null }))}
+                      className="p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition-all"
+                      title="Hapus URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Area */}
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Preview Background</label>
+                 {settings.backgroundImage && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-zinc-400">AKTIFKAN</span>
+                      <button
+                        type="button"
+                        onClick={handleToggleMainBg}
+                        className={`w-10 h-5 rounded-full transition-all relative flex items-center p-1 ${
+                          settings.backgroundActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                        }`}
+                      >
+                        <div className="w-3.5 h-3.5 bg-white rounded-full shadow-lg"></div>
+                      </button>
+                    </div>
+                 )}
+              </div>
+
+              <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center">
+                {settings.backgroundImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img 
+                    src={settings.backgroundImage} 
+                    alt="Background" 
+                    className={`w-full h-full object-cover transition-opacity ${settings.backgroundActive ? 'opacity-100' : 'opacity-40 grayscale'}`}
+                  />
+                ) : (
+                  <span className="text-xs text-zinc-600 font-bold uppercase tracking-wider">Belum ada background</span>
+                )}
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+      </div>
+
+      {/* Right panel: Locations */}
+      <div className="flex flex-col gap-8">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 flex flex-col h-full justify-between">
+          <div>
+            <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-emerald-500" /> Penyelaras Lokasi & Kiblat
+            </h3>
+
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pencarian Tempat / Kota</span>
+                <NominatimSearch onPlaceSelect={handlePlaceSelect} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-zinc-400 uppercase font-black tracking-wider">Latitude</span>
+                  <input 
+                    type="number" 
+                    step="0.000001"
+                    value={settings.latitude}
+                    onChange={(e) => setSettings(prev => ({ ...prev, latitude: parseFloat(e.target.value) || 0 }))}
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-zinc-400 uppercase font-black tracking-wider">Longitude</span>
+                  <input 
+                    type="number" 
+                    step="0.000001"
+                    value={settings.longitude}
+                    onChange={(e) => setSettings(prev => ({ ...prev, longitude: parseFloat(e.target.value) || 0 }))}
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">Metode Perhitungan Adhan</span>
+                <select
+                  value={settings.calculationMethod}
+                  onChange={(e) => setSettings(prev => ({ ...prev, calculationMethod: parseInt(e.target.value) || 4 }))}
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold"
+                >
+                  <option value={20}>Kemenag RI (Kementerian Agama Indonesia)</option>
+                  <option value={4}>Umm Al-Qura (Makkah, Arab Saudi)</option>
+                  <option value={3}>Liga Dunia Islam (Muslim World League)</option>
+                  <option value={2}>Masyarakat Islam Amerika Utara (ISNA)</option>
+                  <option value={1}>Universitas Ilmu Islam, Karachi</option>
+                  <option value={5}>Oblast Mesir (Egyptian General Authority)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Leaflet Dynamic Picker map */}
+            <div className="w-full h-48 border border-zinc-800 rounded-2xl overflow-hidden mb-6 z-0">
+              <DynamicMapPicker 
+                center={mapCenter} 
+                onLocationSelect={handleMapClick} 
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saveLoading}
+            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase cursor-pointer"
+          >
+            {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-zinc-950" /> : 'Simpan Semua Konfigurasi'}
+          </button>
+        </div>
+      </div>
+
+    </form>
+  );
+}
