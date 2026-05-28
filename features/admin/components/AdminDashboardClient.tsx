@@ -144,13 +144,13 @@ export default function AdminDashboardClient() {
       )}
 
       {/* Admin Navbar - Stacked on mobile, side-by-side on desktop */}
-      <header className="bg-zinc-900 border-b border-zinc-800 py-5 md:py-6 px-4 sm:px-8 md:px-12 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-0">
+      <header className="bg-zinc-900 border-b border-zinc-800 py-3 md:py-4 px-4 sm:px-8 md:px-12 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-0">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-[#D4AF37] rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-[#D4AF37] rounded-xl flex items-center justify-center shrink-0">
             <SettingsIcon className="w-5.5 h-5.5 md:w-6 md:h-6 text-zinc-950" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-black tracking-tight font-sans leading-none uppercase">PANEL KONTROL DIGITAL</h1>
+            <h1 className="text-lg md:text-xl font-black tracking-tight font-sans leading-none uppercase">PANEL KONTROL DIGITAL</h1>
             <p className="text-[10px] md:text-xs text-zinc-400 mt-1 max-w-[280px] sm:max-w-md">Kelola informasi masjid, parameter hitung mundur adzan & iqomah, serta poster display TV.</p>
           </div>
         </div>
@@ -176,14 +176,14 @@ export default function AdminDashboardClient() {
       </header>
 
       {/* Main Container - Optimized paddings for mobile */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 mt-6 md:mt-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-8 mt-4 md:mt-8">
         
         {/* Touch-Friendly horizontal scrollable navigation tab bar */}
-        <div className="relative border-b border-zinc-900 mb-6 md:mb-10 select-none">
+        <div className="relative border-b border-zinc-900 mb-4 md:mb-6 select-none">
           <nav className="flex gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-none snap-x -mb-[1px]">
             <button 
               onClick={() => setActiveTab('settings')}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
                 activeTab === 'settings' 
                   ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
                   : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
@@ -195,7 +195,7 @@ export default function AdminDashboardClient() {
             
             <button 
               onClick={() => setActiveTab('announcements')}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
                 activeTab === 'announcements' 
                   ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
                   : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
@@ -207,7 +207,7 @@ export default function AdminDashboardClient() {
 
             <button 
               onClick={() => setActiveTab('banners')}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
                 activeTab === 'banners' 
                   ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
                   : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
@@ -219,7 +219,7 @@ export default function AdminDashboardClient() {
 
             <button 
               onClick={() => setActiveTab('quotes')}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
                 activeTab === 'quotes' 
                   ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
                   : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
@@ -231,7 +231,7 @@ export default function AdminDashboardClient() {
 
             <button 
               onClick={() => setActiveTab('sandbox')}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
                 activeTab === 'sandbox' 
                   ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
                   : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'

@@ -16,18 +16,10 @@ export function useMosqueSettings({
 }: UseMosqueSettingsProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [mainBgUploading, setMainBgUploading] = useState(false);
-  const [mapCenter, setMapCenter] = useState({
+  const mapCenter = {
     lat: initialSettings.latitude,
     lng: initialSettings.longitude,
-  });
-
-  // Sync map center if external settings change
-  useEffect(() => {
-    setMapCenter({
-      lat: initialSettings.latitude,
-      lng: initialSettings.longitude,
-    });
-  }, [initialSettings.latitude, initialSettings.longitude]);
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +114,6 @@ export function useMosqueSettings({
       latitude: lat,
       longitude: lng,
     }));
-    setMapCenter({ lat, lng });
   };
 
   const handleMapClick = (lat: number, lng: number) => {
@@ -131,7 +122,6 @@ export function useMosqueSettings({
       latitude: lat,
       longitude: lng,
     }));
-    setMapCenter({ lat, lng });
   };
 
   return {

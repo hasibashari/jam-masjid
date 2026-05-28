@@ -48,18 +48,18 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
   });
 
   return (
-    <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+    <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
       
       {/* Left panels: Identity & Timings */}
-      <div className="lg:col-span-2 flex flex-col gap-6 md:gap-8">
+      <div className="lg:col-span-2 flex flex-col gap-4 md:gap-6">
         
         {/* Card 1: Identity */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+          <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-emerald-500 shrink-0" /> Identitas Masjid & Jadwal Aktif
           </h3>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Nama Masjid</label>
               <input 
@@ -67,7 +67,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 value={settings.mosqueName}
                 onChange={(e) => setSettings(prev => ({ ...prev, mosqueName: e.target.value }))}
                 required
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-semibold"
                 placeholder="Masukkan nama masjid..."
               />
             </div>
@@ -78,7 +78,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 type="text" 
                 value={settings.mosqueAddress || ''}
                 onChange={(e) => setSettings(prev => ({ ...prev, mosqueAddress: e.target.value }))}
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-semibold"
                 placeholder="Masukkan alamat masjid..."
               />
             </div>
@@ -108,7 +108,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 value={settings.displayStart}
                 onChange={(e) => setSettings(prev => ({ ...prev, displayStart: e.target.value }))}
                 required
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-mono"
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono"
                 placeholder="03:00"
               />
             </div>
@@ -120,7 +120,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 value={settings.displayEnd}
                 onChange={(e) => setSettings(prev => ({ ...prev, displayEnd: e.target.value }))}
                 required
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-mono"
+                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono"
                 placeholder="23:00"
               />
             </div>
@@ -128,12 +128,12 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
         </div>
  
         {/* Card 2: Sholat state timing parameters */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+          <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
             <Clock className="w-5 h-5 text-emerald-500 shrink-0" /> Konfigurasi Fase Durasi Ibadah
           </h3>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 mb-4 sm:mb-6">
             <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 1. Adzan</label>
               <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Durasi memutar audio/alert adzan berkumandang.</span>
@@ -143,7 +143,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   value={settings.adzanDuration}
                   onChange={(e) => setSettings(prev => ({ ...prev, adzanDuration: parseInt(e.target.value) || 0 }))}
                   required
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold font-mono"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm w-20 text-center font-bold font-mono"
                 />
                 <span className="text-xs text-zinc-300 font-medium">detik</span>
               </div>
@@ -158,7 +158,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   value={settings.prayerDuration}
                   onChange={(e) => setSettings(prev => ({ ...prev, prayerDuration: parseInt(e.target.value) || 0 }))}
                   required
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold font-mono"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm w-20 text-center font-bold font-mono"
                 />
                 <span className="text-xs text-zinc-300 font-medium">detik</span>
               </div>
@@ -198,12 +198,12 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
         </div>
  
         {/* Card 2.5: Audio & Adzan Settings */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+          <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-emerald-500 shrink-0" /> Pengaturan Audio & Alarm Adzan
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 items-start">
             
             <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl md:col-span-1">
               <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Suara Adzan</label>
@@ -240,7 +240,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                       setSettings(prev => ({ ...prev, adzanAudioUrl: val }));
                     }
                   }}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-semibold focus:border-emerald-500"
+                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-xs font-semibold focus:border-emerald-500"
                 >
                   <option value="https://www.islamcan.com/audio/adhan/azan1.mp3">Preset 1. Adzan Mekkah (Suara Merdu Syahdu)</option>
                   <option value="https://www.islamcan.com/audio/adhan/azan2.mp3">Preset 2. Adzan Madinah (Suara Tenang & Khusyuk)</option>
@@ -254,7 +254,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     type="url"
                     value={settings.adzanAudioUrl}
                     onChange={(e) => setSettings(prev => ({ ...prev, adzanAudioUrl: e.target.value }))}
-                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 outline-none text-white text-xs font-mono focus:border-emerald-500"
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 outline-none text-white text-xs font-mono focus:border-emerald-500"
                     placeholder="Tempel link URL file .mp3..."
                   />
                 )}
@@ -280,12 +280,12 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
         </div>
  
         {/* Card 3: Main Background Image */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+          <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-emerald-500 shrink-0" /> Background Utama Layar TV
           </h3>
  
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
             
             {/* Upload & URL Input Area */}
             <div className="flex flex-col gap-4">
@@ -320,7 +320,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     type="url"
                     value={settings.backgroundImage || ''}
                     onChange={(e) => setSettings(prev => ({ ...prev, backgroundImage: e.target.value || null }))}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold flex-1"
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold flex-1"
                     placeholder="https://images.unsplash.com/..."
                   />
                   {settings.backgroundImage && (
@@ -377,10 +377,10 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
       </div>
  
       {/* Right panel: Locations */}
-      <div className="flex flex-col gap-6 md:gap-8">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 flex flex-col h-full justify-between">
+      <div className="flex flex-col gap-4 md:gap-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 flex flex-col h-full justify-between">
           <div>
-            <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+            <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
               <MapPin className="w-5 h-5 text-emerald-500 shrink-0" /> Penyelaras Lokasi & Kiblat
             </h3>
  
@@ -398,7 +398,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     step="0.000001"
                     value={settings.latitude}
                     onChange={(e) => setSettings(prev => ({ ...prev, latitude: parseFloat(e.target.value) || 0 }))}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold"
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-xs font-mono font-bold"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -408,7 +408,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                     step="0.000001"
                     value={settings.longitude}
                     onChange={(e) => setSettings(prev => ({ ...prev, longitude: parseFloat(e.target.value) || 0 }))}
-                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold"
+                    className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-xs font-mono font-bold"
                   />
                 </div>
               </div>
@@ -418,7 +418,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 <select
                   value={settings.calculationMethod}
                   onChange={(e) => setSettings(prev => ({ ...prev, calculationMethod: parseInt(e.target.value) || 4 }))}
-                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold"
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-[13px] md:text-sm font-semibold"
                 >
                   <option value={20}>Kemenag RI (Kementerian Agama Indonesia)</option>
                   <option value={4}>Umm Al-Qura (Makkah, Arab Saudi)</option>
@@ -442,7 +442,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
           <button
             type="submit"
             disabled={saveLoading}
-            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase mt-2"
+            className="w-full py-3 md:py-3.5 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-[13px] md:text-sm font-black tracking-wider transition-colors uppercase mt-2"
           >
             {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-zinc-950" /> : 'Simpan Semua Konfigurasi'}
           </button>

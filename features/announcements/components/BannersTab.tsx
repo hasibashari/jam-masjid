@@ -65,11 +65,11 @@ export default function BannersTab({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
       
       {/* Create Banner Form */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 h-fit">
-        <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 h-fit">
+        <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
           <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Unggah Poster Banner Baru
         </h3>
 
@@ -105,7 +105,7 @@ export default function BannersTab({
               type="url"
               value={newBanner.imageUrl}
               onChange={(e) => setNewBanner(prev => ({ ...prev, imageUrl: e.target.value }))}
-              className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono font-bold"
               placeholder="https://images.unsplash.com/..."
             />
           </div>
@@ -159,7 +159,7 @@ export default function BannersTab({
           <button
             type="submit"
             disabled={saveLoading}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 text-white rounded-xl text-sm font-bold transition-colors uppercase tracking-wider mt-4"
+            className="w-full py-3 md:py-3.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 text-white rounded-xl text-[13px] md:text-sm font-bold transition-colors uppercase tracking-wider mt-4"
           >
             {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Unggah Poster Informasi'}
           </button>
@@ -168,15 +168,15 @@ export default function BannersTab({
       </div>
 
       {/* Existing Banners Grid List */}
-      <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-        <h3 className="text-lg font-bold mb-6 text-[#D4AF37]">Daftar Poster Informasi Aktif</h3>
+      <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+        <h3 className="text-base font-bold mb-4 text-[#D4AF37]">Daftar Poster Informasi Aktif</h3>
 
         {banners.length === 0 ? (
           <div className="py-16 text-center text-zinc-500 font-medium">
             Belum ada poster Fullscreen yang diunggah. Tambahkan di panel kiri untuk memulai!
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
             {banners.map((ban) => (
               <div 
                 key={ban.id}
@@ -277,7 +277,7 @@ export default function BannersTab({
                   value={editingBanner.imageUrl}
                   onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, imageUrl: e.target.value }) : null)}
                   required
-                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
                 />
               </div>
 

@@ -26,21 +26,21 @@ export default function SandboxTab({
   });
 
   return (
-    <div className="max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 text-left">
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-        <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-          <Clock className="w-6 h-6 text-white" />
+    <div className="max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 text-left">
+      <div className="flex items-center gap-3 mb-4 pb-4 border-b border-zinc-800">
+        <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+          <Clock className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-[#D4AF37]">Dev Sandbox & Simulators</h3>
-          <p className="text-xs text-zinc-400">Manipulasi waktu, simulasi percepatan, dan force override untuk menguji transisi fase Jam Masjid.</p>
+          <h3 className="text-lg md:text-xl font-bold text-[#D4AF37]">Dev Sandbox & Simulators</h3>
+          <p className="text-[10px] md:text-xs text-zinc-400">Manipulasi waktu, simulasi percepatan, dan force override untuk menguji transisi fase Jam Masjid.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Left Column: Sandbox Config */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-zinc-950 p-4 sm:p-5 md:p-6 rounded-2xl border border-zinc-800 flex flex-col gap-4">
+        <div className="flex flex-col gap-4 md:gap-6">
+          <div className="bg-zinc-950 p-4 sm:p-5 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
             <div className="flex justify-between items-center">
               <div>
                 <span className="text-sm font-bold text-white uppercase tracking-wide">Mode Sandbox</span>
@@ -62,7 +62,7 @@ export default function SandboxTab({
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-4 sm:p-5 md:p-6 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
+          <div className="bg-zinc-950 p-4 sm:p-5 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
             <span className="text-sm font-bold text-white uppercase tracking-wide">Simulasi Force Stage</span>
             <p className="text-[10px] text-zinc-500">Paksa tampilan TV Display untuk masuk ke fase tertentu secara instan.</p>
             
@@ -74,7 +74,7 @@ export default function SandboxTab({
                 await handleUpdateSandboxField({ sandboxStage: val as any });
                 showAlert('success', `Simulasi fase diubah ke ${val}`);
               }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-[13px] md:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <option value="AUTO">Otomatis (Ikuti Waktu)</option>
               <option value="NORMAL">Normal (Tampilan Jam & Jadwal)</option>
@@ -84,7 +84,7 @@ export default function SandboxTab({
             </select>
           </div>
 
-          <div className="bg-zinc-950 p-4 sm:p-5 md:p-6 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
+          <div className="bg-zinc-950 p-4 sm:p-5 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
             <span className="text-sm font-bold text-white uppercase tracking-wide">Faktor Percepatan Waktu</span>
             <p className="text-[10px] text-zinc-500">Mempercepat jalannya waktu virtual sholat (sangat berguna untuk menguji transisi countdown).</p>
             
@@ -96,7 +96,7 @@ export default function SandboxTab({
                 await handleUpdateSandboxField({ sandboxSpeed: val });
                 showAlert('success', `Percepatan waktu diubah ke ${val}x`);
               }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-[13px] md:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <option value={1.0}>1x (Waktu Normal)</option>
               <option value={5.0}>5x (5 Detik Virtual per Detik Nyata)</option>
@@ -108,8 +108,8 @@ export default function SandboxTab({
         </div>
 
         {/* Right Column: Time Travel Quick Presets */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-zinc-950 p-4 sm:p-5 md:p-6 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col gap-4 md:gap-6">
+          <div className="bg-zinc-950 p-4 sm:p-5 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
             <span className="text-sm font-bold text-white uppercase tracking-wide">Time Travel / Set Waktu Virtual</span>
             <p className="text-[10px] text-zinc-500">Atur waktu virtual ke jam, menit, dan detik tertentu.</p>
             
@@ -122,7 +122,7 @@ export default function SandboxTab({
                   const isoStr = e.target.value ? new Date(e.target.value).toISOString() : null;
                   await handleUpdateSandboxField({ sandboxTime: isoStr });
                 }}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-mono font-bold flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white text-xs font-mono font-bold flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <button
                 type="button"
@@ -131,14 +131,14 @@ export default function SandboxTab({
                   await handleUpdateSandboxField({ sandboxTime: null });
                   showAlert('success', 'Waktu virtual direset ke waktu sekarang.');
                 }}
-                className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                className="px-3 md:px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
               >
                 Reset
               </button>
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-4 sm:p-5 md:p-6 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
+          <div className="bg-zinc-950 p-4 sm:p-5 rounded-2xl border border-zinc-800 flex flex-col gap-3 sm:gap-4">
             <span className="text-sm font-bold text-white uppercase tracking-wide">Aksi Cepat Simulasi Fase</span>
             <p className="text-[10px] text-zinc-500">Atur waktu virtual secara otomatis mendekati fase sholat terdekat.</p>
             

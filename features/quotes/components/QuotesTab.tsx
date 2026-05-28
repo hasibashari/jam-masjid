@@ -45,11 +45,11 @@ export default function QuotesTab({
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
       
       {/* Form to add Quote */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8 h-fit">
-        <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 h-fit">
+        <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
           <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Tulis Kata Motivasi / Quotes
         </h3>
         
@@ -61,7 +61,7 @@ export default function QuotesTab({
               onChange={(e) => setNewQuoteText(e.target.value)}
               required
               rows={4}
-              className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold leading-relaxed"
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-semibold leading-relaxed"
               placeholder="Contoh: Bersabarlah, sesungguhnya pertolongan Allah itu sangat dekat..."
             />
           </div>
@@ -72,7 +72,7 @@ export default function QuotesTab({
               type="text"
               value={newQuoteSource}
               onChange={(e) => setNewQuoteSource(e.target.value)}
-              className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold"
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-semibold"
               placeholder="Contoh: HR. Bukhari, QS. Al-Baqarah: 153"
             />
           </div>
@@ -80,7 +80,7 @@ export default function QuotesTab({
           <button
             type="submit"
             disabled={saveLoading}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 text-white rounded-xl text-sm font-bold transition-colors uppercase tracking-wider"
+            className="w-full py-3 md:py-3.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 text-white rounded-xl text-[13px] md:text-sm font-bold transition-colors uppercase tracking-wider"
           >
             {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Tambahkan Quote'}
           </button>
@@ -88,8 +88,8 @@ export default function QuotesTab({
       </div>
 
       {/* List Quotes */}
-      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 sm:p-8">
-        <h3 className="text-lg font-bold mb-6 text-[#D4AF37]">Daftar Kata Motivasi / Quotes Aktif</h3>
+      <div className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6">
+        <h3 className="text-base font-bold mb-4 text-[#D4AF37]">Daftar Kata Motivasi / Quotes Aktif</h3>
         
         {quotes.length === 0 ? (
           <div className="py-12 text-center text-zinc-500 font-medium">
@@ -100,7 +100,7 @@ export default function QuotesTab({
             {quotes.map((q) => (
               <div 
                 key={q.id} 
-                className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border transition-all ${
+                className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl border transition-all ${
                   q.active ? 'bg-zinc-950/40 border-emerald-500/20' : 'bg-transparent border-zinc-800 opacity-60'
                 }`}
               >
@@ -109,14 +109,14 @@ export default function QuotesTab({
                     <textarea
                       value={editingQuoteText}
                       onChange={(e) => setEditingQuoteText(e.target.value)}
-                      className="bg-zinc-950 border border-zinc-850 rounded-xl px-4 py-3 outline-none text-white focus:border-emerald-500 text-sm font-semibold leading-relaxed w-full"
+                      className="bg-zinc-950 border border-zinc-850 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-semibold leading-relaxed w-full"
                       rows={2}
                     />
                     <input
                       type="text"
                       value={editingQuoteSource}
                       onChange={(e) => setEditingQuoteSource(e.target.value)}
-                      className="bg-zinc-950 border border-zinc-850 rounded-xl px-4 py-2 outline-none text-white focus:border-emerald-500 text-xs font-semibold w-full"
+                      className="bg-zinc-950 border border-zinc-850 rounded-xl px-3 py-2 outline-none text-white focus:border-emerald-500 text-xs font-semibold w-full"
                       placeholder="Sumber..."
                     />
                     <div className="flex gap-2 justify-end">
