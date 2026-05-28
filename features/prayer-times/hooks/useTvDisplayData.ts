@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppSettings, AnnouncementType, BannerType } from '@/shared/types';
+import { AppSettings, AnnouncementType, BannerType, QuoteType } from '@/shared/types';
 
 interface UseTvDisplayDataProps {
   initialSettings: AppSettings;
   initialAnnouncements: AnnouncementType[];
+  initialQuotes: QuoteType[];
 }
 
-export function useTvDisplayData({ initialSettings, initialAnnouncements }: UseTvDisplayDataProps) {
+export function useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes }: UseTvDisplayDataProps) {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [announcements, setAnnouncements] = useState<AnnouncementType[]>(initialAnnouncements);
   const [banners, setBanners] = useState<BannerType[]>([]);
+  const [quotes, setQuotes] = useState<QuoteType[]>(initialQuotes);
   const [bgError, setBgError] = useState(false);
   const [prevBgImage, setPrevBgImage] = useState(initialSettings.backgroundImage);
 
@@ -21,13 +23,14 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements }: UseT
     setBgError(false);
   }
 
-  // Fetch settings, announcements, and banners from database
+  // Fetch settings, announcements, banners, and quotes from database
   const fetchLatestData = useCallback(async () => {
     try {
-      const [settingsRes, announcementsRes, bannersRes] = await Promise.all([
+      const [settingsRes, announcementsRes, bannersRes, quotesRes] = await Promise.all([
         fetch('/api/settings').catch(() => null),
         fetch('/api/announcements').catch(() => null),
-        fetch('/api/banners').catch(() => null)
+        fetch('/api/banners').catch(() => null),
+        fetch('/api/quotes').catch(() => null)
       ]);
 
       if (settingsRes?.ok) {
@@ -41,6 +44,10 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements }: UseT
       if (bannersRes?.ok) {
         const remoteBanners = await bannersRes.json();
         setBanners(remoteBanners);
+      }
+      if (quotesRes?.ok) {
+        const remoteQuotes = await quotesRes.json();
+        setQuotes(remoteQuotes);
       }
     } catch (e) {
       console.error("Failed background polling", e);
@@ -77,6 +84,8 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements }: UseT
     setAnnouncements,
     banners,
     setBanners,
+    quotes,
+    setQuotes,
     bgError,
     setBgError,
   };

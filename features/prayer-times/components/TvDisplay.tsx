@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppSettings, AnnouncementType, BannerType, PRAYER_TRANSLATIONS } from '@/shared/types';
+import { AppSettings, AnnouncementType, BannerType, QuoteType, PRAYER_TRANSLATIONS } from '@/shared/types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Loader2, Moon, Maximize, Minimize } from 'lucide-react';
@@ -30,18 +30,20 @@ import FullscreenBanner from '@/features/announcements/components/FullscreenBann
 interface TvDisplayProps {
   initialSettings: AppSettings;
   initialAnnouncements: AnnouncementType[];
+  initialQuotes: QuoteType[];
 }
 
-export default function TvDisplay({ initialSettings, initialAnnouncements }: TvDisplayProps) {
+export default function TvDisplay({ initialSettings, initialAnnouncements, initialQuotes }: TvDisplayProps) {
   // 1. Data synchronization & polling hook (every 2s)
   const {
     settings,
     setSettings,
     announcements,
     banners,
+    quotes,
     bgError,
     setBgError,
-  } = useTvDisplayData({ initialSettings, initialAnnouncements });
+  } = useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes });
 
   // 2. Kiosk system optimization hooks
   useWakeLock();
@@ -144,7 +146,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   // Handle location picker changes on local display layout context
   const handleSaveLocation = async (lat: number, lng: number, placeName: string) => {
     try {
-      const merged = { ...settings, latitude: lat, longitude: lng, mosqueName: placeName };
+      const merged = { ...settings, latitude: lat, longitude: lng };
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -310,7 +312,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         {/* Main Content Area */}
         <main className="flex-grow flex flex-col justify-between relative z-10">
           {/* Central Display Visualizer */}
-          <ClockSection currentTime={currentTime} />
+          <ClockSection currentTime={currentTime} quotes={quotes} />
 
           {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
           <div className="flex justify-start px-8 mb-2">

@@ -10,17 +10,19 @@ import {
   Check, 
   AlertTriangle,
   ExternalLink,
-  LogOut
+  LogOut,
+  Quote as QuoteIcon
 } from 'lucide-react';
-import { AppSettings, AnnouncementType, BannerType, FALLBACK_SETTINGS } from '@/shared/types';
+import { AppSettings, AnnouncementType, BannerType, QuoteType, FALLBACK_SETTINGS } from '@/shared/types';
 
 import SettingsTab from '@/features/settings/components/SettingsTab';
 import AnnouncementsTab from '@/features/announcements/components/AnnouncementsTab';
 import BannersTab from '@/features/announcements/components/BannersTab';
 import SandboxTab from '@/features/settings/components/SandboxTab';
+import QuotesTab from '@/features/quotes/components/QuotesTab';
 
 export default function AdminDashboardClient() {
-  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'sandbox'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'quotes' | 'sandbox'>('settings');
   const [loading, setLoading] = useState(true);
 
   // Consolidated global settings & data states
@@ -28,6 +30,7 @@ export default function AdminDashboardClient() {
   const [prayerTimings, setPrayerTimings] = useState<any>(null);
   const [announcements, setAnnouncements] = useState<AnnouncementType[]>([]);
   const [banners, setBanners] = useState<BannerType[]>([]);
+  const [quotes, setQuotes] = useState<QuoteType[]>([]);
 
   // Toast status alert
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -37,10 +40,11 @@ export default function AdminDashboardClient() {
     const loadAllData = async () => {
       setLoading(true);
       try {
-        const [settingsRes, announcementsRes, bannersRes] = await Promise.all([
+        const [settingsRes, announcementsRes, bannersRes, quotesRes] = await Promise.all([
           fetch('/api/settings'),
           fetch('/api/announcements?all=true'),
-          fetch('/api/banners?all=true')
+          fetch('/api/banners?all=true'),
+          fetch('/api/quotes?all=true')
         ]);
 
         if (settingsRes.ok) {
@@ -63,6 +67,10 @@ export default function AdminDashboardClient() {
         if (bannersRes.ok) {
           const b = await bannersRes.json();
           setBanners(b);
+        }
+        if (quotesRes.ok) {
+          const q = await quotesRes.json();
+          setQuotes(q);
         }
       } catch (err) {
         console.error("Failed loading admin panel data:", err);
@@ -208,6 +216,18 @@ export default function AdminDashboardClient() {
           </button>
 
           <button 
+            onClick={() => setActiveTab('quotes')}
+            className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'quotes' 
+                ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+            }`}
+          >
+            <QuoteIcon className="w-4 h-4" />
+            <span>Kata Motivasi / Quotes</span>
+          </button>
+
+          <button 
             onClick={() => setActiveTab('sandbox')}
             className={`flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold transition-all ${
               activeTab === 'sandbox' 
@@ -242,6 +262,14 @@ export default function AdminDashboardClient() {
             <BannersTab 
               banners={banners} 
               setBanners={setBanners} 
+              showAlert={showAlert} 
+            />
+          )}
+
+          {activeTab === 'quotes' && (
+            <QuotesTab 
+              quotes={quotes} 
+              setQuotes={setQuotes} 
               showAlert={showAlert} 
             />
           )}

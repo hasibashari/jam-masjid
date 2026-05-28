@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { QuoteType } from '@/shared/types';
 
 const ISLAMIC_QUOTES = [
   {
@@ -40,46 +41,59 @@ const ISLAMIC_QUOTES = [
 
 interface ClockSectionProps {
   currentTime: Date;
+  quotes?: QuoteType[];
 }
 
-export default function ClockSection({ currentTime }: ClockSectionProps) {
+export default function ClockSection({ currentTime, quotes }: ClockSectionProps) {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
+
+  const activeQuotes = (quotes && quotes.length > 0) 
+    ? quotes.filter(q => q.active) 
+    : ISLAMIC_QUOTES;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIsFading(true);
       setTimeout(() => {
-        setCurrentQuoteIndex((prev) => (prev + 1) % ISLAMIC_QUOTES.length);
+        setCurrentQuoteIndex((prev) => {
+          const listLength = activeQuotes.length > 0 ? activeQuotes.length : 1;
+          return (prev + 1) % listLength;
+        });
         setIsFading(false);
       }, 500); // 500ms fade out duration before switching content
     }, 30000); // Rotate every 30 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [activeQuotes.length]);
+
+  const currentQuote = activeQuotes[currentQuoteIndex] || ISLAMIC_QUOTES[0];
 
   return (
-    <section className="flex-grow flex flex-col items-center justify-center relative">
-      <div className="z-10 flex flex-col items-center">
+    <section className="flex-grow flex flex-col items-center justify-center relative w-full h-full">
+      {/* 1. Centered Clock Container (Independent, perfectly stable height) */}
+      <div className="z-10 flex flex-col items-center justify-center -mt-16 select-none pointer-events-none">
         {/* Massive Digital Time Display */}
-        <div className="text-[14rem] md:text-[180px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl mb-4 font-[family-name:var(--font-space)] relative">
+        <div className="text-[14rem] md:text-[180px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] relative">
           {format(currentTime, 'HH:mm')}
           <span className="text-5xl md:text-6xl text-emerald-500 font-medium absolute mt-auto bottom-8 ml-4 tabular-nums">
             {format(currentTime, 'ss')}
           </span>
         </div>
+      </div>
 
-        {/* Islamic Daily Quotes Carousel */}
+      {/* 2. Absolute Quotes Container at Bottom Center (Leaves the digital clock centered and completely stable) */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-8 text-center z-10 select-none pointer-events-none">
         <div 
-          className={`mt-8 px-8 py-4 bg-black/25 border border-white/5 rounded-2xl max-w-2xl text-center backdrop-blur-sm transition-all duration-500 transform ${
+          className={`px-8 py-4 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 flex flex-col justify-center min-h-[140px] md:min-h-[120px] ${
             isFading ? 'opacity-0 scale-98 blur-[2px]' : 'opacity-100 scale-100 blur-none'
           }`}
         >
-          <p className="text-zinc-200 text-lg md:text-xl font-medium italic leading-relaxed">
-            &ldquo;{ISLAMIC_QUOTES[currentQuoteIndex].text}&rdquo;
+          <p className="text-zinc-200 text-base md:text-lg font-medium italic leading-relaxed">
+            &ldquo;{currentQuote.text}&rdquo;
           </p>
-          <span className="block mt-2.5 text-emerald-400 text-xs font-extrabold uppercase tracking-[0.2em]">
-            — {ISLAMIC_QUOTES[currentQuoteIndex].source}
+          <span className="block mt-2.5 text-emerald-400 text-xs font-extrabold uppercase tracking-[0.2em] truncate">
+            — {currentQuote.source}
           </span>
         </div>
       </div>

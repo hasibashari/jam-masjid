@@ -121,7 +121,6 @@ export function useMosqueSettings({
       ...prev,
       latitude: lat,
       longitude: lng,
-      mosqueName: placeName || prev.mosqueName,
     }));
     setMapCenter({ lat, lng });
   };

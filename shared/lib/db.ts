@@ -71,6 +71,14 @@ db.exec(`
     role TEXT NOT NULL DEFAULT 'admin',
     createdAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS Quote (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    source TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // Safe Migration: Add column dynamically for existing SQLite files
@@ -122,6 +130,26 @@ if (countRow.count === 0) {
       1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
     )
   `).run();
+}
+
+// Seed default quotes if empty
+const countQuotes = db.prepare("SELECT COUNT(*) as count FROM Quote").get() as { count: number };
+if (countQuotes.count === 0) {
+  const defaultQuotes = [
+    { text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.", source: "QS. Al-Ankabut: 45" },
+    { text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.", source: "HR. Bukhari & Muslim" },
+    { text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.", source: "QS. Al-Baqarah: 45" },
+    { text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.", source: "HR. Bukhari & Muslim" },
+    { text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.", source: "HR. Bukhari & Muslim" },
+    { text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.", source: "HR. Muslim" },
+    { text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.", source: "HR. Bukhari & Muslim" },
+    { text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.", source: "HR. Al-Baihaqi" }
+  ];
+
+  const insertQuote = db.prepare("INSERT INTO Quote (id, text, source, active) VALUES (?, ?, ?, 1)");
+  defaultQuotes.forEach((q, idx) => {
+    insertQuote.run(`quote-${idx + 1}`, q.text, q.source);
+  });
 }
 
 // Convert row data from SQLite representation to JS types (e.g. converting 1/0 to true/false)
@@ -305,6 +333,57 @@ export const userDb = {
     db.prepare(query).run(...vals);
     const row = db.prepare("SELECT * FROM User WHERE id = ?").get(dbData.id);
     return row;
+  }
+};
+
+export const quotesDb = {
+  findMany: async (args?: any) => {
+    let query = "SELECT * FROM Quote";
+    const params: any[] = [];
+    if (args?.where) {
+      const clauses: string[] = [];
+      for (const [k, v] of Object.entries(args.where)) {
+        if (v !== undefined) {
+          clauses.push(`${k} = ?`);
+          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
+        }
+      }
+      if (clauses.length > 0) {
+        query += ` WHERE ${clauses.join(' AND ')}`;
+      }
+    }
+    if (args?.orderBy) {
+      const orderKeys = Object.keys(args.orderBy);
+      if (orderKeys.length > 0) {
+        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+      }
+    }
+    const rows = db.prepare(query).all(...params);
+    return rows.map(fromDbRow);
+  },
+  create: async ({ data }: { data: any }) => {
+    const dbData = toDbData(data);
+    if (!dbData.id) dbData.id = `qot-${Math.random().toString(36).substr(2, 9)}`;
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const query = `INSERT INTO Quote (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
+    db.prepare(query).run(...vals);
+    const row = db.prepare("SELECT * FROM Quote WHERE id = ?").get(dbData.id);
+    return fromDbRow(row);
+  },
+  update: async ({ where, data }: { where: { id: string }, data: any }) => {
+    const dbData = toDbData(data);
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const setClause = keys.map(k => `${k} = ?`).join(', ');
+    const query = `UPDATE Quote SET ${setClause} WHERE id = ?`;
+    db.prepare(query).run(...vals, where.id);
+    const row = db.prepare("SELECT * FROM Quote WHERE id = ?").get(where.id);
+    return fromDbRow(row);
+  },
+  delete: async ({ where }: { where: { id: string } }) => {
+    db.prepare("DELETE FROM Quote WHERE id = ?").run(where.id);
+    return { id: where.id };
   }
 };
 

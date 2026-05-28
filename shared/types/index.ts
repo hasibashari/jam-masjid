@@ -33,6 +33,13 @@ export interface AnnouncementType {
   active: boolean;
 }
 
+export interface QuoteType {
+  id: string;
+  text: string;
+  source: string;
+  active: boolean;
+}
+
 export interface BannerType {
   id: string;
   title: string;
