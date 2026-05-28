@@ -6,9 +6,10 @@ interface FullscreenIqomahProps {
   prayerName: string;
   currentTime: Date;
   secondsLeft: number;
+  iqomahDuration: number;
 }
 
-export default function FullscreenIqomah({ prayerName, currentTime, secondsLeft }: FullscreenIqomahProps) {
+export default function FullscreenIqomah({ prayerName, currentTime, secondsLeft, iqomahDuration }: FullscreenIqomahProps) {
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const timerStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
@@ -40,11 +41,11 @@ export default function FullscreenIqomah({ prayerName, currentTime, secondsLeft 
           {timerStr}
         </div>
 
-        {/* Progress bar simulation based on a standard 10-minute maximum bar or purely display bar */}
+        {/* Dynamic progress bar based on user configuration */}
         <div className="w-96 h-1.5 bg-zinc-800 rounded-full mt-8 overflow-hidden">
           <div 
             className="h-full bg-emerald-500 transition-all duration-1000" 
-            style={{ width: `${Math.min(100, (secondsLeft / 600) * 100)}%` }}
+            style={{ width: `${Math.min(100, (secondsLeft / Math.max(1, iqomahDuration)) * 100)}%` }}
           ></div>
         </div>
       </div>

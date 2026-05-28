@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { AppSettings, AnnouncementType, BannerType } from '@/shared/types';
+import { AppSettings, AnnouncementType, BannerType, PRAYER_TRANSLATIONS } from '@/shared/types';
 import { format, parse } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Settings as SettingsIcon, Loader2, Moon } from 'lucide-react';
@@ -112,14 +112,6 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     sandboxSpeed: settings.sandboxSpeed
   });
 
-  const PRAYER_TRANSLATIONS: Record<string, string> = {
-    Fajr: 'Subuh',
-    Sunrise: 'Syuruq',
-    Dhuhr: 'Dzuhur',
-    Asr: 'Ashar',
-    Maghrib: 'Maghrib',
-    Isha: 'Isya'
-  };
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
 
   // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
@@ -249,6 +241,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
+        iqomahDuration={settings.iqomahDuration}
       />
     );
   }

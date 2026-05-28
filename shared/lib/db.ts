@@ -12,6 +12,12 @@ export const db = globalForSqlite.db ?? new Database(dbPath);
 
 if (process.env.NODE_ENV !== 'production') globalForSqlite.db = db;
 
+// Enable SQLite performance optimizations
+db.pragma('journal_mode = WAL');
+db.pragma('synchronous = NORMAL');
+db.pragma('temp_store = MEMORY');
+db.pragma('busy_timeout = 5000');
+
 // Initialize tables and seed default settings if they do not exist
 db.exec(`
   CREATE TABLE IF NOT EXISTS Announcement (
@@ -48,6 +54,12 @@ db.exec(`
     description TEXT NOT NULL DEFAULT '',
     active INTEGER NOT NULL DEFAULT 1,
     autoHideAfter INTEGER NOT NULL DEFAULT 10,
+    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS PrayerTimesCache (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
     createdAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);

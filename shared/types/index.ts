@@ -58,3 +58,12 @@ export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [
   { id: '2', text: 'Mohon menonaktifkan atau menyamarkan suara HP Anda selama ibadah sholat berlangsung.', active: true },
   { id: '3', text: 'Mari luruskan dan rapatkan shof sholat demi kesempurnaan sholat berjamaah.', active: true }
 ];
+
+export const PRAYER_TRANSLATIONS: Record<string, string> = {
+  Fajr: 'Subuh',
+  Sunrise: 'Syuruq',
+  Dhuhr: 'Dzuhur',
+  Asr: 'Ashar',
+  Maghrib: 'Maghrib',
+  Isha: 'Isya'
+};

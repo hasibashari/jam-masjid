@@ -2,13 +2,14 @@
 
 @theme {
   --animate-marquee: marquee 30s linear infinite;
+  --animate-spin-slow: spin 20s linear infinite;
 
   @keyframes marquee {
     0% {
-      transform: translateX(100vw);
+      transform: translateX(0);
     }
     100% {
-      transform: translateX(-100%);
+      transform: translateX(-50%);
     }
   }
 }

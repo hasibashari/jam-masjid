@@ -3,15 +3,17 @@ import { FALLBACK_ANNOUNCEMENTS, AnnouncementType } from '@/shared/types';
 
 export async function getAnnouncementsService(): Promise<AnnouncementType[]> {
   try {
-    const allAnnouncements = await announcementsDb.findMany({
+    // Fetch only active announcements directly from the SQLite database
+    const activeAnnouncements = await announcementsDb.findMany({
+      where: { active: true },
       orderBy: { createdAt: 'desc' }
     });
     
-    if (allAnnouncements.length === 0) {
+    if (activeAnnouncements.length === 0) {
       return FALLBACK_ANNOUNCEMENTS;
     }
     
-    return allAnnouncements.filter(a => a.active);
+    return activeAnnouncements;
   } catch (error: any) {
     // P2021: Table does not exist in the current database
     // P1001: Can't reach database server

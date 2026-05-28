@@ -90,6 +90,7 @@ export default function AdminDashboard() {
   });
   const [bannerUploadError, setBannerUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedBannerFile, setSelectedBannerFile] = useState<File | null>(null);
 
   // Status prompt
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -351,7 +352,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Banners Handlers (including Base64 Drag and Drop file uploading)
+  // Banners Handlers (optimized to write files physically via FormData)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -367,35 +368,39 @@ export default function AdminDashboard() {
     }
 
     setBannerUploadError("");
-    setIsUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewBanner(prev => ({ ...prev, imageUrl: reader.result as string }));
-      setIsUploading(false);
-    };
-    reader.onerror = () => {
-      setBannerUploadError("Gagal membaca file gambar.");
-      setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
+    setSelectedBannerFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setNewBanner(prev => ({ ...prev, imageUrl: objectUrl }));
   };
 
   const handleAddBanner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBanner.title || !newBanner.imageUrl) {
+    if (!newBanner.title || (!newBanner.imageUrl && !selectedBannerFile)) {
       showAlert('error', 'Judul dan Poster Gambar wajib disediakan.');
       return;
     }
 
     setSaveLoading(true);
     try {
+      const formData = new FormData();
+      formData.append('title', newBanner.title);
+      if (newBanner.description) formData.append('description', newBanner.description);
+      formData.append('active', String(newBanner.active));
+      formData.append('autoHideAfter', String(newBanner.autoHideAfter));
+
+      if (selectedBannerFile) {
+        formData.append('file', selectedBannerFile);
+      } else {
+        formData.append('imageUrl', newBanner.imageUrl);
+      }
+
       const res = await fetch('/api/banners', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBanner)
+        body: formData
       });
       if (res.ok) {
         setNewBanner({ title: 'Poster', description: '', imageUrl: '', active: true, autoHideAfter: 15 });
+        setSelectedBannerFile(null);
         showAlert('success', 'Banner informasi berhasil ditambahkan!');
         // Reload list
         const bannersRes = await fetch('/api/banners?all=true');
@@ -414,10 +419,13 @@ export default function AdminDashboard() {
 
   const handleToggleBanner = async (id: string, currentActive: boolean) => {
     try {
+      const formData = new FormData();
+      formData.append('id', id);
+      formData.append('active', String(!currentActive));
+
       const res = await fetch('/api/banners', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, active: !currentActive })
+        body: formData
       });
 
       if (res.ok) {
@@ -457,10 +465,17 @@ export default function AdminDashboard() {
 
     setSaveLoading(true);
     try {
+      const formData = new FormData();
+      formData.append('id', editingBanner.id);
+      formData.append('title', editingBanner.title);
+      if (editingBanner.description) formData.append('description', editingBanner.description);
+      formData.append('active', String(editingBanner.active));
+      formData.append('autoHideAfter', String(editingBanner.autoHideAfter));
+      formData.append('imageUrl', editingBanner.imageUrl);
+
       const res = await fetch('/api/banners', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingBanner)
+        body: formData
       });
       if (res.ok) {
         const updated = await res.json();

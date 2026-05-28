@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { PRAYER_TRANSLATIONS } from '@/shared/types';
 
 interface ClockSectionProps {
   currentTime: Date;
@@ -10,14 +11,6 @@ interface ClockSectionProps {
 }
 
 export default function ClockSection({ currentTime, nextPrayerName, countdownStr, timezone }: ClockSectionProps) {
-  const PRAYER_TRANSLATIONS: Record<string, string> = {
-    Fajr: 'Subuh',
-    Sunrise: 'Syuruq',
-    Dhuhr: 'Dzuhur',
-    Asr: 'Ashar',
-    Maghrib: 'Maghrib',
-    Isha: 'Isya'
-  };
   const translatedNextPrayerName = PRAYER_TRANSLATIONS[nextPrayerName] || nextPrayerName;
 
   return (
