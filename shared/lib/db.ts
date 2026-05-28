@@ -8,14 +8,14 @@ const pool = new Pool({
 const initDb = async () => {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS Announcement (
+      CREATE TABLE IF NOT EXISTS "Announcement" (
         id TEXT PRIMARY KEY,
         text TEXT NOT NULL,
         active INT NOT NULL DEFAULT 1,
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS Settings (
+      CREATE TABLE IF NOT EXISTS "Settings" (
         id TEXT PRIMARY KEY,
         "mosqueName" TEXT NOT NULL DEFAULT 'Jam Masjid',
         "mosqueAddress" TEXT NOT NULL DEFAULT '',
@@ -37,7 +37,7 @@ const initDb = async () => {
         "adzanAudioVolume" DOUBLE PRECISION NOT NULL DEFAULT 0.8
       );
 
-      CREATE TABLE IF NOT EXISTS Banner (
+      CREATE TABLE IF NOT EXISTS "Banner" (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         "imageUrl" TEXT NOT NULL,
@@ -47,7 +47,7 @@ const initDb = async () => {
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS PrayerTimesCache (
+      CREATE TABLE IF NOT EXISTS "PrayerTimesCache" (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -61,7 +61,7 @@ const initDb = async () => {
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS Quote (
+      CREATE TABLE IF NOT EXISTS "Quote" (
         id TEXT PRIMARY KEY,
         text TEXT NOT NULL,
         source TEXT NOT NULL,
@@ -71,14 +71,14 @@ const initDb = async () => {
     `);
 
     // Seed default settings row if empty
-    const countRow = await pool.query("SELECT COUNT(*) as count FROM Settings");
+    const countRow = await pool.query('SELECT COUNT(*) as count FROM "Settings"');
     if (parseInt(countRow.rows[0].count, 10) === 0) {
       await pool.query(`
-        INSERT INTO Settings (
-          id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
-          adzanDuration, iqomahDuration, prayerDuration, backgroundActive,
-          iqomahFajr, iqomahDhuhr, iqomahAsr, iqomahMaghrib, iqomahIsha,
-          adzanAudioActive, adzanAudioUrl, adzanAudioVolume
+        INSERT INTO "Settings" (
+          id, "mosqueName", "mosqueAddress", latitude, longitude, "calculationMethod", 
+          "adzanDuration", "iqomahDuration", "prayerDuration", "backgroundActive",
+          "iqomahFajr", "iqomahDhuhr", "iqomahAsr", "iqomahMaghrib", "iqomahIsha",
+          "adzanAudioActive", "adzanAudioUrl", "adzanAudioVolume"
         ) VALUES (
           'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
           180, 600, 900, 0,
@@ -125,7 +125,7 @@ function toDbData(data: any) {
 
 export const settingsDb = {
   findFirst: async () => {
-    const res = await pool.query("SELECT * FROM Settings LIMIT 1");
+    const res = await pool.query('SELECT * FROM "Settings" LIMIT 1');
     return fromDbRow(res.rows[0]);
   },
   create: async ({ data }: { data: any }) => {
@@ -133,7 +133,7 @@ export const settingsDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-    const query = `INSERT INTO Settings (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const query = `INSERT INTO "Settings" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING *`;
     const res = await pool.query(query, vals);
     return fromDbRow(res.rows[0]);
   },
@@ -142,7 +142,7 @@ export const settingsDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
-    const query = `UPDATE Settings SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const query = `UPDATE "Settings" SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
     const res = await pool.query(query, [...vals, where.id]);
     return fromDbRow(res.rows[0]);
   }
@@ -150,7 +150,7 @@ export const settingsDb = {
 
 export const announcementsDb = {
   findMany: async (args?: any) => {
-    let query = "SELECT * FROM Announcement";
+    let query = 'SELECT * FROM "Announcement"';
     const params: any[] = [];
     if (args?.where) {
       const clauses: string[] = [];
@@ -179,7 +179,7 @@ export const announcementsDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-    const query = `INSERT INTO Announcement (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const query = `INSERT INTO "Announcement" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING *`;
     const res = await pool.query(query, vals);
     return fromDbRow(res.rows[0]);
   },
@@ -188,19 +188,19 @@ export const announcementsDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
-    const query = `UPDATE Announcement SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const query = `UPDATE "Announcement" SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
     const res = await pool.query(query, [...vals, where.id]);
     return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    await pool.query("DELETE FROM Announcement WHERE id = $1", [where.id]);
+    await pool.query('DELETE FROM "Announcement" WHERE id = $1', [where.id]);
     return { id: where.id };
   }
 };
 
 export const bannersDb = {
   findMany: async (args?: any) => {
-    let query = "SELECT * FROM Banner";
+    let query = 'SELECT * FROM "Banner"';
     const params: any[] = [];
     if (args?.where) {
       const clauses: string[] = [];
@@ -229,7 +229,7 @@ export const bannersDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-    const query = `INSERT INTO Banner (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const query = `INSERT INTO "Banner" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING *`;
     const res = await pool.query(query, vals);
     return fromDbRow(res.rows[0]);
   },
@@ -238,12 +238,12 @@ export const bannersDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
-    const query = `UPDATE Banner SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const query = `UPDATE "Banner" SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
     const res = await pool.query(query, [...vals, where.id]);
     return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    await pool.query("DELETE FROM Banner WHERE id = $1", [where.id]);
+    await pool.query('DELETE FROM "Banner" WHERE id = $1', [where.id]);
     return { id: where.id };
   }
 };
@@ -275,7 +275,7 @@ export const userDb = {
 
 export const quotesDb = {
   findMany: async (args?: any) => {
-    let query = "SELECT * FROM Quote";
+    let query = 'SELECT * FROM "Quote"';
     const params: any[] = [];
     if (args?.where) {
       const clauses: string[] = [];
@@ -304,7 +304,7 @@ export const quotesDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-    const query = `INSERT INTO Quote (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+    const query = `INSERT INTO "Quote" (${keys.map(k => `"${k}"`).join(', ')}) VALUES (${placeholders}) RETURNING *`;
     const res = await pool.query(query, vals);
     return fromDbRow(res.rows[0]);
   },
@@ -313,24 +313,24 @@ export const quotesDb = {
     const keys = Object.keys(dbData);
     const vals = Object.values(dbData);
     const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
-    const query = `UPDATE Quote SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
+    const query = `UPDATE "Quote" SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
     const res = await pool.query(query, [...vals, where.id]);
     return fromDbRow(res.rows[0]);
   },
   delete: async ({ where }: { where: { id: string } }) => {
-    await pool.query("DELETE FROM Quote WHERE id = $1", [where.id]);
+    await pool.query('DELETE FROM "Quote" WHERE id = $1', [where.id]);
     return { id: where.id };
   }
 };
 
 export const prayerTimesCacheDb = {
   findFirst: async (key: string) => {
-    const res = await pool.query("SELECT * FROM PrayerTimesCache WHERE key = $1 LIMIT 1", [key]);
+    const res = await pool.query('SELECT * FROM "PrayerTimesCache" WHERE key = $1 LIMIT 1', [key]);
     return res.rows[0];
   },
   upsert: async (key: string, value: string) => {
     const res = await pool.query(
-      "INSERT INTO PrayerTimesCache (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value RETURNING *",
+      'INSERT INTO "PrayerTimesCache" (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value RETURNING *',
       [key, value]
     );
     return res.rows[0];
