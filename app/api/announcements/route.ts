@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnnouncementsService } from '@/features/announcements/services/getAnnouncements';
-import { prisma } from '@/shared/lib/db';
+import { announcementsDb } from '@/shared/lib/db';
 import { FALLBACK_ANNOUNCEMENTS } from '@/shared/types';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   // Admin wants ALL announcements (active & inactive)
   try {
-    const data = await prisma.announcement.findMany({
+    const data = await announcementsDb.findMany({
       orderBy: { createdAt: 'desc' },
     });
     
@@ -48,13 +48,13 @@ export async function POST(req: NextRequest) {
       if (text !== undefined) data.text = text;
       if (active !== undefined) data.active = Boolean(active);
 
-      result = await prisma.announcement.update({
+      result = await announcementsDb.update({
         where: { id },
         data,
       });
     } else {
       // Create
-      result = await prisma.announcement.create({
+      result = await announcementsDb.create({
         data: {
           text,
           active: active !== undefined ? Boolean(active) : true,
@@ -78,7 +78,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Missing announcement ID" }, { status: 400 });
     }
 
-    await prisma.announcement.delete({
+    await announcementsDb.delete({
       where: { id },
     });
 

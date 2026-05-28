@@ -1,9 +1,9 @@
-import { prisma } from '@/shared/lib/db';
+import { announcementsDb } from '@/shared/lib/db';
 import { FALLBACK_ANNOUNCEMENTS, AnnouncementType } from '@/shared/types';
 
 export async function getAnnouncementsService(): Promise<AnnouncementType[]> {
   try {
-    const allAnnouncements = await prisma.announcement.findMany({
+    const allAnnouncements = await announcementsDb.findMany({
       orderBy: { createdAt: 'desc' }
     });
     

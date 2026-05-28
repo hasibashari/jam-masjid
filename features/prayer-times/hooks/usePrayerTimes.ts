@@ -110,6 +110,7 @@ export function usePrayerTimes({
       currentTime: null,
       prayerTimes: null,
       timezone,
+      timezoneLabel: timezone,
       nextPrayer: null,
       timelineObj: null,
       countdownStr: "00:00:00",
@@ -203,18 +204,35 @@ export function usePrayerTimes({
   const secsToNext = Math.max(0, Math.floor((msToNext % (1000 * 60)) / 1000));
   const countdownStr = `${String(hoursToNext).padStart(2, '0')}:${String(minsToNext).padStart(2, '0')}:${String(secsToNext).padStart(2, '0')}`;
 
-  // Format Hijri Date (using native Intl)
-  const hijriFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic', {
+  // Format Hijri Date (using native Intl in Indonesian)
+  // Dilakukan penyesuaian koreksi -1 hari agar selaras dengan kalender Hijriah resmi Kemenag RI
+  const hijriAdjustedTime = new Date(currentTime.getTime());
+  hijriAdjustedTime.setDate(hijriAdjustedTime.getDate() - 1);
+
+  const hijriFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
-  const hijriDate = hijriFormatter.format(currentTime);
+  const hijriDate = hijriFormatter.format(hijriAdjustedTime);
+
+  const getIndonesianTimezoneLabel = (timezoneStr: string): string => {
+    const tz = timezoneStr.toLowerCase();
+    if (tz.includes('jakarta') || tz.includes('pontianak') || tz.includes('bangkok')) {
+      return 'WIB';
+    } else if (tz.includes('makassar') || tz.includes('singapore') || tz.includes('kuala_lumpur') || tz.includes('bali')) {
+      return 'WITA';
+    } else if (tz.includes('jayapura')) {
+      return 'WIT';
+    }
+    return timezoneStr;
+  };
 
   return {
     currentTime,
     prayerTimes,
     timezone,
+    timezoneLabel: getIndonesianTimezoneLabel(timezone),
     nextPrayer,
     timelineObj,
     countdownStr,

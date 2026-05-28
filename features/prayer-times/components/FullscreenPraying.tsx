@@ -42,7 +42,7 @@ export default function FullscreenPraying({ prayerName, currentTime, secondsLeft
 
         <span className="text-[#D4AF37] text-lg font-bold tracking-[0.5em] uppercase mb-4">MOHON HARAP TENANG</span>
         <h1 className="text-[6vw] font-black tracking-tighter text-white uppercase mb-8 leading-none">
-          SHOLAT BERKATA KHUSYUK
+          TEGAKKAN SHOLAT DENGAN KHUSYUK
         </h1>
 
         <div className="h-0.5 w-40 bg-zinc-900 mb-8"></div>
@@ -59,7 +59,7 @@ export default function FullscreenPraying({ prayerName, currentTime, secondsLeft
           MOHON NON-AKTIFKAN / SILENT HP
         </div>
         <div className="text-xs text-zinc-600 font-mono mt-3">
-          Est. Durasi Utama Selesai: {timerStr}
+          Estimasi Durasi Selesai: {timerStr}
         </div>
       </div>
 

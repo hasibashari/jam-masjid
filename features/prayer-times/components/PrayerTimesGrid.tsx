@@ -16,12 +16,12 @@ interface PrayerTimesGridProps {
 
 export default function PrayerTimesGrid({ timelineObj, nextPrayerName }: PrayerTimesGridProps) {
   const prayers = [
-    { id: 'Fajr', label: 'Fajr', timeObj: timelineObj.Fajr },
-    { id: 'Sunrise', label: 'Sunrise', timeObj: timelineObj.Sunrise },
-    { id: 'Dhuhr', label: 'Dhuhr', timeObj: timelineObj.Dhuhr },
-    { id: 'Asr', label: 'Asr', timeObj: timelineObj.Asr },
+    { id: 'Fajr', label: 'Subuh', timeObj: timelineObj.Fajr },
+    { id: 'Sunrise', label: 'Syuruq', timeObj: timelineObj.Sunrise },
+    { id: 'Dhuhr', label: 'Dzuhur', timeObj: timelineObj.Dhuhr },
+    { id: 'Asr', label: 'Ashar', timeObj: timelineObj.Asr },
     { id: 'Maghrib', label: 'Maghrib', timeObj: timelineObj.Maghrib },
-    { id: 'Isha', label: 'Isha', timeObj: timelineObj.Isha }
+    { id: 'Isha', label: 'Isya', timeObj: timelineObj.Isha }
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName }: PrayerT
               {format(prayer.timeObj, 'HH:mm')}
             </p>
             {isNext ? (
-              <span className="mt-4 text-[10px] font-black bg-[#051109] text-[#D4AF37] px-3 py-1 rounded-full">ACTIVE</span>
+              <span className="mt-4 text-[10px] font-black bg-[#051109] text-[#D4AF37] px-3 py-1 rounded-full">AKTIF</span>
             ) : (
               <div className={`mt-4 w-12 h-1 rounded-full ${isSunrise ? 'bg-white/5' : 'bg-white/10'}`}></div>
             )}

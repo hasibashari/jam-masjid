@@ -57,7 +57,7 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
           {timerStr}
         </div>
         <div className="mt-4 flex gap-4 text-xs text-zinc-400 font-sans tracking-wide">
-          <span>Harap tenang during Adzan</span>
+          <span>Harap tenang saat Adzan berkumandang</span>
           <span>•</span>
           <span>Siapkan diri untuk Sholat Berjamaah</span>
         </div>

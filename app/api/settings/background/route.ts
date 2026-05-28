@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/shared/lib/db';
+import { settingsDb } from '@/shared/lib/db';
 import { writeFile, unlink, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -11,14 +11,14 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File | null;
     const action = formData.get('action') as string;
 
-    const currentSettings = await prisma.settings.findFirst();
+    const currentSettings = await settingsDb.findFirst();
     if (!currentSettings) {
       return NextResponse.json({ error: "Settings not initialized" }, { status: 400 });
     }
 
     if (action === 'toggle') {
       const active = formData.get('active') === 'true';
-      const saved = await prisma.settings.update({
+      const saved = await settingsDb.update({
         where: { id: currentSettings.id },
         data: { backgroundActive: active }
       });
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
       const fileUrl = `/uploads/${filename}`;
 
-      const saved = await prisma.settings.update({
+      const saved = await settingsDb.update({
         where: { id: currentSettings.id },
         data: { 
           backgroundImage: fileUrl,

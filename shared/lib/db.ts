@@ -98,131 +98,131 @@ function toDbData(data: any) {
   return copy;
 }
 
-// Transparent Mock Adapter mapping standard Prisma CRUD operations to sqlite3 statements
-export const prisma = {
-  settings: {
-    findFirst: async () => {
-      const row = db.prepare("SELECT * FROM Settings LIMIT 1").get();
-      return fromDbRow(row);
-    },
-    create: async ({ data }: { data: any }) => {
-      const dbData = toDbData(data);
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const query = `INSERT INTO Settings (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-      db.prepare(query).run(...vals);
-      const row = db.prepare("SELECT * FROM Settings ORDER BY rowid DESC LIMIT 1").get();
-      return fromDbRow(row);
-    },
-    update: async ({ where, data }: { where: { id: string }, data: any }) => {
-      const dbData = toDbData(data);
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const setClause = keys.map(k => `${k} = ?`).join(', ');
-      const query = `UPDATE Settings SET ${setClause} WHERE id = ?`;
-      db.prepare(query).run(...vals, where.id);
-      const row = db.prepare("SELECT * FROM Settings WHERE id = ?").get(where.id);
-      return fromDbRow(row);
-    }
+// Transparent SQLite CRUD Helper Modules replacing the old Prisma mock adapter
+export const settingsDb = {
+  findFirst: async () => {
+    const row = db.prepare("SELECT * FROM Settings LIMIT 1").get();
+    return fromDbRow(row);
   },
-  announcement: {
-    findMany: async (args?: any) => {
-      let query = "SELECT * FROM Announcement";
-      const params: any[] = [];
-      if (args?.where) {
-        const clauses: string[] = [];
-        for (const [k, v] of Object.entries(args.where)) {
-          if (v !== undefined) {
-            clauses.push(`${k} = ?`);
-            params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
-          }
-        }
-        if (clauses.length > 0) {
-          query += ` WHERE ${clauses.join(' AND ')}`;
-        }
-      }
-      if (args?.orderBy) {
-        const orderKeys = Object.keys(args.orderBy);
-        if (orderKeys.length > 0) {
-          query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
-        }
-      }
-      const rows = db.prepare(query).all(...params);
-      return rows.map(fromDbRow);
-    },
-    create: async ({ data }: { data: any }) => {
-      const dbData = toDbData(data);
-      if (!dbData.id) dbData.id = `ann-${Math.random().toString(36).substr(2, 9)}`;
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const query = `INSERT INTO Announcement (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-      db.prepare(query).run(...vals);
-      const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(dbData.id);
-      return fromDbRow(row);
-    },
-    update: async ({ where, data }: { where: { id: string }, data: any }) => {
-      const dbData = toDbData(data);
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const setClause = keys.map(k => `${k} = ?`).join(', ');
-      const query = `UPDATE Announcement SET ${setClause} WHERE id = ?`;
-      db.prepare(query).run(...vals, where.id);
-      const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(where.id);
-      return fromDbRow(row);
-    },
-    delete: async ({ where }: { where: { id: string } }) => {
-      db.prepare("DELETE FROM Announcement WHERE id = ?").run(where.id);
-      return { id: where.id };
-    }
+  create: async ({ data }: { data: any }) => {
+    const dbData = toDbData(data);
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const query = `INSERT INTO Settings (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
+    db.prepare(query).run(...vals);
+    const row = db.prepare("SELECT * FROM Settings ORDER BY rowid DESC LIMIT 1").get();
+    return fromDbRow(row);
   },
-  banner: {
-    findMany: async (args?: any) => {
-      let query = "SELECT * FROM Banner";
-      const params: any[] = [];
-      if (args?.where) {
-        const clauses: string[] = [];
-        for (const [k, v] of Object.entries(args.where)) {
-          if (v !== undefined) {
-            clauses.push(`${k} = ?`);
-            params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
-          }
-        }
-        if (clauses.length > 0) {
-          query += ` WHERE ${clauses.join(' AND ')}`;
+  update: async ({ where, data }: { where: { id: string }, data: any }) => {
+    const dbData = toDbData(data);
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const setClause = keys.map(k => `${k} = ?`).join(', ');
+    const query = `UPDATE Settings SET ${setClause} WHERE id = ?`;
+    db.prepare(query).run(...vals, where.id);
+    const row = db.prepare("SELECT * FROM Settings WHERE id = ?").get(where.id);
+    return fromDbRow(row);
+  }
+};
+
+export const announcementsDb = {
+  findMany: async (args?: any) => {
+    let query = "SELECT * FROM Announcement";
+    const params: any[] = [];
+    if (args?.where) {
+      const clauses: string[] = [];
+      for (const [k, v] of Object.entries(args.where)) {
+        if (v !== undefined) {
+          clauses.push(`${k} = ?`);
+          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
         }
       }
-      if (args?.orderBy) {
-        const orderKeys = Object.keys(args.orderBy);
-        if (orderKeys.length > 0) {
-          query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
-        }
+      if (clauses.length > 0) {
+        query += ` WHERE ${clauses.join(' AND ')}`;
       }
-      const rows = db.prepare(query).all(...params);
-      return rows.map(fromDbRow);
-    },
-    create: async ({ data }: { data: any }) => {
-      const dbData = toDbData(data);
-      if (!dbData.id) dbData.id = `ban-${Math.random().toString(36).substr(2, 9)}`;
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const query = `INSERT INTO Banner (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
-      db.prepare(query).run(...vals);
-      const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(dbData.id);
-      return fromDbRow(row);
-    },
-    update: async ({ where, data }: { where: { id: string }, data: any }) => {
-      const dbData = toDbData(data);
-      const keys = Object.keys(dbData);
-      const vals = Object.values(dbData);
-      const setClause = keys.map(k => `${k} = ?`).join(', ');
-      const query = `UPDATE Banner SET ${setClause} WHERE id = ?`;
-      db.prepare(query).run(...vals, where.id);
-      const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(where.id);
-      return fromDbRow(row);
-    },
-    delete: async ({ where }: { where: { id: string } }) => {
-      db.prepare("DELETE FROM Banner WHERE id = ?").run(where.id);
-      return { id: where.id };
     }
+    if (args?.orderBy) {
+      const orderKeys = Object.keys(args.orderBy);
+      if (orderKeys.length > 0) {
+        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+      }
+    }
+    const rows = db.prepare(query).all(...params);
+    return rows.map(fromDbRow);
+  },
+  create: async ({ data }: { data: any }) => {
+    const dbData = toDbData(data);
+    if (!dbData.id) dbData.id = `ann-${Math.random().toString(36).substr(2, 9)}`;
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const query = `INSERT INTO Announcement (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
+    db.prepare(query).run(...vals);
+    const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(dbData.id);
+    return fromDbRow(row);
+  },
+  update: async ({ where, data }: { where: { id: string }, data: any }) => {
+    const dbData = toDbData(data);
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const setClause = keys.map(k => `${k} = ?`).join(', ');
+    const query = `UPDATE Announcement SET ${setClause} WHERE id = ?`;
+    db.prepare(query).run(...vals, where.id);
+    const row = db.prepare("SELECT * FROM Announcement WHERE id = ?").get(where.id);
+    return fromDbRow(row);
+  },
+  delete: async ({ where }: { where: { id: string } }) => {
+    db.prepare("DELETE FROM Announcement WHERE id = ?").run(where.id);
+    return { id: where.id };
+  }
+};
+
+export const bannersDb = {
+  findMany: async (args?: any) => {
+    let query = "SELECT * FROM Banner";
+    const params: any[] = [];
+    if (args?.where) {
+      const clauses: string[] = [];
+      for (const [k, v] of Object.entries(args.where)) {
+        if (v !== undefined) {
+          clauses.push(`${k} = ?`);
+          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
+        }
+      }
+      if (clauses.length > 0) {
+        query += ` WHERE ${clauses.join(' AND ')}`;
+      }
+    }
+    if (args?.orderBy) {
+      const orderKeys = Object.keys(args.orderBy);
+      if (orderKeys.length > 0) {
+        query += ` ORDER BY ${orderKeys.map(k => `${k} ${args.orderBy[k].toUpperCase()}`).join(', ')}`;
+      }
+    }
+    const rows = db.prepare(query).all(...params);
+    return rows.map(fromDbRow);
+  },
+  create: async ({ data }: { data: any }) => {
+    const dbData = toDbData(data);
+    if (!dbData.id) dbData.id = `ban-${Math.random().toString(36).substr(2, 9)}`;
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const query = `INSERT INTO Banner (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
+    db.prepare(query).run(...vals);
+    const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(dbData.id);
+    return fromDbRow(row);
+  },
+  update: async ({ where, data }: { where: { id: string }, data: any }) => {
+    const dbData = toDbData(data);
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const setClause = keys.map(k => `${k} = ?`).join(', ');
+    const query = `UPDATE Banner SET ${setClause} WHERE id = ?`;
+    db.prepare(query).run(...vals, where.id);
+    const row = db.prepare("SELECT * FROM Banner WHERE id = ?").get(where.id);
+    return fromDbRow(row);
+  },
+  delete: async ({ where }: { where: { id: string } }) => {
+    db.prepare("DELETE FROM Banner WHERE id = ?").run(where.id);
+    return { id: where.id };
   }
 };

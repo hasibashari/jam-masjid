@@ -26,7 +26,7 @@ export default function FullscreenIqomah({ prayerName, currentTime, secondsLeft 
           <span className="text-3xl font-black text-white tracking-tight">HITUNG MUNDUR IQOMAH</span>
         </div>
         <div className="text-right">
-          <span className="text-emerald-400 text-sm font-black tracking-[0.3em] uppercase block mb-1">Current Time</span>
+          <span className="text-emerald-400 text-sm font-black tracking-[0.3em] uppercase block mb-1">Waktu Saat Ini</span>
           <span className="text-3xl font-bold font-mono tracking-tight text-emerald-400">{format(currentTime, 'HH:mm:ss')}</span>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function FullscreenIqomah({ prayerName, currentTime, secondsLeft 
         </div>
 
         <div className="bg-zinc-900/60 border border-zinc-800 p-6 rounded-2xl flex flex-col text-left">
-          <span className="text-emerald-500 text-xs font-black tracking-widest uppercase mb-2">02. SILENCE PRIVATE PHONES</span>
+          <span className="text-emerald-500 text-xs font-black tracking-widest uppercase mb-2">02. SENYAPKAN HP</span>
           <p className="text-sm text-zinc-400 leading-relaxed">
             Mohon me-nonaktifkan suara HP Anda agar tidak mengganggu kekhusyukan jamaah lain.
           </p>

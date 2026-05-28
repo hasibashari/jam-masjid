@@ -8,7 +8,13 @@ export async function GET(req: NextRequest) {
   const lng = parseFloat(searchParams.get('lng') || '106.8456');
   // 20 is Kemenag (Kementerian Agama RI) default for Indonesia
   const method = parseInt(searchParams.get('method') || '20'); 
-  const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+  const defaultDate = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+  const date = searchParams.get('date') || defaultDate;
   
   // Format MM-DD-YYYY for AlAdhan or DD-MM-YYYY
   const [year, month, day] = date.split('-');

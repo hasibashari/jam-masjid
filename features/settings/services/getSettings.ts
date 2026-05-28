@@ -1,9 +1,9 @@
-import { prisma } from '@/shared/lib/db';
+import { settingsDb } from '@/shared/lib/db';
 import { FALLBACK_SETTINGS, AppSettings } from '@/shared/types';
 
 export async function getSettingsService(): Promise<AppSettings> {
   try {
-    const settings = await prisma.settings.findFirst();
+    const settings = await settingsDb.findFirst();
     if (!settings) return FALLBACK_SETTINGS;
     return settings;
   } catch (error: any) {

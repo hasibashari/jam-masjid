@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSettingsService } from '@/features/settings/services/getSettings';
-import { prisma } from '@/shared/lib/db';
+import { settingsDb } from '@/shared/lib/db';
 import { FALLBACK_SETTINGS } from '@/shared/types';
 
 export const dynamic = 'force-dynamic';
@@ -32,11 +32,11 @@ export async function POST(req: NextRequest) {
       backgroundActive,
     } = body;
 
-    const currentSettings = await prisma.settings.findFirst();
+    const currentSettings = await settingsDb.findFirst();
 
     let savedSettings;
     if (currentSettings) {
-      savedSettings = await prisma.settings.update({
+      savedSettings = await settingsDb.update({
         where: { id: currentSettings.id },
         data: {
           mosqueName: mosqueName ?? currentSettings.mosqueName,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      savedSettings = await prisma.settings.create({
+      savedSettings = await settingsDb.create({
         data: {
           mosqueName: mosqueName ?? FALLBACK_SETTINGS.mosqueName,
           latitude: latitude !== undefined ? parseFloat(latitude) : FALLBACK_SETTINGS.latitude,

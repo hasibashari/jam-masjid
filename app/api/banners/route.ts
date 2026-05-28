@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/shared/lib/db';
+import { bannersDb } from '@/shared/lib/db';
 import { BannerType } from '@/shared/types';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const getAll = searchParams.get('all') === 'true';
 
   try {
-    const banners = await prisma.banner.findMany({
+    const banners = await bannersDb.findMany({
       orderBy: { createdAt: 'desc' }
     });
     
@@ -68,13 +68,13 @@ export async function POST(req: NextRequest) {
       if (active !== undefined) data.active = Boolean(active);
       if (autoHideAfter !== undefined) data.autoHideAfter = parseInt(autoHideAfter);
 
-      result = await prisma.banner.update({
+      result = await bannersDb.update({
         where: { id },
         data
       });
     } else {
       // Create
-      result = await prisma.banner.create({
+      result = await bannersDb.create({
         data: {
           title,
           imageUrl,
@@ -101,7 +101,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Missing banner ID" }, { status: 400 });
     }
 
-    await prisma.banner.delete({
+    await bannersDb.delete({
       where: { id }
     });
 

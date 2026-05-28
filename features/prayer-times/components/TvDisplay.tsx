@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AppSettings, AnnouncementType, BannerType } from '@/shared/types';
 import { format, parse } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { Settings as SettingsIcon, Loader2, Moon } from 'lucide-react';
 
 // Feature-Based Absolute Imports
@@ -90,6 +91,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     currentTime,
     prayerTimes,
     timezone,
+    timezoneLabel,
     nextPrayer,
     timelineObj,
     countdownStr,
@@ -109,6 +111,16 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     sandboxStage: settings.sandboxStage,
     sandboxSpeed: settings.sandboxSpeed
   });
+
+  const PRAYER_TRANSLATIONS: Record<string, string> = {
+    Fajr: 'Subuh',
+    Sunrise: 'Syuruq',
+    Dhuhr: 'Dzuhur',
+    Asr: 'Ashar',
+    Maghrib: 'Maghrib',
+    Isha: 'Isya'
+  };
+  const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
 
   // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
   useEffect(() => {
@@ -169,7 +181,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     return (
       <div className="h-screen w-screen bg-[#051109] flex flex-col items-center justify-center text-emerald-500 gap-3">
         <Loader2 className="w-12 h-12 animate-spin text-emerald-500" />
-        <span className="text-sm font-semibold uppercase tracking-wider font-mono">Menuat Jam Masjid...</span>
+        <span className="text-sm font-semibold uppercase tracking-wider font-mono">Memuat Jam Masjid...</span>
       </div>
     );
   }
@@ -224,7 +236,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   if (prayerStage === 'ADZAN') {
     return (
       <FullscreenAdzan 
-        prayerName={activePrayerName!} 
+        prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
       />
@@ -234,7 +246,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   if (prayerStage === 'IQOMAH') {
     return (
       <FullscreenIqomah 
-        prayerName={activePrayerName!} 
+        prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
       />
@@ -244,7 +256,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   if (prayerStage === 'PRAYING') {
     return (
       <FullscreenPraying 
-        prayerName={activePrayerName!} 
+        prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
       />
@@ -299,7 +311,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
           
           <div className="text-right flex flex-col justify-center">
             <div className="text-3xl font-bold text-white tracking-tight">
-              {format(currentTime, 'EEEE, dd MMMM yyyy')}
+              {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
             <div className="text-xl text-emerald-400 font-serif italic mt-1 tracking-wider">
               {hijriDate}
@@ -312,7 +324,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
           currentTime={currentTime} 
           nextPrayerName={nextPrayer.name} 
           countdownStr={countdownStr} 
-          timezone={timezone} 
+          timezone={timezoneLabel} 
         />
 
         {/* Dynamic Prayer Times Grid Bottom Sheet */}
