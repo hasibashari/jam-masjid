@@ -287,23 +287,23 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[180px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[180px] xl:h-[200px] 2xl:h-[220px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight uppercase leading-none">
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-base md:text-lg lg:text-xl text-emerald-400 font-semibold tracking-wide mt-2 uppercase opacity-85">
+              <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-emerald-400 font-semibold tracking-wide mt-2 uppercase opacity-85">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
           
           <div className="text-right flex flex-col justify-center">
-            <div className="text-4xl lg:text-5xl font-bold text-white tracking-tight">
+            <div className="text-4xl lg:text-5xl xl:text-5xl font-bold text-white tracking-tight">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
-            <div className="text-2xl lg:text-3xl text-emerald-400 font-serif italic mt-1.5 tracking-wider">
+            <div className="text-2xl lg:text-3xl xl:text-3xl text-emerald-400 font-serif italic mt-1.5 tracking-wider">
               {hijriDate}
             </div>
           </div>
@@ -316,16 +316,16 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
           {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
           <div className="flex justify-start px-8 mb-2">
-            <div className="flex items-center gap-6 bg-emerald-900/30 border border-emerald-500/20 px-8 py-4 rounded-3xl backdrop-blur-md shadow-xl transition-all duration-500">
-              <div className="flex flex-col border-r border-emerald-500/30 pr-6 text-left">
-                <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
-                <span className="text-3xl font-bold text-white tracking-tight">
+            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10 bg-emerald-900/30 border border-emerald-500/20 px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-5 rounded-3xl backdrop-blur-md shadow-xl transition-all duration-500">
+              <div className="flex flex-col border-r border-emerald-500/30 pr-4 md:pr-6 lg:pr-8 xl:pr-10 text-left">
+                <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
+                <span className="text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-tight">
                   {PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
                 </span>
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezoneLabel})</span>
-                <span className="text-4xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
+                <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezoneLabel})</span>
+                <span className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
               </div>
             </div>
           </div>
