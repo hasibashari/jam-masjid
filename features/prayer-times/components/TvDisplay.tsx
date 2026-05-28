@@ -141,38 +141,50 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     }
   };
 
-  // --- DATA POLLING ---
-  // Poll for background settings, announcements, and poster banners (high reactivity: 10s sync)
-  useEffect(() => {
-    const fetchLatestData = async () => {
-      try {
-        const [settingsRes, announcementsRes, bannersRes] = await Promise.all([
-          fetch('/api/settings').catch(() => null),
-          fetch('/api/announcements').catch(() => null),
-          fetch('/api/banners').catch(() => null)
-        ]);
+  // --- DATA POLLING & SYNCHRONIZATION ---
+  // Memoized fetch operation to allow reuse in both standard polling and instant PWA reconnection events
+  const fetchLatestData = useCallback(async () => {
+    try {
+      const [settingsRes, announcementsRes, bannersRes] = await Promise.all([
+        fetch('/api/settings').catch(() => null),
+        fetch('/api/announcements').catch(() => null),
+        fetch('/api/banners').catch(() => null)
+      ]);
 
-        if (settingsRes?.ok) {
-          const remoteSettings = await settingsRes.json();
-          setSettings(remoteSettings);
-        }
-        if (announcementsRes?.ok) {
-          const remoteAnnouncements = await announcementsRes.json();
-          setAnnouncements(remoteAnnouncements);
-        }
-        if (bannersRes?.ok) {
-          const remoteBanners = await bannersRes.json();
-          setBanners(remoteBanners);
-        }
-      } catch (e) {
-        console.error("Failed background polling", e);
+      if (settingsRes?.ok) {
+        const remoteSettings = await settingsRes.json();
+        setSettings(remoteSettings);
       }
-    };
+      if (announcementsRes?.ok) {
+        const remoteAnnouncements = await announcementsRes.json();
+        setAnnouncements(remoteAnnouncements);
+      }
+      if (bannersRes?.ok) {
+        const remoteBanners = await bannersRes.json();
+        setBanners(remoteBanners);
+      }
+    } catch (e) {
+      console.error("Failed background polling", e);
+    }
+  }, []);
 
+  // Poll for background settings, announcements, and poster banners (high reactivity: 2s sync)
+  useEffect(() => {
     fetchLatestData(); // immediate load triggers
     const poller = setInterval(fetchLatestData, 2 * 1000); // Poll every 2 seconds for real-time responsiveness
     return () => clearInterval(poller);
-  }, []);
+  }, [fetchLatestData]);
+
+  // Event listener for PWA online status reconnection to trigger instant sync
+  useEffect(() => {
+    const handleReconnectionSync = () => {
+      console.log("[PWA] Online reconnection detected! Triggering instant data sync...");
+      fetchLatestData();
+    };
+
+    window.addEventListener('app-sync-data', handleReconnectionSync);
+    return () => window.removeEventListener('app-sync-data', handleReconnectionSync);
+  }, [fetchLatestData]);
 
   // Instantly transition to BANNER mode when new active banners are added/activated
   const activeBannersCount = banners.filter(b => b.active).length;
@@ -507,7 +519,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[140px] flex items-center justify-between px-16 bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[160px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase">
               {settings.mosqueName}
