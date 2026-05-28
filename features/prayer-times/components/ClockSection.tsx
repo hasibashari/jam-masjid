@@ -48,8 +48,8 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
-  const activeQuotes = (quotes && quotes.length > 0) 
-    ? quotes.filter(q => q.active) 
+  const activeQuotes = (quotes && quotes.length > 0)
+    ? quotes.filter(q => q.active)
     : ISLAMIC_QUOTES;
 
   useEffect(() => {
@@ -70,30 +70,34 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   const currentQuote = activeQuotes[currentQuoteIndex] || ISLAMIC_QUOTES[0];
 
   return (
-    <section className="flex-grow flex flex-col items-center justify-center relative w-full h-full">
-      {/* 1. Centered Clock Container (Independent, perfectly stable height) */}
-      <div className="z-10 flex flex-col items-center justify-center -mt-12 md:-mt-16 lg:-mt-20 select-none pointer-events-none">
-        {/* Massive Digital Time Display - Highly scalable up to 75" TV screens */}
+    <section className="relative w-full h-full grid grid-rows-[1fr_auto_1fr] overflow-hidden">
+      {/* Clock */}
+      <div className="row-start-2 flex flex-col items-center justify-center z-10 select-none pointer-events-none -translate-y-6 md:-translate-y-14 lg:-translate-y-20">
+
+        {/* Time */}
         <div className="flex items-end">
-          <span className="text-[5.5rem] sm:text-[120px] md:text-[150px] lg:text-[195px] xl:text-[240px] 2xl:text-[280px] min-[1800px]:text-[320px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] transition-all duration-500">
+          <span className="text-[4rem] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[180px] 2xl:text-[210px] min-[1800px]:text-[240px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)]">
             {format(currentTime, 'HH:mm')}
           </span>
-          <span className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl min-[1800px]:text-5xl text-emerald-400/55 font-medium tabular-nums tracking-wide mb-[0.5vw] sm:mb-[0.7vw] md:mb-[0.9vw] lg:mb-[1.2vw] xl:mb-[1.5vw] 2xl:mb-[1.8vw] ml-3 md:ml-4 lg:ml-6 xl:ml-8 transition-all duration-500">
+
+          <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-emerald-400/55 font-medium mb-[0.5vw] ml-3">
             {format(currentTime, 'ss')}
           </span>
         </div>
       </div>
 
       {/* 2. Absolute Quotes Container at Bottom Center (Leaves the digital clock centered and completely stable) */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl px-6 md:px-8 text-center z-10 select-none pointer-events-none transition-all duration-500">
-        <div 
-          className={`px-6 md:px-10 py-4 md:py-6 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 flex flex-col justify-center min-h-[140px] md:min-h-[120px] lg:min-h-[150px] xl:min-h-[180px] ${
-            isFading ? 'opacity-0 scale-98 blur-[2px]' : 'opacity-100 scale-100 blur-none'
-          }`}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl px-6 md:px-8 z-10">
+        <div
+          className={`px-6 md:px-10 py-4 md:py-6 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 text-center ${isFading
+            ? 'opacity-0 scale-98 blur-[2px]'
+            : 'opacity-100 scale-100 blur-none'
+            }`}
         >
-          <p className="text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-medium italic leading-relaxed">
+          <p className="text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-medium italic leading-relaxed line-clamp-3">
             &ldquo;{currentQuote.text}&rdquo;
           </p>
+
           <span className="block mt-2.5 md:mt-3.5 text-emerald-400 text-[10px] sm:text-xs lg:text-sm xl:text-base font-extrabold uppercase tracking-[0.2em] truncate">
             — {currentQuote.source}
           </span>
