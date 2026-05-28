@@ -12,45 +12,45 @@ const initDb = async () => {
         id TEXT PRIMARY KEY,
         text TEXT NOT NULL,
         active INT NOT NULL DEFAULT 1,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS Settings (
         id TEXT PRIMARY KEY,
-        mosqueName TEXT NOT NULL DEFAULT 'Jam Masjid',
-        mosqueAddress TEXT NOT NULL DEFAULT '',
+        "mosqueName" TEXT NOT NULL DEFAULT 'Jam Masjid',
+        "mosqueAddress" TEXT NOT NULL DEFAULT '',
         latitude DOUBLE PRECISION NOT NULL DEFAULT 21.4225,
         longitude DOUBLE PRECISION NOT NULL DEFAULT 39.8262,
-        calculationMethod INT NOT NULL DEFAULT 4,
-        adzanDuration INT NOT NULL DEFAULT 180,
-        iqomahDuration INT NOT NULL DEFAULT 600,
-        prayerDuration INT NOT NULL DEFAULT 900,
-        backgroundImage TEXT,
-        backgroundActive INT NOT NULL DEFAULT 0,
-        iqomahFajr INT NOT NULL DEFAULT 600,
-        iqomahDhuhr INT NOT NULL DEFAULT 480,
-        iqomahAsr INT NOT NULL DEFAULT 480,
-        iqomahMaghrib INT NOT NULL DEFAULT 420,
-        iqomahIsha INT NOT NULL DEFAULT 600,
-        adzanAudioActive INT NOT NULL DEFAULT 1,
-        adzanAudioUrl TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-        adzanAudioVolume DOUBLE PRECISION NOT NULL DEFAULT 0.8
+        "calculationMethod" INT NOT NULL DEFAULT 4,
+        "adzanDuration" INT NOT NULL DEFAULT 180,
+        "iqomahDuration" INT NOT NULL DEFAULT 600,
+        "prayerDuration" INT NOT NULL DEFAULT 900,
+        "backgroundImage" TEXT,
+        "backgroundActive" INT NOT NULL DEFAULT 0,
+        "iqomahFajr" INT NOT NULL DEFAULT 600,
+        "iqomahDhuhr" INT NOT NULL DEFAULT 480,
+        "iqomahAsr" INT NOT NULL DEFAULT 480,
+        "iqomahMaghrib" INT NOT NULL DEFAULT 420,
+        "iqomahIsha" INT NOT NULL DEFAULT 600,
+        "adzanAudioActive" INT NOT NULL DEFAULT 1,
+        "adzanAudioUrl" TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3',
+        "adzanAudioVolume" DOUBLE PRECISION NOT NULL DEFAULT 0.8
       );
 
       CREATE TABLE IF NOT EXISTS Banner (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
-        imageUrl TEXT NOT NULL,
+        "imageUrl" TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '',
         active INT NOT NULL DEFAULT 1,
-        autoHideAfter INT NOT NULL DEFAULT 10,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "autoHideAfter" INT NOT NULL DEFAULT 10,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS PrayerTimesCache (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS "User" (
@@ -58,7 +58,7 @@ const initDb = async () => {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'admin',
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS Quote (
@@ -66,7 +66,7 @@ const initDb = async () => {
         text TEXT NOT NULL,
         source TEXT NOT NULL,
         active INT NOT NULL DEFAULT 1,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -88,27 +88,7 @@ const initDb = async () => {
       `);
     }
 
-    // Seed default quotes if empty
-    const countQuotes = await pool.query("SELECT COUNT(*) as count FROM Quote");
-    if (parseInt(countQuotes.rows[0].count, 10) === 0) {
-      const defaultQuotes = [
-        { text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.", source: "QS. Al-Ankabut: 45" },
-        { text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.", source: "HR. Bukhari & Muslim" },
-        { text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.", source: "QS. Al-Baqarah: 45" },
-        { text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.", source: "HR. Bukhari & Muslim" },
-        { text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.", source: "HR. Bukhari & Muslim" },
-        { text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.", source: "HR. Muslim" },
-        { text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.", source: "HR. Bukhari & Muslim" },
-        { text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.", source: "HR. Al-Baihaqi" }
-      ];
-
-      for (let i = 0; i < defaultQuotes.length; i++) {
-        const q = defaultQuotes[i];
-        await pool.query("INSERT INTO Quote (id, text, source, active) VALUES ($1, $2, $3, 1)", [
-          `quote-${i + 1}`, q.text, q.source
-        ]);
-      }
-    }
+    // Seeds for Quotes removed as requested
   } catch (err) {
     console.error("Failed to initialize database schema", err);
   }

@@ -8,24 +8,7 @@ import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_BANNERS: BannerType[] = [
-  {
-    id: 'b1',
-    title: 'Pengajian Rutin Pekanan',
-    description: 'Setiap hari Sabtu Ba\'da Maghrib bersama KH. Ahmad Dahlan dengan pembahasan Tafsir Al-Quran.',
-    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200',
-    active: true,
-    autoHideAfter: 15,
-  },
-  {
-    id: 'b2',
-    title: 'Donasi Renovasi Tempat Wudhu',
-    description: 'Mari berinfaq untuk Renovasi area Wudhu jamaah wanita. Salurkan donasi Anda melalui Rekening Masjid.',
-    imageUrl: 'https://images.unsplash.com/photo-1597935258735-e254c1839512?q=80&w=1200',
-    active: true,
-    autoHideAfter: 15,
-  }
-];
+const FALLBACK_BANNERS: BannerType[] = [];
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -38,7 +21,7 @@ export async function GET(req: NextRequest) {
     
     // If the database has no banners at all (unseeded), return the mock fallback banners
     if (banners.length === 0) {
-      return NextResponse.json(getAll ? FALLBACK_BANNERS : FALLBACK_BANNERS.filter(b => b.active));
+      return NextResponse.json([]);
     }
     
     if (getAll) {
@@ -48,7 +31,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(banners.filter(b => b.active));
   } catch (error) {
     console.error("Failed to fetch banners", error);
-    return NextResponse.json(FALLBACK_BANNERS);
+    return NextResponse.json([]);
   }
 }
 

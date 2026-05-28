@@ -253,6 +253,39 @@ export default function BannersTab({
 
             <form onSubmit={handleSaveEditBanner} className="p-4 sm:p-6 flex-1 overflow-y-auto flex flex-col gap-4 sm:gap-5 text-left">
               <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Judul Poster</label>
+                <input 
+                  type="text"
+                  value={editingBanner.title || ''}
+                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, title: e.target.value }) : null)}
+                  required
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-sm font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Deskripsi (Opsional)</label>
+                <textarea 
+                  value={editingBanner.description || ''}
+                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, description: e.target.value }) : null)}
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-sm h-20 resize-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Durasi Tampil (Detik)</label>
+                <input 
+                  type="number"
+                  min="5"
+                  max="300"
+                  value={editingBanner.autoHideAfter || 15}
+                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, autoHideAfter: parseInt(e.target.value) }) : null)}
+                  required
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-sm font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampil</label>
                 <div className="flex items-center gap-3">
                   <button

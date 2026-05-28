@@ -10,10 +10,7 @@ export interface AppSettings {
   prayerDuration: number;
   backgroundImage?: string | null;
   backgroundActive?: boolean;
-  sandboxActive?: boolean;
-  sandboxTime?: string | null;
-  sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
-  sandboxSpeed?: number;
+  // display sleep configuration removed
   iqomahFajr: number;
   iqomahDhuhr: number;
   iqomahAsr: number;
@@ -58,10 +55,6 @@ export const FALLBACK_SETTINGS: AppSettings = {
   prayerDuration: 900, // 15 minutes
   backgroundImage: null,
   backgroundActive: false,
-  sandboxActive: false,
-  sandboxTime: null,
-  sandboxStage: "AUTO",
-  sandboxSpeed: 1.0,
   iqomahFajr: 600,
   iqomahDhuhr: 480,
   iqomahAsr: 480,

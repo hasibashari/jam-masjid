@@ -56,7 +56,7 @@ export default function AdminDashboardClient() {
               setPrayerTimings(ptData.timings);
             }
           } catch (e) {
-            console.error("Failed to load prayer times for sandbox", e);
+            console.error("Failed to load prayer times", e);
           }
         }
         if (announcementsRes.ok) {
@@ -91,7 +91,7 @@ export default function AdminDashboardClient() {
           setPrayerTimings(ptData.timings);
         }
       } catch (e) {
-        console.error("Failed to update prayer times for sandbox", e);
+        console.error("Failed to update prayer times", e);
       }
     };
     fetchTimings();
