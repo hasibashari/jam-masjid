@@ -14,49 +14,76 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
   const timerStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#051c0f] text-white flex flex-col items-center justify-between p-12 select-none animate-fade-in">
-      
-      {/* Decorative top border glow */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-[#D4AF37] to-emerald-500"></div>
+    <div className="fixed inset-0 z-50 bg-[#051c0f] text-white flex flex-col items-center justify-between px-[3vw] py-[2.5vh] select-none animate-fade-in overflow-hidden">
 
-      {/* Top Header */}
-      <div className="w-full flex justify-between items-center max-w-7xl border-b border-emerald-500/20 pb-6">
+      {/* Decorative top border glow */}
+      <div className="absolute top-0 left-0 right-0 h-[0.5vh] bg-gradient-to-r from-emerald-500 via-[#D4AF37] to-emerald-500"></div>
+
+      {/* Ambient Background Glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vh] rounded-full bg-emerald-900/20 blur-[8vw]"></div>
+      </div>
+
+      {/* Top Header — cukup besar dibaca dari jarak 10m */}
+      <div className="w-full flex justify-between items-center border-b border-emerald-500/20 pb-[1.5vh]">
         <div>
-          <span className="text-emerald-400 text-sm font-black tracking-[0.3em] uppercase block mb-1">Status Masjid</span>
-          <span className="text-3xl font-black text-[#D4AF37] tracking-tight">KUMANDANG ADZAN</span>
+          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Status Masjid</span>
+          <span className="font-black text-[#D4AF37] tracking-tight text-[3vw]">KUMANDANG ADZAN</span>
         </div>
         <div className="text-right">
-          <span className="text-emerald-400 text-sm font-black tracking-[0.3em] uppercase block mb-1">Waktu</span>
-          <span className="text-3xl font-bold font-mono">{format(currentTime, 'HH:mm:ss')}</span>
+          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Waktu</span>
+          <span className="font-bold font-mono text-[3vw]">{format(currentTime, 'HH:mm:ss')}</span>
         </div>
       </div>
 
-      {/* Center Hero Information */}
-      <div className="flex flex-col items-center text-center max-w-4xl px-6 relative">
-        {/* Background Islamic Geometric Centerpiece */}
+      {/* Center Hero — dominasi layar, nama sholat sangat besar */}
+      <div className="flex flex-col items-center text-center relative flex-1 justify-center w-full">
+
+        {/* Background Geometric Motif */}
         <div className="absolute inset-0 opacity-5 flex items-center justify-center pointer-events-none -z-10 animate-spin-slow">
-          <div className="w-96 h-96 border-4 border-dashed border-emerald-500 rounded-full flex items-center justify-center">
-            <div className="w-80 h-80 border-4 border-emerald-500 rounded-full"></div>
+          <div
+            className="border-4 border-dashed border-emerald-500 rounded-full flex items-center justify-center"
+            style={{ width: '35vw', height: '35vw' }}
+          >
+            <div
+              className="border-4 border-emerald-500 rounded-full"
+              style={{ width: '28vw', height: '28vw' }}
+            ></div>
           </div>
         </div>
 
-        <span className="text-emerald-400 text-2xl font-black tracking-[0.4em] uppercase mb-4 animate-pulse">ADZAN SEDANG BERKUMANDANG</span>
-        <h1 className="text-8xl md:text-9xl font-black text-[#D4AF37] tracking-tighter uppercase drop-shadow-[0_5px_15px_rgba(3,78,38,0.5)] mb-8">
+        {/* Sub-label "ADZAN SEDANG BERKUMANDANG" */}
+        <span className="text-emerald-400 font-black tracking-[0.4em] uppercase animate-pulse text-[2vw] mb-[1.5vh]">
+          ADZAN SEDANG BERKUMANDANG
+        </span>
+
+        {/* Nama Sholat — hero utama, terbaca dari 15 meter */}
+        <h1
+          className="font-black text-[#D4AF37] tracking-tighter uppercase leading-none mb-[2vh]"
+          style={{ fontSize: 'clamp(5rem, 14vw, 22rem)', textShadow: '0 0 6vw rgba(212,175,55,0.35)' }}
+        >
           {prayerName}
         </h1>
 
-        <p className="text-zinc-300 text-xl font-serif italic max-w-2xl leading-relaxed border-t border-b border-white/5 py-4">
-          &quot;Apabila adzan dikumandangkan, maka setan berpaling sambil bersiul-siul hingga tidak mendengar adzan.&quot; (HR. Bukhari & Muslim)
+        {/* Hadits Quote */}
+        <p className="text-zinc-300 font-serif italic leading-relaxed border-t border-b border-white/10 py-[1.5vh] text-[1.6vw] max-w-[60vw]">
+          &quot;Apabila adzan dikumandangkan, maka setan berpaling sambil bersiul-siul hingga tidak mendengar adzan.&quot;
+          <span className="block mt-[0.5vh] text-zinc-500 not-italic text-[1.2vw]">(HR. Bukhari &amp; Muslim)</span>
         </p>
       </div>
 
-      {/* Bottom timer / Next stage */}
-      <div className="w-full max-w-3xl flex flex-col items-center select-none bg-emerald-950/40 border border-emerald-500/20 rounded-3xl p-8 backdrop-blur shadow-2xl">
-        <span className="text-emerald-400 text-xs font-black tracking-[0.3em] uppercase mb-2">DURASI ADZAN BERLANGSUNG</span>
-        <div className="text-7xl font-mono font-black text-emerald-400 tracking-wider tabular-nums">
+      {/* Bottom Timer Card */}
+      <div className="w-full max-w-[55vw] flex flex-col items-center bg-emerald-950/40 border border-emerald-500/20 rounded-[2vw] px-[4vw] py-[2vh] backdrop-blur shadow-2xl">
+        <span className="text-emerald-400 font-black tracking-[0.3em] uppercase mb-[0.5vh] text-[1.2vw]">
+          DURASI ADZAN BERLANGSUNG
+        </span>
+        <div
+          className="font-mono font-black text-emerald-400 tracking-wider tabular-nums leading-none"
+          style={{ fontSize: 'clamp(3rem, 9vw, 14rem)' }}
+        >
           {timerStr}
         </div>
-        <div className="mt-4 flex gap-4 text-xs text-zinc-400 font-sans tracking-wide">
+        <div className="mt-[1vh] flex gap-[2vw] text-zinc-400 font-sans tracking-wide text-[1.1vw]">
           <span>Harap tenang saat Adzan berkumandang</span>
           <span>•</span>
           <span>Siapkan diri untuk Sholat Berjamaah</span>

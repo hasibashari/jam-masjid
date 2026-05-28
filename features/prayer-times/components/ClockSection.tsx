@@ -72,27 +72,29 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   return (
     <section className="flex-grow flex flex-col items-center justify-center relative w-full h-full">
       {/* 1. Centered Clock Container (Independent, perfectly stable height) */}
-      <div className="z-10 flex flex-col items-center justify-center -mt-16 select-none pointer-events-none">
-        {/* Massive Digital Time Display */}
-        <div className="text-[14rem] md:text-[180px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] relative">
-          {format(currentTime, 'HH:mm')}
-          <span className="text-5xl md:text-6xl text-emerald-500 font-medium absolute mt-auto bottom-8 ml-4 tabular-nums">
+      <div className="z-10 flex flex-col items-center justify-center -mt-16 md:-mt-20 lg:-mt-24 select-none pointer-events-none">
+        {/* Massive Digital Time Display - Highly scalable up to 75" TV screens */}
+        <div className="flex items-end">
+          <span className="text-[6.5rem] sm:text-[140px] md:text-[180px] lg:text-[230px] xl:text-[280px] 2xl:text-[330px] min-[1800px]:text-[370px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)] transition-all duration-500">
+            {format(currentTime, 'HH:mm')}
+          </span>
+          <span className="text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-emerald-400/55 font-medium tabular-nums tracking-wide mb-[0.6vw] sm:mb-[0.8vw] md:mb-[1vw] lg:mb-[1.4vw] xl:mb-[1.7vw] 2xl:mb-[2vw] ml-3 md:ml-4 lg:ml-6 xl:ml-8 transition-all duration-500">
             {format(currentTime, 'ss')}
           </span>
         </div>
       </div>
 
       {/* 2. Absolute Quotes Container at Bottom Center (Leaves the digital clock centered and completely stable) */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-8 text-center z-10 select-none pointer-events-none">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl px-6 md:px-8 text-center z-10 select-none pointer-events-none transition-all duration-500">
         <div 
-          className={`px-8 py-4 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 flex flex-col justify-center min-h-[140px] md:min-h-[120px] ${
+          className={`px-6 md:px-10 py-4 md:py-6 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 flex flex-col justify-center min-h-[140px] md:min-h-[120px] lg:min-h-[150px] xl:min-h-[180px] ${
             isFading ? 'opacity-0 scale-98 blur-[2px]' : 'opacity-100 scale-100 blur-none'
           }`}
         >
-          <p className="text-zinc-200 text-base md:text-lg font-medium italic leading-relaxed">
+          <p className="text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-medium italic leading-relaxed">
             &ldquo;{currentQuote.text}&rdquo;
           </p>
-          <span className="block mt-2.5 text-emerald-400 text-xs font-extrabold uppercase tracking-[0.2em] truncate">
+          <span className="block mt-2.5 md:mt-3.5 text-emerald-400 text-[10px] sm:text-xs lg:text-sm xl:text-base font-extrabold uppercase tracking-[0.2em] truncate">
             — {currentQuote.source}
           </span>
         </div>

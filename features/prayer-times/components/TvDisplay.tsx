@@ -287,23 +287,23 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[160px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[180px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight uppercase leading-none">
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-sm md:text-base text-emerald-400 font-semibold tracking-wide mt-1 uppercase opacity-85">
+              <p className="text-base md:text-lg lg:text-xl text-emerald-400 font-semibold tracking-wide mt-2 uppercase opacity-85">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
           
           <div className="text-right flex flex-col justify-center">
-            <div className="text-3xl font-bold text-white tracking-tight">
+            <div className="text-4xl lg:text-5xl font-bold text-white tracking-tight">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
-            <div className="text-xl text-emerald-400 font-serif italic mt-1 tracking-wider">
+            <div className="text-2xl lg:text-3xl text-emerald-400 font-serif italic mt-1.5 tracking-wider">
               {hijriDate}
             </div>
           </div>

@@ -14,51 +14,73 @@ export default function FullscreenPraying({ prayerName, currentTime, secondsLeft
   const timerStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#000000] text-white flex flex-col items-center justify-between p-16 select-none animate-fade-in">
-      
-      {/* Absolute Dark Minimalist Styling for zero distraction in prayer hall */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-zinc-900"></div>
+    <div className="fixed inset-0 z-50 bg-[#000000] text-white flex flex-col items-center justify-between px-[3vw] py-[2.5vh] select-none animate-fade-in overflow-hidden">
+
+      {/* Subtle top border — minimalis agar tidak mengganggu kekhusyukan */}
+      <div className="absolute top-0 left-0 right-0 h-[0.3vh] bg-zinc-900"></div>
 
       {/* Top Header */}
-      <div className="w-full flex justify-between items-center max-w-7xl border-b border-zinc-900 pb-8">
+      <div className="w-full flex justify-between items-center border-b border-zinc-900 pb-[1.5vh]">
         <div>
-          <span className="text-zinc-600 text-xs font-black tracking-[0.3em] uppercase block mb-1">Status Masjid</span>
-          <span className="text-2xl font-black text-rose-500 tracking-tight">SHOLAT BERLANGSUNG</span>
+          <span className="text-zinc-600 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Status Masjid</span>
+          <span className="font-black text-rose-500 tracking-tight text-[3vw]">SHOLAT BERLANGSUNG</span>
         </div>
         <div className="text-right">
-          <span className="text-zinc-600 text-xs font-black tracking-[0.3em] uppercase block mb-1">Waktu</span>
-          <span className="text-2xl font-bold font-mono text-zinc-500">{format(currentTime, 'HH:mm')}</span>
+          <span className="text-zinc-600 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Waktu</span>
+          <span className="font-bold font-mono text-zinc-500 text-[3vw]">{format(currentTime, 'HH:mm')}</span>
         </div>
       </div>
 
       {/* Central Serene Message */}
-      <div className="flex flex-col items-center text-center max-w-5xl px-6">
-        
-        {/* Large Silent Motif */}
-        <div className="w-24 h-24 mb-10 border border-zinc-800 rounded-full flex items-center justify-center relative">
-          <div className="w-12 h-12 border-2 border-dashed border-rose-500 rounded-full animate-ping absolute"></div>
-          <div className="w-6 h-6 bg-rose-500 rounded-full"></div>
+      <div className="flex flex-col items-center text-center flex-1 justify-center w-full px-[4vw]">
+
+        {/* Large Silent Motif — diperbesar agar menjadi focal point */}
+        <div
+          className="mb-[3vh] border border-zinc-800 rounded-full flex items-center justify-center relative"
+          style={{ width: '8vw', height: '8vw' }}
+        >
+          <div
+            className="border-2 border-dashed border-rose-500 rounded-full animate-ping absolute"
+            style={{ width: '4.5vw', height: '4.5vw' }}
+          ></div>
+          <div
+            className="bg-rose-500 rounded-full"
+            style={{ width: '2.2vw', height: '2.2vw' }}
+          ></div>
         </div>
 
-        <span className="text-[#D4AF37] text-lg font-bold tracking-[0.5em] uppercase mb-4">MOHON HARAP TENANG</span>
-        <h1 className="text-[6vw] font-black tracking-tighter text-white uppercase mb-8 leading-none">
-          TEGAKKAN SHOLAT DENGAN KHUSYUK
+        {/* Label kecil di atas judul utama */}
+        <span className="text-[#D4AF37] font-bold tracking-[0.5em] uppercase mb-[1.5vh] text-[2vw]">
+          MOHON HARAP TENANG
+        </span>
+
+        {/* Judul utama — hero, terbaca dari 15 meter */}
+        <h1
+          className="font-black tracking-tighter text-white uppercase leading-none mb-[2vh]"
+          style={{ fontSize: 'clamp(2.5rem, 8vw, 13rem)' }}
+        >
+          TEGAKKAN SHOLAT<br />DENGAN KHUSYUK
         </h1>
 
-        <div className="h-0.5 w-40 bg-zinc-900 mb-8"></div>
+        {/* Divider */}
+        <div className="bg-zinc-900 mb-[2vh]" style={{ height: '2px', width: '10vw' }}></div>
 
-        <p className="text-zinc-500 text-2xl font-medium tracking-wide uppercase">
-           sedang melaksanakan ibadah sholat fardhu berjamaah <span className="text-emerald-500 font-extrabold">{prayerName}</span>
+        {/* Keterangan nama sholat */}
+        <p className="text-zinc-500 font-medium tracking-wide uppercase text-[1.8vw]">
+          Sedang melaksanakan ibadah sholat fardhu berjamaah{' '}
+          <span className="text-emerald-500 font-extrabold">{prayerName}</span>
         </p>
       </div>
 
-      {/* Bottom status indicator */}
-      <div className="w-full max-w-md flex flex-col items-center select-none py-6 border-t border-zinc-950">
-        <span className="text-zinc-600 text-[10px] font-black tracking-[0.3em] uppercase mb-2">Pemberitahuan Khusus</span>
-        <div className="text-lg text-zinc-400 font-sans tracking-tight font-medium">
+      {/* Bottom Status — peringatan HP, cukup besar terbaca dari jauh */}
+      <div className="w-full flex flex-col items-center border-t border-zinc-950 pt-[1.5vh]">
+        <span className="text-zinc-600 font-black tracking-[0.3em] uppercase mb-[0.5vh] text-[1.1vw]">
+          Pemberitahuan Khusus
+        </span>
+        <div className="text-zinc-400 font-sans tracking-tight font-medium text-[2vw]">
           MOHON NON-AKTIFKAN / SILENT HP
         </div>
-        <div className="text-xs text-zinc-600 font-mono mt-3">
+        <div className="font-mono text-zinc-600 mt-[0.5vh] text-[1.2vw]">
           Estimasi Durasi Selesai: {timerStr}
         </div>
       </div>

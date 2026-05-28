@@ -47,7 +47,7 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
   );
 
   return (
-    <section className={`flex-none h-[240px] grid ${showImsak ? 'grid-cols-7' : 'grid-cols-6'} gap-4 px-8 pb-10 transition-all duration-500`}>
+    <section className={`flex-none h-[220px] lg:h-[260px] xl:h-[300px] 2xl:h-[330px] grid ${showImsak ? 'grid-cols-7' : 'grid-cols-6'} gap-3 md:gap-4 lg:gap-6 px-6 sm:px-8 pb-6 sm:pb-8 lg:pb-10 transition-all duration-500`}>
       {prayers.map((prayer) => {
         const isNext = prayer.id === nextPrayerName;
         const isSunrise = prayer.id === 'Sunrise';
@@ -57,15 +57,15 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
           <div 
             key={prayer.id}
             className={`
-              flex flex-col items-center justify-center rounded-3xl transition-all duration-1000 shadow-sm
+              flex flex-col items-center justify-center rounded-3xl transition-all duration-1000 shadow-sm text-center
               ${isNext 
-                ? 'p-6 bg-[#D4AF37] shadow-[0_20px_50px_rgba(212,175,55,0.15)] ring-4 ring-white/10 text-[#051109] transform scale-105 z-10' 
+                ? 'p-5 lg:p-8 bg-[#D4AF37] shadow-[0_20px_50px_rgba(212,175,55,0.15)] ring-4 ring-white/10 text-[#051109] transform scale-105 z-10' 
                 : isImsak
-                  ? 'p-4 bg-white/3 border border-white/5 opacity-60 scale-95 text-white' 
-                  : 'p-6 bg-white/5 border border-white/10 text-white'}
+                  ? 'p-3 lg:p-5 bg-white/3 border border-white/5 opacity-60 scale-95 text-white' 
+                  : 'p-5 lg:p-8 bg-white/5 border border-white/10 text-white'}
             `}
           >
-            <span className={`text-[10px] font-black uppercase tracking-[0.3em] mb-3 
+            <span className={`text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-black uppercase tracking-[0.3em] mb-2 lg:mb-4 
               ${isNext 
                 ? 'text-[#051109]/70' 
                 : isImsak 
@@ -76,18 +76,18 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
             </span>
             <p className={`
               ${isNext 
-                ? 'text-6xl font-black text-[#051109]' 
+                ? 'text-5xl sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-[#051109]' 
                 : isImsak 
-                  ? 'text-4xl font-bold text-white/70' 
-                  : 'text-5xl font-bold text-white'} 
-              font-[family-name:var(--font-space)] tracking-tighter tabular-nums`}
+                  ? 'text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white/70' 
+                  : 'text-4xl sm:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-white'} 
+              font-[family-name:var(--font-space)] tracking-tighter tabular-nums leading-none`}
             >
               {format(prayer.timeObj, 'HH:mm')}
             </p>
             {isNext ? (
-              <span className="mt-4 text-[10px] font-black bg-[#051109] text-[#D4AF37] px-3 py-1 rounded-full font-sans">AKTIF</span>
+              <span className="mt-3 lg:mt-5 text-[9px] sm:text-[10px] lg:text-xs xl:text-sm font-black bg-[#051109] text-[#D4AF37] px-3 sm:px-4 lg:px-6 py-1 sm:py-1.5 lg:py-2.5 rounded-full font-sans tracking-wider">AKTIF</span>
             ) : (
-              <div className={`mt-4 w-12 h-1 rounded-full ${isImsak ? 'bg-white/5' : 'bg-emerald-500/20'}`}></div>
+              <div className={`mt-3 lg:mt-5 w-10 lg:w-14 h-1 lg:h-1.5 rounded-full ${isImsak ? 'bg-white/5' : 'bg-emerald-500/20'}`}></div>
             )}
           </div>
         );
