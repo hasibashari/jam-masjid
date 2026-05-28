@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Volume2, 
   Clock, 
@@ -13,6 +13,7 @@ import {
 import dynamic from 'next/dynamic';
 import { AppSettings } from '@/shared/types';
 import NominatimSearch from '@/features/location/components/NominatimSearch';
+import { useMosqueSettings } from '../hooks/useMosqueSettings';
 
 const DynamicMapPicker = dynamic(() => import('@/features/location/components/MapPicker'), { 
   ssr: false, 
@@ -31,125 +32,20 @@ interface SettingsTabProps {
 }
 
 export default function SettingsTab({ settings, setSettings, showAlert }: SettingsTabProps) {
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [mainBgUploading, setMainBgUploading] = useState(false);
-  const [mapCenter, setMapCenter] = useState({ lat: settings.latitude, lng: settings.longitude });
-
-  // Sync map center if settings lat/lng changes from external source (e.g. database reload)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMapCenter({ lat: settings.latitude, lng: settings.longitude });
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [settings.latitude, settings.longitude]);
-
-  // Update Settings handler
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaveLoading(true);
-    try {
-      const res = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setSettings(updated);
-        showAlert('success', 'Konfigurasi settings masjid berhasil disimpan!');
-      } else {
-        const errData = await res.json();
-        showAlert('error', errData.error || 'Gagal menyimpan settings.');
-      }
-    } catch (err: any) {
-      showAlert('error', err.message || 'Koneksi error ke server.');
-    } finally {
-      setSaveLoading(false);
-    }
-  };
-
-  // Background Image Handlers
-  const handleMainBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      showAlert('error', 'File harus berupa gambar.');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      showAlert('error', 'Ukuran gambar maksimal 5MB.');
-      return;
-    }
-
-    setMainBgUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('action', 'upload');
-
-    try {
-      const res = await fetch('/api/settings/background', {
-        method: 'POST',
-        body: formData,
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setSettings(updated);
-        showAlert('success', 'Background utama berhasil diperbarui!');
-      } else {
-        const err = await res.json();
-        showAlert('error', err.error || 'Gagal mengunggah background.');
-      }
-    } catch (err) {
-      showAlert('error', 'Error mengunggah gambar.');
-    } finally {
-      setMainBgUploading(false);
-    }
-  };
-
-  const handleToggleMainBg = async () => {
-    const newActive = !settings.backgroundActive;
-    setSettings(prev => ({ ...prev, backgroundActive: newActive }));
-    
-    const formData = new FormData();
-    formData.append('action', 'toggle');
-    formData.append('active', String(newActive));
-    
-    try {
-      const res = await fetch('/api/settings/background', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) {
-        setSettings(prev => ({ ...prev, backgroundActive: !newActive }));
-        showAlert('error', 'Gagal diperbarui status background.');
-      } else {
-        showAlert('success', 'Status background diperbarui.');
-      }
-    } catch {
-      setSettings(prev => ({ ...prev, backgroundActive: !newActive }));
-      showAlert('error', 'Error mengubah status.');
-    }
-  };
-
-  const handlePlaceSelect = (lat: number, lng: number, placeName: string) => {
-    setSettings(prev => ({
-      ...prev,
-      latitude: lat,
-      longitude: lng,
-      mosqueName: placeName || prev.mosqueName
-    }));
-    setMapCenter({ lat, lng });
-  };
-
-  const handleMapClick = (lat: number, lng: number) => {
-    setSettings(prev => ({
-      ...prev,
-      latitude: lat,
-      longitude: lng
-    }));
-    setMapCenter({ lat, lng });
-  };
+  const {
+    saveLoading,
+    mainBgUploading,
+    mapCenter,
+    handleSaveSettings,
+    handleMainBgUpload,
+    handleToggleMainBg,
+    handlePlaceSelect,
+    handleMapClick,
+  } = useMosqueSettings({
+    initialSettings: settings,
+    setSettingsExternal: setSettings,
+    showAlert,
+  });
 
   return (
     <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -546,7 +442,7 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
           <button
             type="submit"
             disabled={saveLoading}
-            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase cursor-pointer"
+            className="w-full py-4 bg-[#D4AF37] hover:bg-[#ebd586] disabled:bg-zinc-700 text-zinc-950 rounded-xl text-sm font-black tracking-wider transition-colors uppercase"
           >
             {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-zinc-950" /> : 'Simpan Semua Konfigurasi'}
           </button>

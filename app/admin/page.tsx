@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifySession } from '@/shared/lib/auth';
-import AdminDashboardClient from './components/AdminDashboardClient';
+import AdminDashboardClient from '@/features/admin/components/AdminDashboardClient';
 
 export const dynamic = 'force-dynamic';
 

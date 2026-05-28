@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AppSettings, AnnouncementType, BannerType, PRAYER_TRANSLATIONS } from '@/shared/types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -11,7 +11,15 @@ import LocationPickerModal from '@/features/location/components/LocationPickerMo
 import RunningAnnouncements from '@/features/announcements/components/RunningAnnouncements';
 import ClockSection from './ClockSection';
 import PrayerTimesGrid from './PrayerTimesGrid';
+
+// Custom Hooks
 import { usePrayerTimes } from '../hooks/usePrayerTimes';
+import { useWakeLock } from '../hooks/useWakeLock';
+import { useAutoHideCursor } from '../hooks/useAutoHideCursor';
+import { useFullscreen } from '../hooks/useFullscreen';
+import { useTvDisplayData } from '../hooks/useTvDisplayData';
+import { useAdzanAlarm } from '../hooks/useAdzanAlarm';
+import { useDisplaySchedule } from '../hooks/useDisplaySchedule';
 
 // Fullscreen Stage Screens
 import FullscreenAdzan from './FullscreenAdzan';
@@ -25,192 +33,30 @@ interface TvDisplayProps {
 }
 
 export default function TvDisplay({ initialSettings, initialAnnouncements }: TvDisplayProps) {
-  const [settings, setSettings] = useState<AppSettings>(initialSettings);
-  const [announcements, setAnnouncements] = useState<AnnouncementType[]>(initialAnnouncements);
-  const [banners, setBanners] = useState<BannerType[]>([]);
+  // 1. Data synchronization & polling hook (every 2s)
+  const {
+    settings,
+    setSettings,
+    announcements,
+    banners,
+    bgError,
+    setBgError,
+  } = useTvDisplayData({ initialSettings, initialAnnouncements });
+
+  // 2. Kiosk system optimization hooks
+  useWakeLock();
+  const mouseActive = useAutoHideCursor();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  // 3. Modals and Display Stage States
   const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [bgError, setBgError] = useState(false);
-  const [prevBgImage, setPrevBgImage] = useState(settings.backgroundImage);
-
-  // Reset background error status in render phase if the image URL changes to avoid cascading renders
-  if (settings.backgroundImage !== prevBgImage) {
-    setPrevBgImage(settings.backgroundImage);
-    setBgError(false);
-  }
-
-  // Signage Layout States which toggles between normal Clocks and dynamic Poster Banners
   const [viewMode, setViewMode] = useState<'CLOCK' | 'BANNER'>('CLOCK');
   const [bgBannerIndex, setBgBannerIndex] = useState(0);
 
-  // --- KIOSK TV OPTIMIZATIONS ---
-  const [mouseActive, setMouseActive] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const wakeLockRef = useRef<any>(null);
-
-  // 1. Screen Wake Lock API
-  const requestWakeLock = async () => {
-    try {
-      if ('wakeLock' in navigator) {
-        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
-        console.log('Screen Wake Lock acquired successfully');
-      }
-    } catch (err) {
-      console.warn('Failed to acquire Screen Wake Lock:', err);
-    }
-  };
-
-  const releaseWakeLock = async () => {
-    try {
-      if (wakeLockRef.current) {
-        await wakeLockRef.current.release();
-        wakeLockRef.current = null;
-        console.log('Screen Wake Lock released');
-      }
-    } catch (err) {
-      console.error('Failed to release Screen Wake Lock:', err);
-    }
-  };
-
-  useEffect(() => {
-    requestWakeLock();
-    
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
-        await requestWakeLock();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      releaseWakeLock();
-    };
-  }, []);
-
-  // 2. Global Auto-Hide Cursor
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    const handleMouseMove = () => {
-      setMouseActive(true);
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setMouseActive(false);
-      }, 3000); // 3 seconds timeout
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    // Initial trigger
-    timeoutId = setTimeout(() => {
-      setMouseActive(false);
-    }, 3000);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mouseActive) {
-      document.body.classList.add('cursor-none');
-    } else {
-      document.body.classList.remove('cursor-none');
-    }
-    return () => {
-      document.body.classList.remove('cursor-none');
-    };
-  }, [mouseActive]);
-
-  // 3. Fullscreen Tracking
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
-  // --- DATA POLLING & SYNCHRONIZATION ---
-  // Memoized fetch operation to allow reuse in both standard polling and instant PWA reconnection events
-  const fetchLatestData = useCallback(async () => {
-    try {
-      const [settingsRes, announcementsRes, bannersRes] = await Promise.all([
-        fetch('/api/settings').catch(() => null),
-        fetch('/api/announcements').catch(() => null),
-        fetch('/api/banners').catch(() => null)
-      ]);
-
-      if (settingsRes?.ok) {
-        const remoteSettings = await settingsRes.json();
-        setSettings(remoteSettings);
-      }
-      if (announcementsRes?.ok) {
-        const remoteAnnouncements = await announcementsRes.json();
-        setAnnouncements(remoteAnnouncements);
-      }
-      if (bannersRes?.ok) {
-        const remoteBanners = await bannersRes.json();
-        setBanners(remoteBanners);
-      }
-    } catch (e) {
-      console.error("Failed background polling", e);
-    }
-  }, []);
-
-  // Poll for background settings, announcements, and poster banners (high reactivity: 2s sync)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchLatestData(); // immediate load triggers deferred to avoid synchronous setState inside effect body
-    }, 0);
-    const poller = setInterval(fetchLatestData, 2 * 1000); // Poll every 2 seconds for real-time responsiveness
-    return () => {
-      clearTimeout(timer);
-      clearInterval(poller);
-    };
-  }, [fetchLatestData]);
-
-  // Event listener for PWA online status reconnection to trigger instant sync
-  useEffect(() => {
-    const handleReconnectionSync = () => {
-      console.log("[PWA] Online reconnection detected! Triggering instant data sync...");
-      fetchLatestData();
-    };
-
-    window.addEventListener('app-sync-data', handleReconnectionSync);
-    return () => window.removeEventListener('app-sync-data', handleReconnectionSync);
-  }, [fetchLatestData]);
-
-  // Instantly transition to BANNER mode when new active banners are added/activated
-  const activeBannersCount = banners.filter(b => b.active).length;
-  const [prevActiveCount, setPrevActiveCount] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (activeBannersCount > prevActiveCount) {
-        setViewMode('BANNER');
-        setBgBannerIndex(activeBannersCount - 1); // Show the latest activated/added banner
-      }
-      setPrevActiveCount(activeBannersCount);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [activeBannersCount, prevActiveCount]);
-
-  // Delegate core clock ticking, next prayer calculation, timing difference, Hijri computation and active Stage (Adzan/Iqomah/Praying) state machine to domain hook
+  // 4. Core prayer calculation hook
   const {
     currentTime,
     prayerTimes,
-    timezone,
     timezoneLabel,
     nextPrayer,
     timelineObj,
@@ -236,133 +82,53 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     sandboxSpeed: settings.sandboxSpeed
   });
 
+  // 5. Audio & alarm synthetic beeping hooks
+  useAdzanAlarm({
+    prayerStage,
+    stageSecondsLeft,
+    adzanAudioActive: settings.adzanAudioActive,
+    adzanAudioUrl: settings.adzanAudioUrl,
+    adzanAudioVolume: settings.adzanAudioVolume,
+  });
+
+  // 6. Mosque display energy saving sleep schedule
+  const shouldEnterStandby = useDisplaySchedule({
+    currentTime,
+    settings,
+    prayerStage,
+  });
+
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
 
-  // --- AUDIO & ALARM AUTOMATION ---
-  const adzanAudioRef = useRef<HTMLAudioElement | null>(null);
-  const lastBeepedSecondRef = useRef<number | null>(null);
+  // Instantly transition to BANNER mode when new active banners are added/activated
+  const activeBannersCount = banners.filter(b => b.active).length;
+  const [prevActiveCount, setPrevActiveCount] = useState(0);
 
-  // 1. Adzan Player Trigger
   useEffect(() => {
-    if (prayerStage === 'ADZAN' && settings.adzanAudioActive && settings.adzanAudioUrl) {
-      try {
-        if (!adzanAudioRef.current) {
-          adzanAudioRef.current = new Audio(settings.adzanAudioUrl);
-        } else if (adzanAudioRef.current.src !== settings.adzanAudioUrl) {
-          adzanAudioRef.current.pause();
-          adzanAudioRef.current = new Audio(settings.adzanAudioUrl);
-        }
-        
-        adzanAudioRef.current.volume = settings.adzanAudioVolume;
-        adzanAudioRef.current.play().catch((err) => {
-          console.warn("Autoplay blocked or adzan audio failed to load:", err);
-        });
-      } catch (err) {
-        console.error("Adzan audio player error:", err);
+    const timer = setTimeout(() => {
+      if (activeBannersCount > prevActiveCount) {
+        setViewMode('BANNER');
+        setBgBannerIndex(activeBannersCount - 1); // Show latest banner
       }
-    } else {
-      // Clean stop & mute when leaving ADZAN stage (includes PRAYING fail-safe)
-      if (adzanAudioRef.current) {
-        adzanAudioRef.current.pause();
-        adzanAudioRef.current.currentTime = 0;
-      }
-    }
-  }, [prayerStage, settings.adzanAudioActive, settings.adzanAudioUrl, settings.adzanAudioVolume]);
+      setPrevActiveCount(activeBannersCount);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [activeBannersCount, prevActiveCount]);
 
-  // 2. Web Audio API Offline Beep Synthesizer
+  // Schedule rotation between CLOCK layout and BANNERS layout when in normal mode
   useEffect(() => {
-    if (prayerStage !== 'IQOMAH' || stageSecondsLeft === undefined || stageSecondsLeft > 10 || stageSecondsLeft < 0) {
-      lastBeepedSecondRef.current = null;
-      return;
-    }
-
-    // Protect: ensure beep rings only once per second
-    if (lastBeepedSecondRef.current === stageSecondsLeft) {
-      return;
-    }
-    lastBeepedSecondRef.current = stageSecondsLeft;
-
-    try {
-      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtxClass) return;
-
-      const audioCtx = new AudioCtxClass();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.type = 'sine';
-
-      if (stageSecondsLeft > 0) {
-        // High pitched short warning beep (880Hz, 120ms)
-        oscillator.frequency.value = 880;
-        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.12);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.12);
-      } else if (stageSecondsLeft === 0) {
-        // Deep long alarm double-pitch for prayer start (1000Hz, 500ms)
-        oscillator.frequency.value = 1000;
-        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.5);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.5);
-      }
-    } catch (e) {
-      console.warn("Failed to play synthetic warning beep:", e);
-    }
-  }, [prayerStage, stageSecondsLeft]);
-
-  // --- DYNAMIC GRADIENT HELPER ---
-  const getDynamicGradientClass = (prayerName: string | null) => {
-    if (!prayerName) return 'from-[#051109] via-[#020b06] to-[#010502]';
-    switch (prayerName) {
-      case 'Imsak':
-      case 'Fajr': // Subuh: Deep dawn navy blue-purple
-        return 'from-[#0a182c] via-[#051109] to-[#030814]';
-      case 'Sunrise':
-      case 'Dhuhr': // Dzuhur: Morning golden-green
-        return 'from-[#022416] via-[#051109] to-[#0e3321]';
-      case 'Asr': // Ashar: Olive warm bronze-green
-        return 'from-[#201c0c] via-[#051109] to-[#0a140f]';
-      case 'Maghrib': // Maghrib: Sunset orange-rose
-        return 'from-[#2c1208] via-[#051109] to-[#0d0914]';
-      case 'Isha': // Isya: Starry space blue-black
-        return 'from-[#030c1c] via-[#051109] to-[#010408]';
-      default:
-        return 'from-[#051109] via-[#020b06] to-[#010502]';
-    }
-  };
-
-  const activeGradient = getDynamicGradientClass(nextPrayer?.name || null);
-
-
-  // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
-  useEffect(() => {
-    console.log("TvDisplay clock-to-banner timer effect triggered!", { 
-      prayerStage, 
-      viewMode, 
-      activeBannersCount: banners.filter(b => b.active).length 
-    });
-
     if (prayerStage !== 'NORMAL' || viewMode !== 'CLOCK') return;
 
     const activeBanners = banners.filter(b => b.active);
     if (activeBanners.length === 0) return;
 
-    // Show clock for 15 seconds, then trigger banner rotation (shorter duration for high-reactivity digital signage)
+    // Show clock for 15s, then show poster banner
     const clockTimer = setTimeout(() => {
-      console.log("TvDisplay clockTimer FIRED! Toggling to BANNER mode.");
       setBgBannerIndex(0);
       setViewMode('BANNER');
     }, 15 * 1000);
 
-    return () => {
-      console.log("TvDisplay clock-to-banner timer effect CLEANED UP!");
-      clearTimeout(clockTimer);
-    };
+    return () => clearTimeout(clockTimer);
   }, [prayerStage, viewMode, activeBannersCount, banners]);
 
   const handleBannerComplete = useCallback(() => {
@@ -394,6 +160,27 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     setShowLocationPicker(false);
   };
 
+  // --- DYNAMIC GRADIENT HELPER ---
+  const getDynamicGradientClass = (prayerName: string | null) => {
+    if (!prayerName) return 'from-[#051109] via-[#020b06] to-[#010502]';
+    switch (prayerName) {
+      case 'Imsak':
+      case 'Fajr': // Subuh: Deep dawn navy blue-purple
+        return 'from-[#0a182c] via-[#051109] to-[#030814]';
+      case 'Sunrise':
+      case 'Dhuhr': // Dzuhur: Morning golden-green
+        return 'from-[#022416] via-[#051109] to-[#0e3321]';
+      case 'Asr': // Ashar: Olive warm bronze-green
+        return 'from-[#201c0c] via-[#051109] to-[#0a140f]';
+      case 'Maghrib': // Maghrib: Sunset orange-rose
+        return 'from-[#2c1208] via-[#051109] to-[#0d0914]';
+      case 'Isha': // Isya: Starry space blue-black
+        return 'from-[#030c1c] via-[#051109] to-[#010408]';
+      default:
+        return 'from-[#051109] via-[#020b06] to-[#010502]';
+    }
+  };
+
   if (!currentTime || !prayerTimes || !timelineObj || !nextPrayer) {
     return (
       <div className="h-screen w-screen bg-[#051109] flex flex-col items-center justify-center text-emerald-500 gap-3">
@@ -402,36 +189,6 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
       </div>
     );
   }
-
-  // Evaluate Active/Inactive operating hour schedule
-  // e.g. Start at 03:00, End at 23:00.
-  const isDisplayScheduledSleep = () => {
-    if (!settings.displayActive) return true;
-
-    try {
-      const currentFormatted = format(currentTime, 'HH:mm');
-      const [currH, currM] = currentFormatted.split(':').map(Number);
-      const [startH, startM] = settings.displayStart.split(':').map(Number);
-      const [endH, endM] = settings.displayEnd.split(':').map(Number);
-
-      const currMin = currH * 60 + currM;
-      const startMin = startH * 60 + startM;
-      const endMin = endH * 60 + endM;
-
-      if (startMin <= endMin) {
-        return currMin < startMin || currMin > endMin;
-      } else {
-        // Over midnight wrap
-        return currMin < startMin && currMin > endMin;
-      }
-    } catch (e) {
-      return false; // Fail safe show layout
-    }
-  };
-
-  // Determine sleep state. Worship trigger override schedules to ensure display handles early Subuh alerts, etc!
-  const isSleep = isDisplayScheduledSleep();
-  const shouldEnterStandby = isSleep && prayerStage === 'NORMAL';
 
   // Standby screen renders
   if (shouldEnterStandby) {
@@ -503,10 +260,11 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
   // Otherwise, default layout
   const hasValidBg = settings.backgroundActive && settings.backgroundImage && !bgError;
+  const activeGradient = getDynamicGradientClass(nextPrayer?.name || null);
 
   return (
     <>
-      <div className={`h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-black`}>
+      <div className="h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-black">
         
         {hasValidBg ? (
           <div className="absolute inset-0 -z-10 select-none pointer-events-none">

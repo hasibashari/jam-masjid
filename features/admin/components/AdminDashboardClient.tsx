@@ -14,10 +14,10 @@ import {
 } from 'lucide-react';
 import { AppSettings, AnnouncementType, BannerType, FALLBACK_SETTINGS } from '@/shared/types';
 
-import SettingsTab from './SettingsTab';
-import AnnouncementsTab from './AnnouncementsTab';
-import BannersTab from './BannersTab';
-import SandboxTab from './SandboxTab';
+import SettingsTab from '@/features/settings/components/SettingsTab';
+import AnnouncementsTab from '@/features/announcements/components/AnnouncementsTab';
+import BannersTab from '@/features/announcements/components/BannersTab';
+import SandboxTab from '@/features/settings/components/SandboxTab';
 
 export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'sandbox'>('settings');

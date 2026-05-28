@@ -3,6 +3,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { AppSettings } from '@/shared/types';
+import { useSandbox } from '../hooks/useSandbox';
 
 interface SandboxTabProps {
   settings: AppSettings;
@@ -17,55 +18,12 @@ export default function SandboxTab({
   prayerTimings, 
   showAlert 
 }: SandboxTabProps) {
-
-  // Calculate dynamic simulation times relative to computed Dhuhr prayer time
-  const getSimulatedTimes = () => {
-    const dhuhrStr = (prayerTimings?.Dhuhr || "12:00").split(" ")[0];
-    const [hours, minutes] = dhuhrStr.split(":").map(Number);
-    
-    // Adzan simulation: 1 minute before Dhuhr
-    const adzanSimDate = new Date();
-    adzanSimDate.setHours(hours, minutes, 0, 0);
-    adzanSimDate.setMinutes(adzanSimDate.getMinutes() - 1);
-    
-    // Iqomah simulation: Dhuhr + adzanDuration + 10 seconds
-    const iqomahSimDate = new Date();
-    iqomahSimDate.setHours(hours, minutes, 0, 0);
-    iqomahSimDate.setSeconds(iqomahSimDate.getSeconds() + (settings.adzanDuration || 180) + 10);
-    
-    // Sholat simulation: Dhuhr + adzanDuration + iqomahDuration + 10 seconds
-    const sholatSimDate = new Date();
-    sholatSimDate.setHours(hours, minutes, 0, 0);
-    sholatSimDate.setSeconds(sholatSimDate.getSeconds() + (settings.adzanDuration || 180) + (settings.iqomahDuration || 600) + 10);
-    
-    const formatTimeStr = (d: Date) => {
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      const ss = String(d.getSeconds()).padStart(2, '0');
-      return `${hh}:${mm}:${ss}`;
-    };
-    
-    return {
-      adzan: { date: adzanSimDate, str: formatTimeStr(adzanSimDate) },
-      iqomah: { date: iqomahSimDate, str: formatTimeStr(iqomahSimDate) },
-      sholat: { date: sholatSimDate, str: formatTimeStr(sholatSimDate) }
-    };
-  };
-
-  const simTimes = getSimulatedTimes();
-
-  const handleUpdateSandboxField = async (fields: Partial<AppSettings>) => {
-    setSettings(prev => ({ ...prev, ...fields }));
-    try {
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...settings, ...fields })
-      });
-    } catch (err) {
-      showAlert('error', 'Gagal memperbarui status sandbox.');
-    }
-  };
+  const { simTimes, handleUpdateSandboxField } = useSandbox({
+    settings,
+    setSettings,
+    prayerTimings,
+    showAlert,
+  });
 
   return (
     <div className="max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-left">
@@ -193,7 +151,7 @@ export default function SandboxTab({
                   await handleUpdateSandboxField({ sandboxTime: isoStr, sandboxStage: 'AUTO' });
                   showAlert('success', `Waktu disetel ke 1 menit sebelum Zuhur (${simTimes.adzan.str.substring(0, 5)}). Sempurna untuk menguji transisi Adzan!`);
                 }}
-                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
+                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all"
               >
                 <span>Simulasikan Fase Adzan Zuhur ({simTimes.adzan.str.substring(0, 5)} - Menjelang Adzan)</span>
               </button>
@@ -206,7 +164,7 @@ export default function SandboxTab({
                   await handleUpdateSandboxField({ sandboxTime: isoStr, sandboxStage: 'AUTO' });
                   showAlert('success', `Waktu disetel ke ${simTimes.iqomah.str} (Awal Iqomah Zuhur). Sempurna untuk menguji hitung mundur Iqomah!`);
                 }}
-                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
+                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all"
               >
                 <span>Simulasikan Hitung Mundur Iqomah Zuhur ({simTimes.iqomah.str} - Adzan Selesai)</span>
               </button>
@@ -219,7 +177,7 @@ export default function SandboxTab({
                   await handleUpdateSandboxField({ sandboxTime: isoStr, sandboxStage: 'AUTO' });
                   showAlert('success', `Waktu disetel ke ${simTimes.sholat.str} (Awal Fase Shalat Zuhur). Sempurna untuk menguji Fase Shalat!`);
                 }}
-                className="w-full py-3 bg-[#0d2e1a] border border-emerald-500/20 hover:bg-[#124225] disabled:opacity-50 text-emerald-400 rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
+                className="w-full py-3 bg-[#0d2e1a] border border-emerald-500/20 hover:bg-[#124225] disabled:opacity-50 text-emerald-400 rounded-xl text-xs font-bold text-left px-5 transition-all"
               >
                 <span>Simulasikan Fase Shalat Zuhur ({simTimes.sholat.str} - Shalat Berjamaah)</span>
               </button>
@@ -234,7 +192,7 @@ export default function SandboxTab({
                   await handleUpdateSandboxField({ sandboxTime: isoStr, sandboxStage: 'AUTO' });
                   showAlert('success', 'Waktu disetel ke 23:30. Tampilan TV akan masuk ke Mode Hemat Energi / Istirahat.');
                 }}
-                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all animate-none"
+                className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold text-left px-5 transition-all"
               >
                 <span>Simulasikan Jam Istirahat Tampilan / Standby (23:30)</span>
               </button>

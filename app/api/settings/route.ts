@@ -31,6 +31,14 @@ export async function POST(req: NextRequest) {
       sandboxSpeed,
       backgroundImage,
       backgroundActive,
+      iqomahFajr,
+      iqomahDhuhr,
+      iqomahAsr,
+      iqomahMaghrib,
+      iqomahIsha,
+      adzanAudioActive,
+      adzanAudioUrl,
+      adzanAudioVolume,
     } = body;
 
     const currentSettings = await settingsDb.findFirst();
@@ -57,6 +65,14 @@ export async function POST(req: NextRequest) {
           sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : currentSettings.sandboxSpeed,
           backgroundImage: backgroundImage !== undefined ? backgroundImage : undefined,
           backgroundActive: backgroundActive !== undefined ? Boolean(backgroundActive) : undefined,
+          iqomahFajr: iqomahFajr !== undefined ? parseInt(iqomahFajr) : currentSettings.iqomahFajr,
+          iqomahDhuhr: iqomahDhuhr !== undefined ? parseInt(iqomahDhuhr) : currentSettings.iqomahDhuhr,
+          iqomahAsr: iqomahAsr !== undefined ? parseInt(iqomahAsr) : currentSettings.iqomahAsr,
+          iqomahMaghrib: iqomahMaghrib !== undefined ? parseInt(iqomahMaghrib) : currentSettings.iqomahMaghrib,
+          iqomahIsha: iqomahIsha !== undefined ? parseInt(iqomahIsha) : currentSettings.iqomahIsha,
+          adzanAudioActive: adzanAudioActive !== undefined ? Boolean(adzanAudioActive) : currentSettings.adzanAudioActive,
+          adzanAudioUrl: adzanAudioUrl ?? currentSettings.adzanAudioUrl,
+          adzanAudioVolume: adzanAudioVolume !== undefined ? parseFloat(adzanAudioVolume) : currentSettings.adzanAudioVolume,
         },
       });
     } else {
@@ -79,6 +95,14 @@ export async function POST(req: NextRequest) {
           sandboxSpeed: sandboxSpeed !== undefined ? parseFloat(sandboxSpeed) : 1.0,
           backgroundImage: backgroundImage ?? null,
           backgroundActive: backgroundActive !== undefined ? Boolean(backgroundActive) : false,
+          iqomahFajr: iqomahFajr !== undefined ? parseInt(iqomahFajr) : FALLBACK_SETTINGS.iqomahFajr,
+          iqomahDhuhr: iqomahDhuhr !== undefined ? parseInt(iqomahDhuhr) : FALLBACK_SETTINGS.iqomahDhuhr,
+          iqomahAsr: iqomahAsr !== undefined ? parseInt(iqomahAsr) : FALLBACK_SETTINGS.iqomahAsr,
+          iqomahMaghrib: iqomahMaghrib !== undefined ? parseInt(iqomahMaghrib) : FALLBACK_SETTINGS.iqomahMaghrib,
+          iqomahIsha: iqomahIsha !== undefined ? parseInt(iqomahIsha) : FALLBACK_SETTINGS.iqomahIsha,
+          adzanAudioActive: adzanAudioActive !== undefined ? Boolean(adzanAudioActive) : FALLBACK_SETTINGS.adzanAudioActive,
+          adzanAudioUrl: adzanAudioUrl ?? FALLBACK_SETTINGS.adzanAudioUrl,
+          adzanAudioVolume: adzanAudioVolume !== undefined ? parseFloat(adzanAudioVolume) : FALLBACK_SETTINGS.adzanAudioVolume,
         },
       });
     }
