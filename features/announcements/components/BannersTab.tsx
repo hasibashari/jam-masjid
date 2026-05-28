@@ -8,7 +8,11 @@ import {
   X, 
   Edit, 
   Power, 
-  Trash2 
+  Trash2,
+  Megaphone,
+  Layout,
+  Clock,
+  Eye
 } from 'lucide-react';
 import { BannerType } from '@/shared/types';
 import { useMosqueBanners } from '../hooks/useMosqueBanners';
@@ -18,27 +22,6 @@ interface BannersTabProps {
   setBanners: React.Dispatch<React.SetStateAction<BannerType[]>>;
   showAlert: (type: 'success' | 'error', text: string) => void;
 }
-
-const BANNER_PRESETS = [
-  {
-    title: 'Kajian Riyadhus Shalihin',
-    description: 'Rutinitas membaca Kitab Riyadhus Shalihin bersama Ustadz Abdurrahman setelah Sholat Isya.',
-    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800',
-    autoHideAfter: 15
-  },
-  {
-    title: 'Donasi Program Sosial Ramadhan',
-    description: 'Bantu ringankan beban anak yatim dan dhuafa dengan berkontribusi dalam paket pangan Ramadhan.',
-    imageUrl: 'https://images.unsplash.com/photo-1597935258735-e254c1839512?q=80&w=800',
-    autoHideAfter: 15
-  },
-  {
-    title: 'Kebersihan Adalah Sebagian Dari Iman',
-    description: 'Mari jaga kebersihan area masjid dan letakkan kembali sendal/sepatu Anda di rak yang disiapkan.',
-    imageUrl: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=800',
-    autoHideAfter: 10
-  }
-];
 
 export default function BannersTab({ 
   banners, 
@@ -70,90 +53,211 @@ export default function BannersTab({
       {/* Create Banner Form */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 h-fit">
         <h3 className="text-base font-bold mb-4 text-[#D4AF37] flex items-center gap-2">
-          <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Unggah Poster Banner Baru
+          <Plus className="w-5 h-5 text-emerald-500 shrink-0" /> Tambah Banner Informasi
         </h3>
 
         <form onSubmit={handleAddBanner} className="flex flex-col gap-5">
           
-          {/* Upload Section */}
+          {/* Banner Type Toggle */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Desain Poster Gambar</label>
-            
-            <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-4 sm:p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors">
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <Upload className="w-8 h-8 text-zinc-500" />
-              <div>
-                <span className="text-xs font-bold text-emerald-500">Klik / Seret File Gambar</span>
-                <p className="text-[10px] text-zinc-500 mt-1">Saran aspek rasio: 16:9 Landscape (Maks. 2MB)</p>
-              </div>
+            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Tipe Layout Banner</label>
+            <div className="grid grid-cols-2 gap-2 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setNewBanner(prev => ({ ...prev, contentMode: 'IMAGE' }))}
+                className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  newBanner.contentMode === 'IMAGE'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Poster Gambar
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewBanner(prev => ({ ...prev, contentMode: 'TEXT' }))}
+                className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  newBanner.contentMode === 'TEXT'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Teks Manual (Gradasi)
+              </button>
             </div>
-
-            {bannerUploadError && (
-              <span className="text-xs text-rose-500 font-semibold">{bannerUploadError}</span>
-            )}
           </div>
 
-          {/* Manual Link Input */}
+          {/* Announcement Title */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Atau Tempel URL Gambar</label>
+            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">
+              {newBanner.contentMode === 'TEXT' ? 'Judul Utama Pengumuman' : 'Judul Poster'}
+            </label>
             <input 
-              type="url"
-              value={newBanner.imageUrl}
-              onChange={(e) => setNewBanner(prev => ({ ...prev, imageUrl: e.target.value }))}
-              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono font-bold"
-              placeholder="https://images.unsplash.com/..."
+              type="text"
+              value={newBanner.title}
+              onChange={(e) => setNewBanner(prev => ({ ...prev, title: e.target.value }))}
+              required
+              placeholder={newBanner.contentMode === 'TEXT' ? 'Contoh: KAJIAN RUTIN AHAD SUBUH' : 'Contoh: Poster Kajian Ahad'}
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-bold"
             />
           </div>
 
-          {/* Preset shortcuts for quick setup */}
-          <div className="flex flex-col gap-1.5 mt-2">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Pilih Preset Gambar Cepat:</span>
-            <div className="flex flex-wrap gap-2">
-              {BANNER_PRESETS.map((preset, pIdx) => (
-                <button
-                  key={pIdx}
-                  type="button"
-                  onClick={() => setNewBanner({
-                    title: preset.title,
-                    description: preset.description,
-                    imageUrl: preset.imageUrl,
-                    active: true,
-                    autoHideAfter: preset.autoHideAfter
-                  })}
-                  className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-2.5 py-1.5 rounded cursor-pointer"
-                >
-                  {preset.title.substring(0, 18)}...
-                </button>
-              ))}
-            </div>
+          {/* Description */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">
+              {newBanner.contentMode === 'TEXT' ? 'Isi Detail Pengumuman (Opsional)' : 'Deskripsi / Catatan (Opsional)'}
+            </label>
+            <textarea 
+              value={newBanner.description}
+              onChange={(e) => setNewBanner(prev => ({ ...prev, description: e.target.value }))}
+              placeholder={newBanner.contentMode === 'TEXT' ? 'Contoh: Bersama Ustadz Adi Hidayat, Lc., M.A. di Ruang Utama Masjid.' : 'Keterangan tambahan...'}
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm h-20 resize-none"
+            />
           </div>
 
-          {/* Render preview */}
-          {newBanner.imageUrl && (
-            <div className="mt-4 flex flex-col gap-2 border-t border-zinc-800 pt-4">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase">PREVIEW GAMBAR</span>
-              <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black border border-zinc-800">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={newBanner.imageUrl} 
-                  alt="Preview" 
-                  className="w-full h-full object-cover" 
-                  onError={() => setBannerUploadError("URL gambar tidak dapat dimuat.")}
-                />
-                <button 
-                  type="button" 
-                  onClick={() => setNewBanner(prev => ({ ...prev, imageUrl: '' }))}
-                  className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black/90 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          {/* Display Duration */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Durasi Tampil (Detik)</label>
+            <input 
+              type="number"
+              min="5"
+              max="300"
+              value={newBanner.autoHideAfter}
+              onChange={(e) => setNewBanner(prev => ({ ...prev, autoHideAfter: parseInt(e.target.value) || 15 }))}
+              required
+              className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono"
+            />
+          </div>
+
+          {/* Conditional Layout Inputs */}
+          {newBanner.contentMode === 'IMAGE' ? (
+            <>
+              {/* Upload Section */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Desain Poster Gambar</label>
+                
+                <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-4 sm:p-6 bg-zinc-950/40 flex flex-col items-center justify-center text-center gap-3 relative cursor-pointer hover:border-emerald-500/50 transition-colors">
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <Upload className="w-8 h-8 text-zinc-500" />
+                  <div>
+                    <span className="text-xs font-bold text-emerald-500">Klik / Seret File Gambar</span>
+                    <p className="text-[10px] text-zinc-500 mt-1">Saran aspek rasio: 16:9 Landscape (Maks. 2MB)</p>
+                  </div>
+                </div>
+
+                {bannerUploadError && (
+                  <span className="text-xs text-rose-500 font-semibold">{bannerUploadError}</span>
+                )}
               </div>
-            </div>
+
+              {/* Manual Link Input */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Atau Tempel URL Gambar</label>
+                <input 
+                  type="url"
+                  value={newBanner.imageUrl}
+                  onChange={(e) => setNewBanner(prev => ({ ...prev, imageUrl: e.target.value }))}
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono font-bold"
+                  placeholder="https://images.unsplash.com/..."
+                />
+              </div>
+
+              {/* Render preview */}
+              {newBanner.imageUrl && (
+                <div className="mt-4 flex flex-col gap-2 border-t border-zinc-800 pt-4">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase">PREVIEW GAMBAR</span>
+                  <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black border border-zinc-800">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={newBanner.imageUrl} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover" 
+                      onError={() => setBannerUploadError("URL gambar tidak dapat dimuat.")}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setNewBanner(prev => ({ ...prev, imageUrl: '' }))}
+                      className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black/90 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Gradient Preset Picker */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background (Gradasi)</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    { id: 'emerald', class: 'bg-gradient-to-br from-[#022416] to-[#0e3321]', name: 'Emerald' },
+                    { id: 'sapphire', class: 'bg-gradient-to-br from-[#031d44] to-[#010814]', name: 'Sapphire' },
+                    { id: 'amber', class: 'bg-gradient-to-br from-[#2d1a04] to-[#1e1102]', name: 'Amber' },
+                    { id: 'purple', class: 'bg-gradient-to-br from-[#24032c] to-[#12011b]', name: 'Purple' },
+                    { id: 'charcoal', class: 'bg-gradient-to-br from-[#1c1c1c] to-[#111111]', name: 'Charcoal' }
+                  ].map((grad) => (
+                    <button
+                      key={grad.id}
+                      type="button"
+                      onClick={() => setNewBanner(prev => ({ ...prev, bgGradient: grad.id }))}
+                      className={`aspect-square rounded-xl ${grad.class} border-2 transition-all relative group flex items-center justify-center cursor-pointer ${
+                        newBanner.bgGradient === grad.id 
+                          ? 'border-[#D4AF37] scale-105 shadow-lg shadow-[#D4AF37]/20' 
+                          : 'border-zinc-800 hover:border-zinc-600'
+                      }`}
+                      title={grad.name}
+                    >
+                      {newBanner.bgGradient === grad.id && (
+                        <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dynamic visual preview of the text banner */}
+              <div className="mt-4 flex flex-col gap-2 border-t border-zinc-800 pt-4">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">PREVIEW TAMPILAN TEKS</span>
+                <div className={`relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 flex flex-col items-center justify-between p-4 bg-gradient-to-br ${
+                  newBanner.bgGradient === 'emerald' ? 'from-[#022416] via-[#051109] to-[#0e3321]' :
+                  newBanner.bgGradient === 'sapphire' ? 'from-[#031d44] via-[#020b1e] to-[#010814]' :
+                  newBanner.bgGradient === 'amber' ? 'from-[#2d1a04] via-[#0c0902] to-[#1e1102]' :
+                  newBanner.bgGradient === 'purple' ? 'from-[#24032c] via-[#0f0214] to-[#12011b]' :
+                  'from-[#1c1c1c] via-[#0d0d0d] to-[#111111]'
+                }`}>
+                  {/* Decorative mesh/light grid */}
+                  <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none"></div>
+                  
+                  <div className="w-6 h-6 rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shadow-inner relative z-10 shrink-0">
+                    <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col justify-center items-center text-center p-2 relative z-10 w-full">
+                    <h4 className="text-[11px] font-black text-white uppercase tracking-tight leading-none text-center line-clamp-2 w-full px-1">
+                      {newBanner.title || 'JUDUL UTAMA PENGUMUMAN'}
+                    </h4>
+                    {newBanner.description && (
+                      <p className="text-[7.5px] text-zinc-300 font-medium leading-normal mt-1 text-center w-[90%] line-clamp-2">
+                        {newBanner.description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden relative z-10 shrink-0">
+                    <div className="bg-[#D4AF37] h-full w-[80%] rounded-full shadow-[0_0_5px_#D4AF37]"></div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           <button
@@ -161,7 +265,7 @@ export default function BannersTab({
             disabled={saveLoading}
             className="w-full py-3 md:py-3.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 text-white rounded-xl text-[13px] md:text-sm font-bold transition-colors uppercase tracking-wider mt-4"
           >
-            {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Unggah Poster Informasi'}
+            {saveLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Simpan Banner Informasi'}
           </button>
 
         </form>
@@ -185,18 +289,46 @@ export default function BannersTab({
                 }`}
               >
                 <div className="relative aspect-video bg-black">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={ban.imageUrl} 
-                    alt="Poster Preview" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-3 right-3 flex gap-2">
+                  {ban.contentMode === 'TEXT' ? (
+                    <div className={`w-full h-full flex flex-col items-center justify-between p-4 bg-gradient-to-br text-center border-b border-zinc-800 relative overflow-hidden ${
+                      ban.bgGradient === 'emerald' ? 'from-[#022416] via-[#051109] to-[#0e3321]' :
+                      ban.bgGradient === 'sapphire' ? 'from-[#031d44] via-[#020b1e] to-[#010814]' :
+                      ban.bgGradient === 'amber' ? 'from-[#2d1a04] via-[#0c0902] to-[#1e1102]' :
+                      ban.bgGradient === 'purple' ? 'from-[#24032c] via-[#0f0214] to-[#12011b]' :
+                      'from-[#1c1c1c] via-[#0d0d0d] to-[#111111]'
+                    }`}>
+                      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none"></div>
+                      
+                      <Megaphone className="w-6 h-6 text-[#D4AF37] shrink-0" />
+                      
+                      <div className="flex-1 flex flex-col items-center justify-center w-full my-1">
+                        <span className="text-xs font-black text-white uppercase tracking-tight text-center line-clamp-2 px-1">
+                          {ban.title}
+                        </span>
+                        {ban.description && (
+                          <span className="text-[10px] text-zinc-400 text-center line-clamp-2 px-2 mt-0.5">
+                            {ban.description}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="w-full bg-white/10 h-0.5 rounded-full overflow-hidden shrink-0"></div>
+                    </div>
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img 
+                      src={ban.imageUrl} 
+                      alt="Poster Preview" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  
+                  <div className="absolute top-3 right-3 flex gap-2 z-20">
                     <button
                       type="button"
                       onClick={() => setEditingBanner(ban)}
-                      className="p-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white backdrop-blur rounded-xl transition-colors cursor-pointer"
+                      className="p-2 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white backdrop-blur rounded-xl transition-colors cursor-pointer"
                       title="Edit Poster Banner"
                     >
                       <Edit className="w-4 h-4" />
@@ -206,8 +338,8 @@ export default function BannersTab({
                       onClick={() => handleToggleBanner(ban.id, ban.active)}
                       className={`p-2 rounded-xl backdrop-blur transition-colors border cursor-pointer ${
                         ban.active 
-                          ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/90' 
-                          : 'bg-zinc-900/80 border-zinc-700 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/90' 
+                          : 'bg-zinc-900/90 border-zinc-700 text-zinc-400 hover:bg-zinc-800'
                       }`}
                       title={ban.active ? 'Nonaktifkan Banner' : 'Aktifkan Banner'}
                     >
@@ -216,7 +348,7 @@ export default function BannersTab({
                     <button
                       type="button"
                       onClick={() => handleDeleteBanner(ban.id)}
-                      className="p-2 bg-rose-950/80 hover:bg-rose-900/90 border border-rose-500/30 text-rose-400 backdrop-blur rounded-xl transition-colors cursor-pointer"
+                      className="p-2 bg-rose-950/90 hover:bg-rose-900/90 border border-rose-500/30 text-rose-400 backdrop-blur rounded-xl transition-colors cursor-pointer"
                       title="Hapus Banner"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -226,7 +358,19 @@ export default function BannersTab({
 
                 <div className="p-4 flex-1 flex flex-col justify-between text-left border-t border-zinc-800 bg-zinc-950/30">
                   <div>
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider font-mono">ID: {ban.id}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider font-mono">ID: {ban.id}</span>
+                      <div className="flex gap-1">
+                        <span className="text-[9px] bg-zinc-900 text-zinc-400 font-bold px-1.5 py-0.5 rounded border border-zinc-800 flex items-center gap-1 font-sans">
+                          <Layout className="w-2.5 h-2.5" /> {ban.contentMode === 'TEXT' ? 'Teks' : 'Poster'}
+                        </span>
+                        <span className="text-[9px] bg-zinc-900 text-zinc-400 font-bold px-1.5 py-0.5 rounded border border-zinc-800 flex items-center gap-1 font-mono">
+                          <Clock className="w-2.5 h-2.5" /> {ban.autoHideAfter}s
+                        </span>
+                      </div>
+                    </div>
+                    <h4 className="text-sm font-bold text-white mt-2 line-clamp-1">{ban.title}</h4>
+                    <p className="text-xs text-zinc-400 line-clamp-2 mt-1">{ban.description || 'Tidak ada deskripsi'}</p>
                   </div>
                 </div>
               </div>
@@ -252,8 +396,41 @@ export default function BannersTab({
             </div>
 
             <form onSubmit={handleSaveEditBanner} className="p-4 sm:p-6 flex-1 overflow-y-auto flex flex-col gap-4 sm:gap-5 text-left">
+              
+              {/* Layout Switch Toggle */}
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Judul Poster</label>
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Tipe Layout Banner</label>
+                <div className="grid grid-cols-2 gap-2 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditingBanner(prev => prev ? ({ ...prev, contentMode: 'IMAGE' }) : null)}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      editingBanner.contentMode === 'IMAGE'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    Poster Gambar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingBanner(prev => prev ? ({ ...prev, contentMode: 'TEXT' }) : null)}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      editingBanner.contentMode === 'TEXT'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    Teks Manual (Gradasi)
+                  </button>
+                </div>
+              </div>
+
+              {/* Title */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">
+                  {editingBanner.contentMode === 'TEXT' ? 'Judul Utama Pengumuman' : 'Judul Poster'}
+                </label>
                 <input 
                   type="text"
                   value={editingBanner.title || ''}
@@ -263,8 +440,11 @@ export default function BannersTab({
                 />
               </div>
 
+              {/* Description */}
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Deskripsi (Opsional)</label>
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">
+                  {editingBanner.contentMode === 'TEXT' ? 'Isi Detail Pengumuman (Opsional)' : 'Deskripsi (Opsional)'}
+                </label>
                 <textarea 
                   value={editingBanner.description || ''}
                   onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, description: e.target.value }) : null)}
@@ -272,6 +452,7 @@ export default function BannersTab({
                 />
               </div>
 
+              {/* Duration */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Durasi Tampil (Detik)</label>
                 <input 
@@ -279,12 +460,13 @@ export default function BannersTab({
                   min="5"
                   max="300"
                   value={editingBanner.autoHideAfter || 15}
-                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, autoHideAfter: parseInt(e.target.value) }) : null)}
+                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, autoHideAfter: parseInt(e.target.value) || 15 }) : null)}
                   required
                   className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-sm font-mono"
                 />
               </div>
 
+              {/* Active Toggle */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampil</label>
                 <div className="flex items-center gap-3">
@@ -303,28 +485,97 @@ export default function BannersTab({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">URL Gambar Poster</label>
-                <input 
-                  type="url"
-                  value={editingBanner.imageUrl}
-                  onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, imageUrl: e.target.value }) : null)}
-                  required
-                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
-                />
-              </div>
+              {/* Conditional Fields */}
+              {editingBanner.contentMode === 'IMAGE' ? (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">URL Gambar Poster</label>
+                    <input 
+                      type="url"
+                      value={editingBanner.imageUrl || ''}
+                      onChange={(e) => setEditingBanner(prev => prev ? ({ ...prev, imageUrl: e.target.value }) : null)}
+                      required
+                      className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-xs font-mono font-bold"
+                    />
+                  </div>
 
-              <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-800 mt-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={editingBanner.imageUrl} 
-                  alt="Edit Preview" 
-                  className="w-full h-full object-cover" 
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800';
-                  }}
-                />
-              </div>
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zinc-800 mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={editingBanner.imageUrl} 
+                      alt="Edit Preview" 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800';
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Gradient Picker for edit */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background (Gradasi)</label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {[
+                        { id: 'emerald', class: 'bg-gradient-to-br from-[#022416] to-[#0e3321]', name: 'Emerald' },
+                        { id: 'sapphire', class: 'bg-gradient-to-br from-[#031d44] to-[#010814]', name: 'Sapphire' },
+                        { id: 'amber', class: 'bg-gradient-to-br from-[#2d1a04] to-[#1e1102]', name: 'Amber' },
+                        { id: 'purple', class: 'bg-gradient-to-br from-[#24032c] to-[#12011b]', name: 'Purple' },
+                        { id: 'charcoal', class: 'bg-gradient-to-br from-[#1c1c1c] to-[#111111]', name: 'Charcoal' }
+                      ].map((grad) => (
+                        <button
+                          key={grad.id}
+                          type="button"
+                          onClick={() => setEditingBanner(prev => prev ? ({ ...prev, bgGradient: grad.id }) : null)}
+                          className={`aspect-square rounded-xl ${grad.class} border-2 transition-all relative group flex items-center justify-center cursor-pointer ${
+                            editingBanner.bgGradient === grad.id 
+                              ? 'border-[#D4AF37] scale-105 shadow-lg shadow-[#D4AF37]/20' 
+                              : 'border-zinc-800 hover:border-zinc-600'
+                          }`}
+                          title={grad.name}
+                        >
+                          {editingBanner.bgGradient === grad.id && (
+                            <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Live Modal Preview */}
+                  <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 flex flex-col items-center justify-between p-4 bg-gradient-to-br mt-2 relative overflow-hidden ${
+                    editingBanner.bgGradient === 'emerald' ? 'from-[#022416] via-[#051109] to-[#0e3321]' :
+                    editingBanner.bgGradient === 'sapphire' ? 'from-[#031d44] via-[#020b1e] to-[#010814]' :
+                    editingBanner.bgGradient === 'amber' ? 'from-[#2d1a04] via-[#0c0902] to-[#1e1102]' :
+                    editingBanner.bgGradient === 'purple' ? 'from-[#24032c] via-[#0f0214] to-[#12011b]' :
+                    'from-[#1c1c1c] via-[#0d0d0d] to-[#111111]'
+                  }">
+                    <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none"></div>
+                    
+                    <div className="w-6 h-6 rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shadow-inner relative z-10 shrink-0">
+                      <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col justify-center items-center text-center p-2 relative z-10 w-full">
+                      <h4 className="text-[12px] font-black text-white uppercase tracking-tight leading-none text-center line-clamp-2 w-full px-1">
+                        {editingBanner.title || 'JUDUL UTAMA PENGUMUMAN'}
+                      </h4>
+                      {editingBanner.description && (
+                        <p className="text-[8px] text-zinc-300 font-medium leading-normal mt-1 text-center w-[90%] line-clamp-2">
+                          {editingBanner.description}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden relative z-10 shrink-0">
+                      <div className="bg-[#D4AF37] h-full w-[80%] rounded-full shadow-[0_0_5px_#D4AF37]"></div>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t border-zinc-800">
                 <button 

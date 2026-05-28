@@ -20,7 +20,9 @@ export function useMosqueBanners({
     description: '',
     imageUrl: '',
     active: true,
-    autoHideAfter: 15
+    autoHideAfter: 15,
+    contentMode: 'IMAGE' as 'IMAGE' | 'TEXT',
+    bgGradient: 'emerald'
   });
   const [bannerUploadError, setBannerUploadError] = useState("");
   const [selectedBannerFile, setSelectedBannerFile] = useState<File | null>(null);
@@ -48,8 +50,9 @@ export function useMosqueBanners({
 
   const handleAddBanner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBanner.title || (!newBanner.imageUrl && !selectedBannerFile)) {
-      showAlert('error', 'Judul dan Poster Gambar wajib disediakan.');
+    const isTextMode = newBanner.contentMode === 'TEXT';
+    if (!newBanner.title || (!isTextMode && !newBanner.imageUrl && !selectedBannerFile)) {
+      showAlert('error', isTextMode ? 'Judul/Pengumuman wajib disediakan.' : 'Judul dan Poster Gambar wajib disediakan.');
       return;
     }
 
@@ -60,11 +63,15 @@ export function useMosqueBanners({
       if (newBanner.description) formData.append('description', newBanner.description);
       formData.append('active', String(newBanner.active));
       formData.append('autoHideAfter', String(newBanner.autoHideAfter));
+      formData.append('contentMode', newBanner.contentMode);
+      formData.append('bgGradient', newBanner.bgGradient);
 
-      if (selectedBannerFile) {
-        formData.append('file', selectedBannerFile);
-      } else {
-        formData.append('imageUrl', newBanner.imageUrl);
+      if (!isTextMode) {
+        if (selectedBannerFile) {
+          formData.append('file', selectedBannerFile);
+        } else {
+          formData.append('imageUrl', newBanner.imageUrl);
+        }
       }
 
       const res = await fetch('/api/banners', {
@@ -72,7 +79,7 @@ export function useMosqueBanners({
         body: formData
       });
       if (res.ok) {
-        setNewBanner({ title: 'Poster', description: '', imageUrl: '', active: true, autoHideAfter: 15 });
+        setNewBanner({ title: 'Poster', description: '', imageUrl: '', active: true, autoHideAfter: 15, contentMode: 'IMAGE', bgGradient: 'emerald' });
         setSelectedBannerFile(null);
         showAlert('success', 'Banner informasi berhasil ditambahkan!');
         
@@ -115,7 +122,9 @@ export function useMosqueBanners({
 
   const handleSaveEditBanner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingBanner || !editingBanner.title || !editingBanner.imageUrl) return;
+    if (!editingBanner || !editingBanner.title) return;
+    const isTextMode = editingBanner.contentMode === 'TEXT';
+    if (!isTextMode && !editingBanner.imageUrl) return;
 
     setSaveLoading(true);
     try {
@@ -125,7 +134,11 @@ export function useMosqueBanners({
       if (editingBanner.description) formData.append('description', editingBanner.description);
       formData.append('active', String(editingBanner.active));
       formData.append('autoHideAfter', String(editingBanner.autoHideAfter));
-      formData.append('imageUrl', editingBanner.imageUrl);
+      formData.append('contentMode', editingBanner.contentMode || 'IMAGE');
+      formData.append('bgGradient', editingBanner.bgGradient || 'emerald');
+      if (editingBanner.imageUrl) {
+        formData.append('imageUrl', editingBanner.imageUrl);
+      }
 
       const res = await fetch('/api/banners', {
         method: 'POST',

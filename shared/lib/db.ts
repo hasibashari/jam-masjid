@@ -44,7 +44,8 @@ const initDb = async () => {
         "adjustIsha" INT NOT NULL DEFAULT 0,
         "tahrimAudioActive" INT NOT NULL DEFAULT 0,
         "tahrimAudioUrl" TEXT NOT NULL DEFAULT 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3',
-        "tahrimDuration" INT NOT NULL DEFAULT 10
+        "tahrimDuration" INT NOT NULL DEFAULT 10,
+        "fastingReminderActive" INT NOT NULL DEFAULT 1
       );
 
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustImsak" INT NOT NULL DEFAULT 0;
@@ -57,6 +58,7 @@ const initDb = async () => {
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimAudioActive" INT NOT NULL DEFAULT 0;
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimAudioUrl" TEXT NOT NULL DEFAULT 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3';
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimDuration" INT NOT NULL DEFAULT 10;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "fastingReminderActive" INT NOT NULL DEFAULT 1;
 
       CREATE TABLE IF NOT EXISTS "Banner" (
         id TEXT PRIMARY KEY,
@@ -65,8 +67,13 @@ const initDb = async () => {
         description TEXT NOT NULL DEFAULT '',
         active INT NOT NULL DEFAULT 1,
         "autoHideAfter" INT NOT NULL DEFAULT 10,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "contentMode" TEXT NOT NULL DEFAULT 'IMAGE',
+        "bgGradient" TEXT NOT NULL DEFAULT 'emerald'
       );
+
+      ALTER TABLE "Banner" ADD COLUMN IF NOT EXISTS "contentMode" TEXT NOT NULL DEFAULT 'IMAGE';
+      ALTER TABLE "Banner" ADD COLUMN IF NOT EXISTS "bgGradient" TEXT NOT NULL DEFAULT 'emerald';
 
       CREATE TABLE IF NOT EXISTS "PrayerTimesCache" (
         key TEXT PRIMARY KEY,
@@ -101,14 +108,14 @@ const initDb = async () => {
           "iqomahFajr", "iqomahDhuhr", "iqomahAsr", "iqomahMaghrib", "iqomahIsha",
           "adzanAudioActive", "adzanAudioUrl", "adzanAudioVolume",
           "adjustImsak", "adjustFajr", "adjustSunrise", "adjustDhuhr", "adjustAsr", "adjustMaghrib", "adjustIsha",
-          "tahrimAudioActive", "tahrimAudioUrl", "tahrimDuration"
+          "tahrimAudioActive", "tahrimAudioUrl", "tahrimDuration", "fastingReminderActive"
         ) VALUES (
           'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
           180, 600, 900, 0,
           600, 480, 480, 420, 600,
           0, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8,
           0, 0, 0, 0, 0, 0, 0,
-          0, 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3', 10
+          0, 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3', 10, 1
         )
       `);
     }
@@ -130,6 +137,7 @@ function fromDbRow(row: any) {
   if ('backgroundActive' in copy) copy.backgroundActive = Boolean(copy.backgroundActive);
   if ('adzanAudioActive' in copy) copy.adzanAudioActive = Boolean(copy.adzanAudioActive);
   if ('tahrimAudioActive' in copy) copy.tahrimAudioActive = Boolean(copy.tahrimAudioActive);
+  if ('fastingReminderActive' in copy) copy.fastingReminderActive = Boolean(copy.fastingReminderActive);
   return copy;
 }
 
@@ -140,6 +148,7 @@ function toDbData(data: any) {
   if ('backgroundActive' in copy && typeof copy.backgroundActive === 'boolean') copy.backgroundActive = copy.backgroundActive ? 1 : 0;
   if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
   if ('tahrimAudioActive' in copy && typeof copy.tahrimAudioActive === 'boolean') copy.tahrimAudioActive = copy.tahrimAudioActive ? 1 : 0;
+  if ('fastingReminderActive' in copy && typeof copy.fastingReminderActive === 'boolean') copy.fastingReminderActive = copy.fastingReminderActive ? 1 : 0;
   
   // Strip out undefined values to support partial updates correctly
   for (const key of Object.keys(copy)) {

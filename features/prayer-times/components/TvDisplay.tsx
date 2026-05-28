@@ -102,44 +102,28 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
 
-  // Instantly transition to BANNER mode when new active banners are added/activated
-  const activeBannersCount = banners.filter(b => b.active).length;
-  const [prevActiveCount, setPrevActiveCount] = useState(0);
-
+  // Automatically switch to BANNER mode if there are active banners, otherwise use CLOCK
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (activeBannersCount > prevActiveCount) {
-        setViewMode('BANNER');
-        setBgBannerIndex(activeBannersCount - 1); // Show latest banner
-      }
-      setPrevActiveCount(activeBannersCount);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [activeBannersCount, prevActiveCount]);
-
-  // Schedule rotation between CLOCK layout and BANNERS layout when in normal mode
-  useEffect(() => {
-    if (prayerStage !== 'NORMAL' || viewMode !== 'CLOCK') return;
-
     const activeBanners = banners.filter(b => b.active);
-    if (activeBanners.length === 0) return;
-
-    // Show clock for 15s, then show poster banner
-    const clockTimer = setTimeout(() => {
-      setBgBannerIndex(0);
+    if (activeBanners.length > 0) {
       setViewMode('BANNER');
-    }, 15 * 1000);
-
-    return () => clearTimeout(clockTimer);
-  }, [prayerStage, viewMode, activeBannersCount, banners]);
+    } else {
+      setViewMode('CLOCK');
+      setBgBannerIndex(0);
+    }
+  }, [banners]);
 
   const handleBannerComplete = useCallback(() => {
     const activeBanners = banners.filter(b => b.active);
+    if (activeBanners.length === 0) {
+      setViewMode('CLOCK');
+      return;
+    }
     if (bgBannerIndex + 1 < activeBanners.length) {
       setBgBannerIndex(prev => prev + 1);
     } else {
-      // Returned back to standard Clock
-      setViewMode('CLOCK');
+      // Loop back to the first poster instead of returning to the clock
+      setBgBannerIndex(0);
     }
   }, [banners, bgBannerIndex]);
 
@@ -238,8 +222,9 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
   if (viewMode === 'BANNER' && activeBannersList.length > 0 && activeBannersList[bgBannerIndex]) {
     return (
       <FullscreenBanner 
-        banner={activeBannersList[bgBannerIndex]} 
-        onComplete={handleBannerComplete} 
+        banners={activeBannersList} 
+        activeIndex={bgBannerIndex}
+        onIndexChange={setBgBannerIndex} 
       />
     );
   }
@@ -247,6 +232,63 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
   // Otherwise, default layout
   const hasValidBg = settings.backgroundActive && settings.backgroundImage && !bgError;
   const activeGradient = getDynamicGradientClass(nextPrayer?.name || null);
+
+  // Calculate dynamic fasting reminders (Monday/Thursday & Ayyamul Bidh)
+  const fastingAnnouncements: AnnouncementType[] = [];
+  if (settings.fastingReminderActive) {
+    const dayOfWeek = currentTime.getDay();
+    if (dayOfWeek === 0) { // Sunday
+      fastingAnnouncements.push({
+        id: 'fasting-mon-tomorrow',
+        text: '🔔 Pengingat: Besok hari Senin, mari bersiap menjalankan ibadah Puasa Sunnah Senin.',
+        active: true
+      });
+    } else if (dayOfWeek === 1) { // Monday
+      fastingAnnouncements.push({
+        id: 'fasting-mon-today',
+        text: '✨ Hari ini: Puasa Sunnah Senin. Selamat menjalankan ibadah puasa, semoga berkah bagi kita semua.',
+        active: true
+      });
+    } else if (dayOfWeek === 3) { // Wednesday
+      fastingAnnouncements.push({
+        id: 'fasting-thu-tomorrow',
+        text: '🔔 Pengingat: Besok hari Kamis, mari bersiap menjalankan ibadah Puasa Sunnah Kamis.',
+        active: true
+      });
+    } else if (dayOfWeek === 4) { // Thursday
+      fastingAnnouncements.push({
+        id: 'fasting-thu-today',
+        text: '✨ Hari ini: Puasa Sunnah Kamis. Selamat menjalankan ibadah puasa, semoga berkah bagi kita semua.',
+        active: true
+      });
+    }
+
+    try {
+      const hijriAdjusted = new Date(currentTime.getTime());
+      hijriAdjusted.setDate(hijriAdjusted.getDate() - 1); // 1-day offset
+      const hijriDayFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', { day: 'numeric' });
+      const formattedDay = hijriDayFormatter.format(hijriAdjusted);
+      const hijriDayNum = parseInt(formattedDay.replace(/\D/g, ''), 10);
+
+      if (hijriDayNum === 12) {
+        fastingAnnouncements.push({
+          id: 'fasting-bidh-tomorrow',
+          text: '📅 Pengingat: Besok memasuki tanggal 13 Hijriah. Disunnahkan berpuasa Ayyamul Bidh (13, 14, 15 Hijriah).',
+          active: true
+        });
+      } else if (hijriDayNum === 13 || hijriDayNum === 14 || hijriDayNum === 15) {
+        fastingAnnouncements.push({
+          id: `fasting-bidh-today-${hijriDayNum}`,
+          text: `✨ Hari ini: Puasa Sunnah Ayyamul Bidh (${hijriDayNum} Hijriah). Selamat menjalankan ibadah puasa.`,
+          active: true
+        });
+      }
+    } catch (e) {
+      console.error("Fasting reminder Hijri parser error:", e);
+    }
+  }
+
+  const combinedAnnouncements = [...fastingAnnouncements, ...announcements];
 
   return (
     <>
@@ -324,7 +366,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         </main>
 
         {/* Running Announcement Banner */}
-        <RunningAnnouncements announcements={announcements} />
+        <RunningAnnouncements announcements={combinedAnnouncements} />
       </div>
 
       {/* Floating Fullscreen Control Button */}

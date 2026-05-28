@@ -29,6 +29,7 @@ export interface AppSettings {
   tahrimAudioActive: boolean;
   tahrimAudioUrl: string;
   tahrimDuration: number; // in minutes before Fajr
+  fastingReminderActive: boolean;
 }
 
 export interface AnnouncementType {
@@ -52,6 +53,8 @@ export interface BannerType {
   active: boolean;
   autoHideAfter: number; // in seconds
   createdAt?: string | Date;
+  contentMode?: 'IMAGE' | 'TEXT';
+  bgGradient?: string;
 }
 
 export const FALLBACK_SETTINGS: AppSettings = {
@@ -82,7 +85,8 @@ export const FALLBACK_SETTINGS: AppSettings = {
   adjustIsha: 0,
   tahrimAudioActive: false,
   tahrimAudioUrl: "https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3",
-  tahrimDuration: 10
+  tahrimDuration: 10,
+  fastingReminderActive: true
 };
 
 export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [

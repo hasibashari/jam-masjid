@@ -94,6 +94,25 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 placeholder="Masukkan alamat masjid..."
               />
             </div>
+
+            <div className="flex flex-col gap-2 sm:col-span-2 bg-zinc-950 border border-zinc-800 p-4 rounded-2xl mt-2">
+              <label className="text-xs font-black uppercase text-emerald-400 tracking-wider">Pengingat Puasa Sunnah Otomatis</label>
+              <span className="text-[10px] text-zinc-500 mb-2 leading-relaxed">Secara otomatis menyisipkan pengumuman puasa sunnah (Senin-Kamis & Ayyamul Bidh 13, 14, 15 Hijriah) ke dalam baris teks berjalan di TV Display.</span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, fastingReminderActive: !prev.fastingReminderActive }))}
+                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
+                    settings.fastingReminderActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                  }`}
+                >
+                  <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
+                </button>
+                <span className="text-xs text-zinc-300 font-semibold">
+                  {settings.fastingReminderActive ? 'Pengingat Aktif' : 'Non-aktif'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
  

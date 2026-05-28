@@ -45,19 +45,21 @@ export async function POST(req: NextRequest) {
     const autoHideAfterStr = formData.get('autoHideAfter') as string | null;
     const remoteImageUrl = formData.get('imageUrl') as string | null;
     const file = formData.get('file') as File | null;
+    const contentMode = formData.get('contentMode') as string | null;
+    const bgGradient = formData.get('bgGradient') as string | null;
 
     const active = activeStr !== null ? activeStr === 'true' : undefined;
     const autoHideAfter = autoHideAfterStr !== null ? parseInt(autoHideAfterStr) : undefined;
 
     // Enforce required fields ONLY on creation
-    if (!id && (!title || (!remoteImageUrl && (!file || file.size === 0)))) {
+    if (!id && (!title || (contentMode !== 'TEXT' && !remoteImageUrl && (!file || file.size === 0)))) {
       return NextResponse.json({ error: "Title and either image file or URL are required for new banners" }, { status: 400 });
     }
 
     let finalImageUrl = remoteImageUrl || '';
 
-    // Handle Image File Upload if present
-    if (file && file.size > 0) {
+    // Handle Image File Upload if present (only when contentMode is not TEXT)
+    if (contentMode !== 'TEXT' && file && file.size > 0) {
       if (!file.type.startsWith('image/')) {
         return NextResponse.json({ error: "File must be an image" }, { status: 400 });
       }
@@ -105,6 +107,8 @@ export async function POST(req: NextRequest) {
       if (description !== null) data.description = description;
       if (active !== undefined) data.active = active;
       if (autoHideAfter !== undefined) data.autoHideAfter = autoHideAfter;
+      if (contentMode !== null) data.contentMode = contentMode;
+      if (bgGradient !== null) data.bgGradient = bgGradient;
 
       result = await bannersDb.update({
         where: { id },
@@ -118,7 +122,9 @@ export async function POST(req: NextRequest) {
           imageUrl: finalImageUrl,
           description: description ?? "",
           active: active !== undefined ? active : true,
-          autoHideAfter: autoHideAfter !== undefined ? autoHideAfter : 15
+          autoHideAfter: autoHideAfter !== undefined ? autoHideAfter : 15,
+          contentMode: contentMode || 'IMAGE',
+          bgGradient: bgGradient || 'emerald'
         }
       });
     }

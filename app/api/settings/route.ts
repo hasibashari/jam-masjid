@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       tahrimAudioActive,
       tahrimAudioUrl,
       tahrimDuration,
+      fastingReminderActive,
     } = body;
 
     const currentSettings = await settingsDb.findFirst();
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
           tahrimAudioActive: tahrimAudioActive !== undefined ? Boolean(tahrimAudioActive) : currentSettings.tahrimAudioActive,
           tahrimAudioUrl: tahrimAudioUrl ?? currentSettings.tahrimAudioUrl,
           tahrimDuration: tahrimDuration !== undefined ? parseInt(tahrimDuration) : currentSettings.tahrimDuration,
+          fastingReminderActive: fastingReminderActive !== undefined ? Boolean(fastingReminderActive) : currentSettings.fastingReminderActive,
         },
       });
     } else {
@@ -112,6 +114,7 @@ export async function POST(req: NextRequest) {
           tahrimAudioActive: tahrimAudioActive !== undefined ? Boolean(tahrimAudioActive) : FALLBACK_SETTINGS.tahrimAudioActive,
           tahrimAudioUrl: tahrimAudioUrl ?? FALLBACK_SETTINGS.tahrimAudioUrl,
           tahrimDuration: tahrimDuration !== undefined ? parseInt(tahrimDuration) : FALLBACK_SETTINGS.tahrimDuration,
+          fastingReminderActive: fastingReminderActive !== undefined ? Boolean(fastingReminderActive) : FALLBACK_SETTINGS.fastingReminderActive,
         },
       });
     }
