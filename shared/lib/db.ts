@@ -357,3 +357,17 @@ export const quotesDb = {
     return { id: where.id };
   }
 };
+
+export const prayerTimesCacheDb = {
+  findFirst: async (key: string) => {
+    const res = await pool.query("SELECT * FROM PrayerTimesCache WHERE key = $1 LIMIT 1", [key]);
+    return res.rows[0];
+  },
+  upsert: async (key: string, value: string) => {
+    const res = await pool.query(
+      "INSERT INTO PrayerTimesCache (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value RETURNING *",
+      [key, value]
+    );
+    return res.rows[0];
+  }
+};

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/shared/lib/db';
+import { prayerTimesCacheDb } from '@/shared/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,11 +26,11 @@ export async function GET(req: NextRequest) {
     // Cache key incorporates normalized date, rounded lat/lng, and calculation method
     const cacheKey = `${date}_${lat}_${lng}_${method}`;
 
-    // 1. Check SQLite Cache
-    const cachedRow = db.prepare("SELECT * FROM PrayerTimesCache WHERE key = ?").get(cacheKey) as { key: string; value: string } | undefined;
+    // 1. Check PostgreSQL Cache
+    const cachedRow = await prayerTimesCacheDb.findFirst(cacheKey) as { key: string; value: string } | undefined;
 
     if (cachedRow) {
-      console.log(`[Cache Hit] Serving prayer times from SQLite for key: ${cacheKey}`);
+      console.log(`[Cache Hit] Serving prayer times from PostgreSQL for key: ${cacheKey}`);
       try {
         const valueObj = JSON.parse(cachedRow.value);
         return NextResponse.json(valueObj);
@@ -52,9 +52,8 @@ export async function GET(req: NextRequest) {
       throw new Error("Invalid response structure from AlAdhan API");
     }
 
-    // 2. Save entire data block to SQLite cache
-    db.prepare("INSERT OR REPLACE INTO PrayerTimesCache (key, value) VALUES (?, ?)")
-      .run(cacheKey, JSON.stringify(apiData.data));
+    // 2. Save entire data block to PostgreSQL cache
+    await prayerTimesCacheDb.upsert(cacheKey, JSON.stringify(apiData.data));
 
     return NextResponse.json(apiData.data);
   } catch (error: any) {
