@@ -76,16 +76,28 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     iqomahAsr: settings.iqomahAsr,
     iqomahMaghrib: settings.iqomahMaghrib,
     iqomahIsha: settings.iqomahIsha,
-    prayerDuration: settings.prayerDuration
+    prayerDuration: settings.prayerDuration,
+    adjustImsak: settings.adjustImsak,
+    adjustFajr: settings.adjustFajr,
+    adjustSunrise: settings.adjustSunrise,
+    adjustDhuhr: settings.adjustDhuhr,
+    adjustAsr: settings.adjustAsr,
+    adjustMaghrib: settings.adjustMaghrib,
+    adjustIsha: settings.adjustIsha
   });
 
-  // 5. Audio & alarm synthetic beeping hooks
+  // 5. Audio, adzan alarm & Tahrim background audio hooks
   useAdzanAlarm({
     prayerStage,
     stageSecondsLeft,
     adzanAudioActive: settings.adzanAudioActive,
     adzanAudioUrl: settings.adzanAudioUrl,
     adzanAudioVolume: settings.adzanAudioVolume,
+    currentTime,
+    fajrTime: timelineObj ? timelineObj.Fajr : null,
+    tahrimAudioActive: settings.tahrimAudioActive,
+    tahrimAudioUrl: settings.tahrimAudioUrl,
+    tahrimDuration: settings.tahrimDuration,
   });
 
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
@@ -287,7 +299,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
           <ClockSection currentTime={currentTime} quotes={quotes} />
 
           {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
-          <div className="flex justify-start px-8 mb-2">
+          <div className="flex justify-start px-8 mb-6 lg:mb-8">
             <div className="flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10 bg-emerald-900/30 border border-emerald-500/20 px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-5 rounded-3xl backdrop-blur-md shadow-xl transition-all duration-500">
               <div className="flex flex-col border-r border-emerald-500/30 pr-4 md:pr-6 lg:pr-8 xl:pr-10 text-left">
                 <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>

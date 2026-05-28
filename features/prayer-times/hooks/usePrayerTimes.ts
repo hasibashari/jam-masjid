@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { differenceInMilliseconds, parse, addSeconds } from 'date-fns';
+import { differenceInMilliseconds, parse, addSeconds, addMinutes } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PrayerTimesState, PrayerItem } from '../types';
 
@@ -16,6 +16,13 @@ interface UsePrayerTimesProps {
   iqomahMaghrib: number;
   iqomahIsha: number;
   prayerDuration: number; // in seconds
+  adjustImsak: number;
+  adjustFajr: number;
+  adjustSunrise: number;
+  adjustDhuhr: number;
+  adjustAsr: number;
+  adjustMaghrib: number;
+  adjustIsha: number;
 }
 
 export type PrayerStage = 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
@@ -30,7 +37,14 @@ export function usePrayerTimes({
   iqomahAsr,
   iqomahMaghrib,
   iqomahIsha,
-  prayerDuration
+  prayerDuration,
+  adjustImsak,
+  adjustFajr,
+  adjustSunrise,
+  adjustDhuhr,
+  adjustAsr,
+  adjustMaghrib,
+  adjustIsha
 }: UsePrayerTimesProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimesState | null>(null);
@@ -94,13 +108,13 @@ export function usePrayerTimes({
   const parseTime = (timeStr: string) => parse(timeStr.split(" ")[0], "HH:mm", currentTime);
 
   const timelineObj = {
-    Imsak: parseTime(prayerTimes.Imsak || "04:10"),
-    Fajr: parseTime(prayerTimes.Fajr),
-    Sunrise: parseTime(prayerTimes.Sunrise),
-    Dhuhr: parseTime(prayerTimes.Dhuhr),
-    Asr: parseTime(prayerTimes.Asr),
-    Maghrib: parseTime(prayerTimes.Maghrib),
-    Isha: parseTime(prayerTimes.Isha)
+    Imsak: addMinutes(parseTime(prayerTimes.Imsak || "04:10"), adjustImsak || 0),
+    Fajr: addMinutes(parseTime(prayerTimes.Fajr), adjustFajr || 0),
+    Sunrise: addMinutes(parseTime(prayerTimes.Sunrise), adjustSunrise || 0),
+    Dhuhr: addMinutes(parseTime(prayerTimes.Dhuhr), adjustDhuhr || 0),
+    Asr: addMinutes(parseTime(prayerTimes.Asr), adjustAsr || 0),
+    Maghrib: addMinutes(parseTime(prayerTimes.Maghrib), adjustMaghrib || 0),
+    Isha: addMinutes(parseTime(prayerTimes.Isha), adjustIsha || 0)
   };
 
   const timelineValid: PrayerItem[] = [

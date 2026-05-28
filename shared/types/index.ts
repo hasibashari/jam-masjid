@@ -19,6 +19,16 @@ export interface AppSettings {
   adzanAudioActive: boolean;
   adzanAudioUrl: string;
   adzanAudioVolume: number;
+  adjustImsak: number;
+  adjustFajr: number;
+  adjustSunrise: number;
+  adjustDhuhr: number;
+  adjustAsr: number;
+  adjustMaghrib: number;
+  adjustIsha: number;
+  tahrimAudioActive: boolean;
+  tahrimAudioUrl: string;
+  tahrimDuration: number; // in minutes before Fajr
 }
 
 export interface AnnouncementType {
@@ -62,7 +72,17 @@ export const FALLBACK_SETTINGS: AppSettings = {
   iqomahIsha: 600,
   adzanAudioActive: true,
   adzanAudioUrl: "https://www.islamcan.com/audio/adhan/azan1.mp3",
-  adzanAudioVolume: 0.8
+  adzanAudioVolume: 0.8,
+  adjustImsak: 0,
+  adjustFajr: 0,
+  adjustSunrise: 0,
+  adjustDhuhr: 0,
+  adjustAsr: 0,
+  adjustMaghrib: 0,
+  adjustIsha: 0,
+  tahrimAudioActive: false,
+  tahrimAudioUrl: "https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3",
+  tahrimDuration: 10
 };
 
 export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [

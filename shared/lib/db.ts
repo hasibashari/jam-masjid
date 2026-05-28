@@ -32,10 +32,31 @@ const initDb = async () => {
         "iqomahAsr" INT NOT NULL DEFAULT 480,
         "iqomahMaghrib" INT NOT NULL DEFAULT 420,
         "iqomahIsha" INT NOT NULL DEFAULT 600,
-        "adzanAudioActive" INT NOT NULL DEFAULT 1,
+        "adzanAudioActive" INT NOT NULL DEFAULT 0,
         "adzanAudioUrl" TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-        "adzanAudioVolume" DOUBLE PRECISION NOT NULL DEFAULT 0.8
+        "adzanAudioVolume" DOUBLE PRECISION NOT NULL DEFAULT 0.8,
+        "adjustImsak" INT NOT NULL DEFAULT 0,
+        "adjustFajr" INT NOT NULL DEFAULT 0,
+        "adjustSunrise" INT NOT NULL DEFAULT 0,
+        "adjustDhuhr" INT NOT NULL DEFAULT 0,
+        "adjustAsr" INT NOT NULL DEFAULT 0,
+        "adjustMaghrib" INT NOT NULL DEFAULT 0,
+        "adjustIsha" INT NOT NULL DEFAULT 0,
+        "tahrimAudioActive" INT NOT NULL DEFAULT 0,
+        "tahrimAudioUrl" TEXT NOT NULL DEFAULT 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3',
+        "tahrimDuration" INT NOT NULL DEFAULT 10
       );
+
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustImsak" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustFajr" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustSunrise" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustDhuhr" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustAsr" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustMaghrib" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "adjustIsha" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimAudioActive" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimAudioUrl" TEXT NOT NULL DEFAULT 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3';
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimDuration" INT NOT NULL DEFAULT 10;
 
       CREATE TABLE IF NOT EXISTS "Banner" (
         id TEXT PRIMARY KEY,
@@ -78,12 +99,16 @@ const initDb = async () => {
           id, "mosqueName", "mosqueAddress", latitude, longitude, "calculationMethod", 
           "adzanDuration", "iqomahDuration", "prayerDuration", "backgroundActive",
           "iqomahFajr", "iqomahDhuhr", "iqomahAsr", "iqomahMaghrib", "iqomahIsha",
-          "adzanAudioActive", "adzanAudioUrl", "adzanAudioVolume"
+          "adzanAudioActive", "adzanAudioUrl", "adzanAudioVolume",
+          "adjustImsak", "adjustFajr", "adjustSunrise", "adjustDhuhr", "adjustAsr", "adjustMaghrib", "adjustIsha",
+          "tahrimAudioActive", "tahrimAudioUrl", "tahrimDuration"
         ) VALUES (
           'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
           180, 600, 900, 0,
           600, 480, 480, 420, 600,
-          1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
+          0, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8,
+          0, 0, 0, 0, 0, 0, 0,
+          0, 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3', 10
         )
       `);
     }
@@ -104,6 +129,7 @@ function fromDbRow(row: any) {
   if ('active' in copy) copy.active = Boolean(copy.active);
   if ('backgroundActive' in copy) copy.backgroundActive = Boolean(copy.backgroundActive);
   if ('adzanAudioActive' in copy) copy.adzanAudioActive = Boolean(copy.adzanAudioActive);
+  if ('tahrimAudioActive' in copy) copy.tahrimAudioActive = Boolean(copy.tahrimAudioActive);
   return copy;
 }
 
@@ -113,6 +139,7 @@ function toDbData(data: any) {
   if ('active' in copy && typeof copy.active === 'boolean') copy.active = copy.active ? 1 : 0;
   if ('backgroundActive' in copy && typeof copy.backgroundActive === 'boolean') copy.backgroundActive = copy.backgroundActive ? 1 : 0;
   if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
+  if ('tahrimAudioActive' in copy && typeof copy.tahrimAudioActive === 'boolean') copy.tahrimAudioActive = copy.tahrimAudioActive ? 1 : 0;
   
   // Strip out undefined values to support partial updates correctly
   for (const key of Object.keys(copy)) {

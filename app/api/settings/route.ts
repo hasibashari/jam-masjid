@@ -32,6 +32,16 @@ export async function POST(req: NextRequest) {
       adzanAudioActive,
       adzanAudioUrl,
       adzanAudioVolume,
+      adjustImsak,
+      adjustFajr,
+      adjustSunrise,
+      adjustDhuhr,
+      adjustAsr,
+      adjustMaghrib,
+      adjustIsha,
+      tahrimAudioActive,
+      tahrimAudioUrl,
+      tahrimDuration,
     } = body;
 
     const currentSettings = await settingsDb.findFirst();
@@ -59,6 +69,16 @@ export async function POST(req: NextRequest) {
           adzanAudioActive: adzanAudioActive !== undefined ? Boolean(adzanAudioActive) : currentSettings.adzanAudioActive,
           adzanAudioUrl: adzanAudioUrl ?? currentSettings.adzanAudioUrl,
           adzanAudioVolume: adzanAudioVolume !== undefined ? parseFloat(adzanAudioVolume) : currentSettings.adzanAudioVolume,
+          adjustImsak: adjustImsak !== undefined ? parseInt(adjustImsak) : currentSettings.adjustImsak,
+          adjustFajr: adjustFajr !== undefined ? parseInt(adjustFajr) : currentSettings.adjustFajr,
+          adjustSunrise: adjustSunrise !== undefined ? parseInt(adjustSunrise) : currentSettings.adjustSunrise,
+          adjustDhuhr: adjustDhuhr !== undefined ? parseInt(adjustDhuhr) : currentSettings.adjustDhuhr,
+          adjustAsr: adjustAsr !== undefined ? parseInt(adjustAsr) : currentSettings.adjustAsr,
+          adjustMaghrib: adjustMaghrib !== undefined ? parseInt(adjustMaghrib) : currentSettings.adjustMaghrib,
+          adjustIsha: adjustIsha !== undefined ? parseInt(adjustIsha) : currentSettings.adjustIsha,
+          tahrimAudioActive: tahrimAudioActive !== undefined ? Boolean(tahrimAudioActive) : currentSettings.tahrimAudioActive,
+          tahrimAudioUrl: tahrimAudioUrl ?? currentSettings.tahrimAudioUrl,
+          tahrimDuration: tahrimDuration !== undefined ? parseInt(tahrimDuration) : currentSettings.tahrimDuration,
         },
       });
     } else {
@@ -82,6 +102,16 @@ export async function POST(req: NextRequest) {
           adzanAudioActive: adzanAudioActive !== undefined ? Boolean(adzanAudioActive) : FALLBACK_SETTINGS.adzanAudioActive,
           adzanAudioUrl: adzanAudioUrl ?? FALLBACK_SETTINGS.adzanAudioUrl,
           adzanAudioVolume: adzanAudioVolume !== undefined ? parseFloat(adzanAudioVolume) : FALLBACK_SETTINGS.adzanAudioVolume,
+          adjustImsak: adjustImsak !== undefined ? parseInt(adjustImsak) : FALLBACK_SETTINGS.adjustImsak,
+          adjustFajr: adjustFajr !== undefined ? parseInt(adjustFajr) : FALLBACK_SETTINGS.adjustFajr,
+          adjustSunrise: adjustSunrise !== undefined ? parseInt(adjustSunrise) : FALLBACK_SETTINGS.adjustSunrise,
+          adjustDhuhr: adjustDhuhr !== undefined ? parseInt(adjustDhuhr) : FALLBACK_SETTINGS.adjustDhuhr,
+          adjustAsr: adjustAsr !== undefined ? parseInt(adjustAsr) : FALLBACK_SETTINGS.adjustAsr,
+          adjustMaghrib: adjustMaghrib !== undefined ? parseInt(adjustMaghrib) : FALLBACK_SETTINGS.adjustMaghrib,
+          adjustIsha: adjustIsha !== undefined ? parseInt(adjustIsha) : FALLBACK_SETTINGS.adjustIsha,
+          tahrimAudioActive: tahrimAudioActive !== undefined ? Boolean(tahrimAudioActive) : FALLBACK_SETTINGS.tahrimAudioActive,
+          tahrimAudioUrl: tahrimAudioUrl ?? FALLBACK_SETTINGS.tahrimAudioUrl,
+          tahrimDuration: tahrimDuration !== undefined ? parseInt(tahrimDuration) : FALLBACK_SETTINGS.tahrimDuration,
         },
       });
     }

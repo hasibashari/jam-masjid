@@ -65,7 +65,7 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
                   : 'p-4 lg:p-6 xl:p-6 bg-white/5 border border-white/10 text-white'}
             `}
           >
-            <span className={`text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-black uppercase tracking-[0.3em] mb-2 lg:mb-4 
+            <span className={`text-[11px] sm:text-xs lg:text-sm xl:text-base 2xl:text-lg font-black uppercase tracking-[0.3em] mb-2 lg:mb-4 
               ${isNext 
                 ? 'text-[#051109]/70' 
                 : isImsak 
