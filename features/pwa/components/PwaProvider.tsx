@@ -10,10 +10,10 @@ export default function PwaProvider({ children }: { children: React.ReactNode })
   const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    setMounted(true);
-    
-    // Set initial state
-    setIsOnline(navigator.onLine);
+    const timer = setTimeout(() => {
+      setMounted(true);
+      setIsOnline(navigator.onLine);
+    }, 0);
 
     // 1. Register Service Worker
     if ('serviceWorker' in navigator) {
@@ -39,10 +39,10 @@ export default function PwaProvider({ children }: { children: React.ReactNode })
       window.dispatchEvent(new CustomEvent('app-sync-data'));
 
       // Dismiss the "Back Online" toast after 4 seconds
-      const timer = setTimeout(() => {
+      const toastTimer = setTimeout(() => {
         setShowOnlineToast(false);
       }, 4000);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(toastTimer);
     };
 
     const handleOffline = () => {
@@ -55,6 +55,7 @@ export default function PwaProvider({ children }: { children: React.ReactNode })
     window.addEventListener('offline', handleOffline);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };

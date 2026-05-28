@@ -76,7 +76,7 @@ export default function ClockSection({ currentTime }: ClockSectionProps) {
           }`}
         >
           <p className="text-zinc-200 text-lg md:text-xl font-medium italic leading-relaxed">
-            "{ISLAMIC_QUOTES[currentQuoteIndex].text}"
+            &ldquo;{ISLAMIC_QUOTES[currentQuoteIndex].text}&rdquo;
           </p>
           <span className="block mt-2.5 text-emerald-400 text-xs font-extrabold uppercase tracking-[0.2em]">
             — {ISLAMIC_QUOTES[currentQuoteIndex].source}

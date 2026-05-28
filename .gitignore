@@ -5,6 +5,8 @@ coverage/
 *.log
 .env*
 !.env.example
-sqlite.db
-sqlite.db-journal
+*.db
+*.db-shm
+*.db-wal
+*.tsbuildinfo
 

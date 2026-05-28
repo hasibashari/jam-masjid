@@ -170,9 +170,14 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
   // Poll for background settings, announcements, and poster banners (high reactivity: 2s sync)
   useEffect(() => {
-    fetchLatestData(); // immediate load triggers
+    const timer = setTimeout(() => {
+      fetchLatestData(); // immediate load triggers deferred to avoid synchronous setState inside effect body
+    }, 0);
     const poller = setInterval(fetchLatestData, 2 * 1000); // Poll every 2 seconds for real-time responsiveness
-    return () => clearInterval(poller);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(poller);
+    };
   }, [fetchLatestData]);
 
   // Event listener for PWA online status reconnection to trigger instant sync
@@ -191,11 +196,14 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   const [prevActiveCount, setPrevActiveCount] = useState(0);
 
   useEffect(() => {
-    if (activeBannersCount > prevActiveCount) {
-      setViewMode('BANNER');
-      setBgBannerIndex(activeBannersCount - 1); // Show the latest activated/added banner
-    }
-    setPrevActiveCount(activeBannersCount);
+    const timer = setTimeout(() => {
+      if (activeBannersCount > prevActiveCount) {
+        setViewMode('BANNER');
+        setBgBannerIndex(activeBannersCount - 1); // Show the latest activated/added banner
+      }
+      setPrevActiveCount(activeBannersCount);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [activeBannersCount, prevActiveCount]);
 
   // Delegate core clock ticking, next prayer calculation, timing difference, Hijri computation and active Stage (Adzan/Iqomah/Praying) state machine to domain hook
@@ -355,7 +363,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
       console.log("TvDisplay clock-to-banner timer effect CLEANED UP!");
       clearTimeout(clockTimer);
     };
-  }, [prayerStage, viewMode, banners.filter(b => b.active).length]);
+  }, [prayerStage, viewMode, activeBannersCount, banners]);
 
   const handleBannerComplete = useCallback(() => {
     const activeBanners = banners.filter(b => b.active);

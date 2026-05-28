@@ -38,7 +38,10 @@ export default function NominatimSearch({ onPlaceSelect }: NominatimSearchProps)
 
   // Reset keyboard focus whenever search results change
   useEffect(() => {
-    setFocusedIndex(-1);
+    const timer = setTimeout(() => {
+      setFocusedIndex(-1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [results]);
 
   const selectItem = (item: any) => {

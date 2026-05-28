@@ -37,7 +37,10 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
 
   // Sync map center if settings lat/lng changes from external source (e.g. database reload)
   useEffect(() => {
-    setMapCenter({ lat: settings.latitude, lng: settings.longitude });
+    const timer = setTimeout(() => {
+      setMapCenter({ lat: settings.latitude, lng: settings.longitude });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [settings.latitude, settings.longitude]);
 
   // Update Settings handler
