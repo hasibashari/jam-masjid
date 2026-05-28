@@ -1,7 +1,43 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { PRAYER_TRANSLATIONS } from '@/shared/types';
+
+const ISLAMIC_QUOTES = [
+  {
+    text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.",
+    source: "QS. Al-Ankabut: 45"
+  },
+  {
+    text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.",
+    source: "HR. Bukhari & Muslim"
+  },
+  {
+    text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.",
+    source: "QS. Al-Baqarah: 45"
+  },
+  {
+    text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.",
+    source: "HR. Bukhari & Muslim"
+  },
+  {
+    text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.",
+    source: "HR. Bukhari & Muslim"
+  },
+  {
+    text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.",
+    source: "HR. Muslim"
+  },
+  {
+    text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.",
+    source: "HR. Bukhari & Muslim"
+  },
+  {
+    text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.",
+    source: "HR. Al-Baihaqi"
+  }
+];
 
 interface ClockSectionProps {
   currentTime: Date;
@@ -12,6 +48,20 @@ interface ClockSectionProps {
 
 export default function ClockSection({ currentTime, nextPrayerName, countdownStr, timezone }: ClockSectionProps) {
   const translatedNextPrayerName = PRAYER_TRANSLATIONS[nextPrayerName] || nextPrayerName;
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFading(true);
+      setTimeout(() => {
+        setCurrentQuoteIndex((prev) => (prev + 1) % ISLAMIC_QUOTES.length);
+        setIsFading(false);
+      }, 500); // 500ms fade out duration before switching content
+    }, 30000); // Rotate every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="flex-grow flex flex-col items-center justify-center relative">
@@ -30,7 +80,7 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
         </div>
         
         {/* Next Prayer Countdown Widget */}
-        <div className="flex items-center gap-6 bg-emerald-900/30 border border-emerald-500/20 px-10 py-5 rounded-3xl backdrop-blur-md shadow-xl">
+        <div className="flex items-center gap-6 bg-emerald-900/30 border border-emerald-500/20 px-10 py-5 rounded-3xl backdrop-blur-md shadow-xl mb-4">
           <div className="flex flex-col border-r border-emerald-500/30 pr-6 text-left">
             <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
             <span className="text-3xl font-bold text-white tracking-tight">{translatedNextPrayerName}</span>
@@ -39,6 +89,20 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
             <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezone})</span>
             <span className="text-4xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
           </div>
+        </div>
+
+        {/* Islamic Daily Quotes Carousel */}
+        <div 
+          className={`mt-4 px-8 py-4 bg-black/25 border border-white/5 rounded-2xl max-w-2xl text-center backdrop-blur-sm transition-all duration-500 transform ${
+            isFading ? 'opacity-0 scale-98 blur-[2px]' : 'opacity-100 scale-100 blur-none'
+          }`}
+        >
+          <p className="text-zinc-200 text-lg md:text-xl font-medium italic leading-relaxed">
+            "{ISLAMIC_QUOTES[currentQuoteIndex].text}"
+          </p>
+          <span className="block mt-2.5 text-emerald-400 text-xs font-extrabold uppercase tracking-[0.2em]">
+            — {ISLAMIC_QUOTES[currentQuoteIndex].source}
+          </span>
         </div>
       </div>
     </section>

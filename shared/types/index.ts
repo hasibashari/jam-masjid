@@ -17,6 +17,14 @@ export interface AppSettings {
   sandboxTime?: string | null;
   sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
   sandboxSpeed?: number;
+  iqomahFajr: number;
+  iqomahDhuhr: number;
+  iqomahAsr: number;
+  iqomahMaghrib: number;
+  iqomahIsha: number;
+  adzanAudioActive: boolean;
+  adzanAudioUrl: string;
+  adzanAudioVolume: number;
 }
 
 export interface AnnouncementType {
@@ -52,7 +60,15 @@ export const FALLBACK_SETTINGS: AppSettings = {
   sandboxActive: false,
   sandboxTime: null,
   sandboxStage: "AUTO",
-  sandboxSpeed: 1.0
+  sandboxSpeed: 1.0,
+  iqomahFajr: 600,
+  iqomahDhuhr: 480,
+  iqomahAsr: 480,
+  iqomahMaghrib: 420,
+  iqomahIsha: 600,
+  adzanAudioActive: true,
+  adzanAudioUrl: "https://www.islamcan.com/audio/adhan/azan1.mp3",
+  adzanAudioVolume: 0.8
 };
 
 export const FALLBACK_ANNOUNCEMENTS: AnnouncementType[] = [

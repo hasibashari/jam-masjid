@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { AppSettings, AnnouncementType, BannerType, PRAYER_TRANSLATIONS } from '@/shared/types';
 import { format, parse } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Settings as SettingsIcon, Loader2, Moon } from 'lucide-react';
+import { Settings as SettingsIcon, Loader2, Moon, Maximize, Minimize } from 'lucide-react';
 
 // Feature-Based Absolute Imports
 import LocationPickerModal from '@/features/location/components/LocationPickerModal';
@@ -42,6 +42,106 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   const [viewMode, setViewMode] = useState<'CLOCK' | 'BANNER'>('CLOCK');
   const [bgBannerIndex, setBgBannerIndex] = useState(0);
 
+  // --- KIOSK TV OPTIMIZATIONS ---
+  const [mouseActive, setMouseActive] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const wakeLockRef = useRef<any>(null);
+
+  // 1. Screen Wake Lock API
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        console.log('Screen Wake Lock acquired successfully');
+      }
+    } catch (err) {
+      console.warn('Failed to acquire Screen Wake Lock:', err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    try {
+      if (wakeLockRef.current) {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        console.log('Screen Wake Lock released');
+      }
+    } catch (err) {
+      console.error('Failed to release Screen Wake Lock:', err);
+    }
+  };
+
+  useEffect(() => {
+    requestWakeLock();
+    
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      releaseWakeLock();
+    };
+  }, []);
+
+  // 2. Global Auto-Hide Cursor
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const handleMouseMove = () => {
+      setMouseActive(true);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setMouseActive(false);
+      }, 3000); // 3 seconds timeout
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    // Initial trigger
+    timeoutId = setTimeout(() => {
+      setMouseActive(false);
+    }, 3000);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mouseActive) {
+      document.body.classList.add('cursor-none');
+    } else {
+      document.body.classList.remove('cursor-none');
+    }
+    return () => {
+      document.body.classList.remove('cursor-none');
+    };
+  }, [mouseActive]);
+
+  // 3. Fullscreen Tracking
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  // --- DATA POLLING ---
   // Poll for background settings, announcements, and poster banners (high reactivity: 10s sync)
   useEffect(() => {
     const fetchLatestData = async () => {
@@ -104,7 +204,11 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
     longitude: settings.longitude,
     calculationMethod: settings.calculationMethod,
     adzanDuration: settings.adzanDuration,
-    iqomahDuration: settings.iqomahDuration,
+    iqomahFajr: settings.iqomahFajr,
+    iqomahDhuhr: settings.iqomahDhuhr,
+    iqomahAsr: settings.iqomahAsr,
+    iqomahMaghrib: settings.iqomahMaghrib,
+    iqomahIsha: settings.iqomahIsha,
     prayerDuration: settings.prayerDuration,
     sandboxActive: settings.sandboxActive,
     sandboxTime: settings.sandboxTime,
@@ -113,6 +217,107 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   });
 
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
+
+  // --- AUDIO & ALARM AUTOMATION ---
+  const adzanAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastBeepedSecondRef = useRef<number | null>(null);
+
+  // 1. Adzan Player Trigger
+  useEffect(() => {
+    if (prayerStage === 'ADZAN' && settings.adzanAudioActive && settings.adzanAudioUrl) {
+      try {
+        if (!adzanAudioRef.current) {
+          adzanAudioRef.current = new Audio(settings.adzanAudioUrl);
+        } else if (adzanAudioRef.current.src !== settings.adzanAudioUrl) {
+          adzanAudioRef.current.pause();
+          adzanAudioRef.current = new Audio(settings.adzanAudioUrl);
+        }
+        
+        adzanAudioRef.current.volume = settings.adzanAudioVolume;
+        adzanAudioRef.current.play().catch((err) => {
+          console.warn("Autoplay blocked or adzan audio failed to load:", err);
+        });
+      } catch (err) {
+        console.error("Adzan audio player error:", err);
+      }
+    } else {
+      // Clean stop & mute when leaving ADZAN stage (includes PRAYING fail-safe)
+      if (adzanAudioRef.current) {
+        adzanAudioRef.current.pause();
+        adzanAudioRef.current.currentTime = 0;
+      }
+    }
+  }, [prayerStage, settings.adzanAudioActive, settings.adzanAudioUrl, settings.adzanAudioVolume]);
+
+  // 2. Web Audio API Offline Beep Synthesizer
+  useEffect(() => {
+    if (prayerStage !== 'IQOMAH' || stageSecondsLeft === undefined || stageSecondsLeft > 10 || stageSecondsLeft < 0) {
+      lastBeepedSecondRef.current = null;
+      return;
+    }
+
+    // Protect: ensure beep rings only once per second
+    if (lastBeepedSecondRef.current === stageSecondsLeft) {
+      return;
+    }
+    lastBeepedSecondRef.current = stageSecondsLeft;
+
+    try {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtxClass) return;
+
+      const audioCtx = new AudioCtxClass();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.type = 'sine';
+
+      if (stageSecondsLeft > 0) {
+        // High pitched short warning beep (880Hz, 120ms)
+        oscillator.frequency.value = 880;
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.12);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.12);
+      } else if (stageSecondsLeft === 0) {
+        // Deep long alarm double-pitch for prayer start (1000Hz, 500ms)
+        oscillator.frequency.value = 1000;
+        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.5);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.5);
+      }
+    } catch (e) {
+      console.warn("Failed to play synthetic warning beep:", e);
+    }
+  }, [prayerStage, stageSecondsLeft]);
+
+  // --- DYNAMIC GRADIENT HELPER ---
+  const getDynamicGradientClass = (prayerName: string | null) => {
+    if (!prayerName) return 'from-[#051109] via-[#020b06] to-[#010502]';
+    switch (prayerName) {
+      case 'Imsak':
+      case 'Fajr': // Subuh: Deep dawn navy blue-purple
+        return 'from-[#0a182c] via-[#051109] to-[#030814]';
+      case 'Sunrise':
+      case 'Dhuhr': // Dzuhur: Morning golden-green
+        return 'from-[#022416] via-[#051109] to-[#0e3321]';
+      case 'Asr': // Ashar: Olive warm bronze-green
+        return 'from-[#201c0c] via-[#051109] to-[#0a140f]';
+      case 'Maghrib': // Maghrib: Sunset orange-rose
+        return 'from-[#2c1208] via-[#051109] to-[#0d0914]';
+      case 'Isha': // Isya: Starry space blue-black
+        return 'from-[#030c1c] via-[#051109] to-[#010408]';
+      default:
+        return 'from-[#051109] via-[#020b06] to-[#010502]';
+    }
+  };
+
+  const activeGradient = getDynamicGradientClass(nextPrayer?.name || null);
+
 
   // Schedule alternation between CLOCK layout and BANNERS layout when in normal mode
   useEffect(() => {
@@ -236,12 +441,21 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
   }
 
   if (prayerStage === 'IQOMAH') {
+    let activeIqomahDuration = 600;
+    switch (activePrayerName) {
+      case 'Fajr': activeIqomahDuration = settings.iqomahFajr; break;
+      case 'Dhuhr': activeIqomahDuration = settings.iqomahDhuhr; break;
+      case 'Asr': activeIqomahDuration = settings.iqomahAsr; break;
+      case 'Maghrib': activeIqomahDuration = settings.iqomahMaghrib; break;
+      case 'Isha': activeIqomahDuration = settings.iqomahIsha; break;
+    }
+
     return (
       <FullscreenIqomah 
         prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
-        iqomahDuration={settings.iqomahDuration}
+        iqomahDuration={activeIqomahDuration}
       />
     );
   }
@@ -272,7 +486,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
 
   return (
     <>
-      <div className={`h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 ${hasValidBg ? 'bg-black' : 'bg-[#051109]'}`}>
+      <div className={`h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-black`}>
         
         {hasValidBg ? (
           <div className="absolute inset-0 -z-10 select-none pointer-events-none">
@@ -283,15 +497,13 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
               className="w-full h-full object-cover opacity-45 brightness-75"
               onError={() => setBgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#051109]/80 via-transparent to-[#051109]/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
           </div>
         ) : (
-          /* Premium dynamic gradient fallback if background active but image fails to load */
-          settings.backgroundActive && (
-            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#021308] via-[#051109] to-[#010904] select-none pointer-events-none">
-              <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)]"></div>
-            </div>
-          )
+          /* Premium dynamic gradient background based on time of day / next prayer */
+          <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${activeGradient} select-none pointer-events-none transition-all duration-1000`}>
+            <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.06)_0%,transparent_70%)]"></div>
+          </div>
         )}
 
         {/* Header Section */}
@@ -331,12 +543,25 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
           <PrayerTimesGrid 
             timelineObj={timelineObj} 
             nextPrayerName={nextPrayer.name} 
+            hijriDate={hijriDate}
+            currentTime={currentTime}
           />
         </main>
 
         {/* Running Announcement Banner */}
         <RunningAnnouncements announcements={announcements} />
       </div>
+
+      {/* Floating Fullscreen Control Button */}
+      <button
+        onClick={toggleFullscreen}
+        className={`fixed bottom-24 right-8 z-50 p-4 bg-black/45 hover:bg-black/70 border border-white/10 rounded-full text-white/70 hover:text-white backdrop-blur shadow-2xl transition-all duration-300 transform active:scale-95 cursor-pointer ${
+          !mouseActive ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'
+        }`}
+        title="Toggle Fullscreen"
+      >
+        {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+      </button>
 
       {showLocationPicker && (
         <LocationPickerModal 

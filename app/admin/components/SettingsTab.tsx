@@ -234,12 +234,9 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
             <Clock className="w-5 h-5 text-emerald-500" /> Konfigurasi Fase Durasi Ibadah
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 1. Adzan</label>
-              </div>
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 1. Adzan</label>
               <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi memutar audio/alert adzan berkumandang.</span>
               <div className="flex items-center gap-2">
                 <input 
@@ -247,43 +244,137 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                   value={settings.adzanDuration}
                   onChange={(e) => setSettings(prev => ({ ...prev, adzanDuration: parseInt(e.target.value) || 0 }))}
                   required
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold font-mono"
                 />
                 <span className="text-xs text-zinc-300 font-medium">detik</span>
               </div>
             </div>
-
+            
             <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 2. Iqomah</label>
-              </div>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Hitung mundur iqomah mempersiapkan shaf jamaah.</span>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="number" 
-                  value={settings.iqomahDuration}
-                  onChange={(e) => setSettings(prev => ({ ...prev, iqomahDuration: parseInt(e.target.value) || 0 }))}
-                  required
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
-                />
-                <span className="text-xs text-zinc-300 font-medium">detik</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl">
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 3. Shalat</label>
-              </div>
-              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi ibadah silent shalat berjamaah berlangsung.</span>
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Fase 3. Durasi Shalat</label>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Durasi ibadah hening shalat berjamaah berlangsung.</span>
               <div className="flex items-center gap-2">
                 <input 
                   type="number" 
                   value={settings.prayerDuration}
                   onChange={(e) => setSettings(prev => ({ ...prev, prayerDuration: parseInt(e.target.value) || 0 }))}
                   required
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 outline-none text-white focus:border-emerald-500 text-sm w-24 text-center font-bold font-mono"
                 />
                 <span className="text-xs text-zinc-300 font-medium">detik</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl flex flex-col">
+            <label className="text-xs font-black uppercase text-[#D4AF37] tracking-wider mb-2">Fase 2. Jeda Iqomah (Per Waktu Sholat)</label>
+            <span className="text-[10px] text-zinc-500 mb-6 leading-relaxed">Atur jeda hitung mundur iqomah secara spesifik untuk masing-masing waktu sholat (dalam menit).</span>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { key: 'iqomahFajr', label: 'Subuh' },
+                { key: 'iqomahDhuhr', label: 'Dzuhur' },
+                { key: 'iqomahAsr', label: 'Ashar' },
+                { key: 'iqomahMaghrib', label: 'Maghrib' },
+                { key: 'iqomahIsha', label: 'Isya' }
+              ].map((item) => (
+                <div key={item.key} className="flex flex-col gap-2 bg-zinc-900/60 border border-zinc-800 p-3.5 rounded-xl items-center">
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{item.label}</span>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <input 
+                      type="number" 
+                      value={Math.floor((settings[item.key as keyof AppSettings] as number || 0) / 60)}
+                      onChange={(e) => {
+                        const mins = parseInt(e.target.value) || 0;
+                        setSettings(prev => ({ ...prev, [item.key]: mins * 60 }));
+                      }}
+                      required
+                      className="bg-zinc-950 border border-zinc-800 rounded-md px-2 py-1.5 outline-none text-white focus:border-emerald-500 text-xs w-14 text-center font-bold font-mono"
+                    />
+                    <span className="text-[10px] text-zinc-400 font-semibold">menit</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2.5: Audio & Adzan Settings */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <h3 className="text-lg font-bold mb-6 text-[#D4AF37] flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-emerald-500" /> Pengaturan Audio & Alarm Adzan
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl md:col-span-1">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Suara Adzan</label>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Putar rekaman suara adzan secara otomatis ketika waktu sholat masuk.</span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, adzanAudioActive: !prev.adzanAudioActive }))}
+                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${
+                    settings.adzanAudioActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
+                  }`}
+                >
+                  <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
+                </button>
+                <span className="text-sm text-zinc-300 font-semibold">
+                  {settings.adzanAudioActive ? 'Audio Aktif' : 'Mute / Hening'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 p-5 rounded-2xl md:col-span-2">
+              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Suara Muadzin / URL Audio</label>
+              <span className="text-[10px] text-zinc-500 mb-3 leading-relaxed">Pilih salah satu preset rekaman adzan berkualitas tinggi atau masukkan URL .mp3 kustom Anda sendiri.</span>
+              <div className="flex flex-col gap-3">
+                <select
+                  value={
+                    ['https://www.islamcan.com/audio/adhan/azan1.mp3', 'https://www.islamcan.com/audio/adhan/azan2.mp3', 'https://www.islamcan.com/audio/adhan/azan3.mp3'].includes(settings.adzanAudioUrl)
+                      ? settings.adzanAudioUrl
+                      : 'custom'
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val !== 'custom') {
+                      setSettings(prev => ({ ...prev, adzanAudioUrl: val }));
+                    }
+                  }}
+                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none text-white text-xs font-semibold focus:border-emerald-500"
+                >
+                  <option value="https://www.islamcan.com/audio/adhan/azan1.mp3">Preset 1. Adzan Mekkah (Suara Merdu Syahdu)</option>
+                  <option value="https://www.islamcan.com/audio/adhan/azan2.mp3">Preset 2. Adzan Madinah (Suara Tenang & Khusyuk)</option>
+                  <option value="https://www.islamcan.com/audio/adhan/azan3.mp3">Preset 3. Adzan Masjid Al-Aqsa (Tradisional)</option>
+                  <option value="custom">-- Masukkan URL Audio Kustom (.mp3) --</option>
+                </select>
+
+                {(settings.adzanAudioUrl && !['https://www.islamcan.com/audio/adhan/azan1.mp3', 'https://www.islamcan.com/audio/adhan/azan2.mp3', 'https://www.islamcan.com/audio/adhan/azan3.mp3'].includes(settings.adzanAudioUrl) || 
+                  ['https://www.islamcan.com/audio/adhan/azan1.mp3', 'https://www.islamcan.com/audio/adhan/azan2.mp3', 'https://www.islamcan.com/audio/adhan/azan3.mp3'].includes(settings.adzanAudioUrl) === false) && (
+                  <input
+                    type="url"
+                    value={settings.adzanAudioUrl}
+                    onChange={(e) => setSettings(prev => ({ ...prev, adzanAudioUrl: e.target.value }))}
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 outline-none text-white text-xs font-mono focus:border-emerald-500"
+                    placeholder="Tempel link URL file .mp3..."
+                  />
+                )}
+                
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">Volume Suara Adzan</span>
+                    <span className="text-xs text-emerald-400 font-bold font-mono">{Math.round(settings.adzanAudioVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={settings.adzanAudioVolume}
+                    onChange={(e) => setSettings(prev => ({ ...prev, adzanAudioVolume: parseFloat(e.target.value) }))}
+                    className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                  />
+                </div>
               </div>
             </div>
           </div>

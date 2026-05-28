@@ -10,7 +10,11 @@ interface UsePrayerTimesProps {
   longitude: number;
   calculationMethod: number;
   adzanDuration: number; // in seconds
-  iqomahDuration: number; // in seconds
+  iqomahFajr: number;
+  iqomahDhuhr: number;
+  iqomahAsr: number;
+  iqomahMaghrib: number;
+  iqomahIsha: number;
   prayerDuration: number; // in seconds
   sandboxActive?: boolean;
   sandboxTime?: string | null;
@@ -25,7 +29,11 @@ export function usePrayerTimes({
   longitude,
   calculationMethod,
   adzanDuration,
-  iqomahDuration,
+  iqomahFajr,
+  iqomahDhuhr,
+  iqomahAsr,
+  iqomahMaghrib,
+  iqomahIsha,
   prayerDuration,
   sandboxActive,
   sandboxTime,
@@ -156,9 +164,20 @@ export function usePrayerTimes({
   } else {
     for (const item of timelineValid) {
       const prayerTime = item.time;
+      
+      // Determine active iqomah duration dynamically per sholat fardhu
+      let activeIqomahDuration = 600;
+      switch (item.name) {
+        case 'Fajr': activeIqomahDuration = iqomahFajr; break;
+        case 'Dhuhr': activeIqomahDuration = iqomahDhuhr; break;
+        case 'Asr': activeIqomahDuration = iqomahAsr; break;
+        case 'Maghrib': activeIqomahDuration = iqomahMaghrib; break;
+        case 'Isha': activeIqomahDuration = iqomahIsha; break;
+      }
+
       // End times calculations relative to start
       const adzanEndTime = addSeconds(prayerTime, adzanDuration);
-      const iqomahEndTime = addSeconds(adzanEndTime, iqomahDuration);
+      const iqomahEndTime = addSeconds(adzanEndTime, activeIqomahDuration);
       const prayerEndTime = addSeconds(iqomahEndTime, prayerDuration);
 
       if (currentTime >= prayerTime && currentTime < adzanEndTime) {

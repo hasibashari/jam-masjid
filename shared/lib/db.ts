@@ -63,14 +63,44 @@ db.exec(`
     value TEXT NOT NULL,
     createdAt TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS User (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'admin',
+    createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // Safe Migration: Add column dynamically for existing SQLite files
 try {
   db.exec("ALTER TABLE Settings ADD COLUMN mosqueAddress TEXT NOT NULL DEFAULT ''");
-} catch (e) {
-  // Column already exists, safe to ignore
-}
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN iqomahFajr INTEGER NOT NULL DEFAULT 600");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN iqomahDhuhr INTEGER NOT NULL DEFAULT 480");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN iqomahAsr INTEGER NOT NULL DEFAULT 480");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN iqomahMaghrib INTEGER NOT NULL DEFAULT 420");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN iqomahIsha INTEGER NOT NULL DEFAULT 600");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioActive INTEGER NOT NULL DEFAULT 1");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioUrl TEXT NOT NULL DEFAULT 'https://www.islamcan.com/audio/adhan/azan1.mp3'");
+} catch (e) {}
+try {
+  db.exec("ALTER TABLE Settings ADD COLUMN adzanAudioVolume REAL NOT NULL DEFAULT 0.8");
+} catch (e) {}
 
 // Seed default settings row if empty
 const countRow = db.prepare("SELECT COUNT(*) as count FROM Settings").get() as { count: number };
@@ -80,12 +110,16 @@ if (countRow.count === 0) {
       id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
       adzanDuration, iqomahDuration, prayerDuration, displayActive, 
       displayStart, displayEnd, backgroundActive, sandboxActive, 
-      sandboxTime, sandboxStage, sandboxSpeed
+      sandboxTime, sandboxStage, sandboxSpeed,
+      iqomahFajr, iqomahDhuhr, iqomahAsr, iqomahMaghrib, iqomahIsha,
+      adzanAudioActive, adzanAudioUrl, adzanAudioVolume
     ) VALUES (
       'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
       180, 600, 900, 1, 
       '03:00', '23:00', 0, 0, 
-      NULL, 'AUTO', 1.0
+      NULL, 'AUTO', 1.0,
+      600, 480, 480, 420, 600,
+      1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
     )
   `).run();
 }
@@ -98,6 +132,7 @@ function fromDbRow(row: any) {
   if ('displayActive' in copy) copy.displayActive = Boolean(copy.displayActive);
   if ('backgroundActive' in copy) copy.backgroundActive = Boolean(copy.backgroundActive);
   if ('sandboxActive' in copy) copy.sandboxActive = Boolean(copy.sandboxActive);
+  if ('adzanAudioActive' in copy) copy.adzanAudioActive = Boolean(copy.adzanAudioActive);
   return copy;
 }
 
@@ -108,6 +143,7 @@ function toDbData(data: any) {
   if ('displayActive' in copy && typeof copy.displayActive === 'boolean') copy.displayActive = copy.displayActive ? 1 : 0;
   if ('backgroundActive' in copy && typeof copy.backgroundActive === 'boolean') copy.backgroundActive = copy.backgroundActive ? 1 : 0;
   if ('sandboxActive' in copy && typeof copy.sandboxActive === 'boolean') copy.sandboxActive = copy.sandboxActive ? 1 : 0;
+  if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
   
   // Strip out undefined values to support partial updates correctly without setting them to NULL
   for (const key of Object.keys(copy)) {
@@ -246,3 +282,29 @@ export const bannersDb = {
     return { id: where.id };
   }
 };
+
+export const userDb = {
+  findFirst: async () => {
+    const row = db.prepare("SELECT * FROM User LIMIT 1").get();
+    return row;
+  },
+  findByEmail: async (email: string) => {
+    const row = db.prepare("SELECT * FROM User WHERE email = ?").get(email);
+    return row;
+  },
+  count: async () => {
+    const row = db.prepare("SELECT COUNT(*) as count FROM User").get() as { count: number };
+    return row.count;
+  },
+  create: async ({ data }: { data: any }) => {
+    const dbData = { ...data };
+    if (!dbData.id) dbData.id = `usr-${Math.random().toString(36).substr(2, 9)}`;
+    const keys = Object.keys(dbData);
+    const vals = Object.values(dbData);
+    const query = `INSERT INTO User (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
+    db.prepare(query).run(...vals);
+    const row = db.prepare("SELECT * FROM User WHERE id = ?").get(dbData.id);
+    return row;
+  }
+};
+
