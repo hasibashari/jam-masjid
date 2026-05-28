@@ -82,48 +82,6 @@ export default function SettingsTab({ settings, setSettings, showAlert }: Settin
                 placeholder="Masukkan alamat masjid..."
               />
             </div>
- 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Status Tampilan Layar</label>
-              <div className="flex items-center gap-3 py-1">
-                <button
-                  type="button"
-                  onClick={() => setSettings(prev => ({ ...prev, displayActive: !prev.displayActive }))}
-                  className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 shrink-0 ${
-                    settings.displayActive ? 'bg-emerald-600 justify-end' : 'bg-zinc-700 justify-start'
-                  }`}
-                >
-                  <div className="w-6 h-6 bg-white rounded-full shadow-lg"></div>
-                </button>
-                <span className="text-xs sm:text-sm text-zinc-300 font-semibold leading-tight">
-                  {settings.displayActive ? 'Layar Display Aktif' : 'Layar Display Standby'}
-                </span>
-              </div>
-            </div>
- 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Mulai Operasi</label>
-              <input 
-                type="text" 
-                value={settings.displayStart}
-                onChange={(e) => setSettings(prev => ({ ...prev, displayStart: e.target.value }))}
-                required
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono"
-                placeholder="03:00"
-              />
-            </div>
- 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Jam Akhir Operasi</label>
-              <input 
-                type="text" 
-                value={settings.displayEnd}
-                onChange={(e) => setSettings(prev => ({ ...prev, displayEnd: e.target.value }))}
-                required
-                className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 outline-none text-white focus:border-emerald-500 text-[13px] md:text-sm font-mono"
-                placeholder="23:00"
-              />
-            </div>
           </div>
         </div>
  

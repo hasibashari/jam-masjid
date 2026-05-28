@@ -25,15 +25,8 @@ const initDb = async () => {
         adzanDuration INT NOT NULL DEFAULT 180,
         iqomahDuration INT NOT NULL DEFAULT 600,
         prayerDuration INT NOT NULL DEFAULT 900,
-        displayActive INT NOT NULL DEFAULT 1,
-        displayStart TEXT NOT NULL DEFAULT '03:00',
-        displayEnd TEXT NOT NULL DEFAULT '23:00',
         backgroundImage TEXT,
         backgroundActive INT NOT NULL DEFAULT 0,
-        sandboxActive INT NOT NULL DEFAULT 0,
-        sandboxTime TEXT,
-        sandboxStage TEXT NOT NULL DEFAULT 'AUTO',
-        sandboxSpeed DOUBLE PRECISION NOT NULL DEFAULT 1.0,
         iqomahFajr INT NOT NULL DEFAULT 600,
         iqomahDhuhr INT NOT NULL DEFAULT 480,
         iqomahAsr INT NOT NULL DEFAULT 480,
@@ -83,16 +76,12 @@ const initDb = async () => {
       await pool.query(`
         INSERT INTO Settings (
           id, mosqueName, mosqueAddress, latitude, longitude, calculationMethod, 
-          adzanDuration, iqomahDuration, prayerDuration, displayActive, 
-          displayStart, displayEnd, backgroundActive, sandboxActive, 
-          sandboxTime, sandboxStage, sandboxSpeed,
+          adzanDuration, iqomahDuration, prayerDuration, backgroundActive,
           iqomahFajr, iqomahDhuhr, iqomahAsr, iqomahMaghrib, iqomahIsha,
           adzanAudioActive, adzanAudioUrl, adzanAudioVolume
         ) VALUES (
           'default', 'Jam Masjid Al-Hikmah', 'Jl. Jenderal Sudirman No. 1, Jakarta', -6.2088, 106.8456, 20, 
-          180, 600, 900, 1, 
-          '03:00', '23:00', 0, 0, 
-          NULL, 'AUTO', 1.0,
+          180, 600, 900, 0,
           600, 480, 480, 420, 600,
           1, 'https://www.islamcan.com/audio/adhan/azan1.mp3', 0.8
         )
@@ -133,9 +122,7 @@ function fromDbRow(row: any) {
   if (!row) return row;
   const copy = { ...row };
   if ('active' in copy) copy.active = Boolean(copy.active);
-  if ('displayActive' in copy) copy.displayActive = Boolean(copy.displayActive);
   if ('backgroundActive' in copy) copy.backgroundActive = Boolean(copy.backgroundActive);
-  if ('sandboxActive' in copy) copy.sandboxActive = Boolean(copy.sandboxActive);
   if ('adzanAudioActive' in copy) copy.adzanAudioActive = Boolean(copy.adzanAudioActive);
   return copy;
 }
@@ -144,9 +131,7 @@ function fromDbRow(row: any) {
 function toDbData(data: any) {
   const copy = { ...data };
   if ('active' in copy && typeof copy.active === 'boolean') copy.active = copy.active ? 1 : 0;
-  if ('displayActive' in copy && typeof copy.displayActive === 'boolean') copy.displayActive = copy.displayActive ? 1 : 0;
   if ('backgroundActive' in copy && typeof copy.backgroundActive === 'boolean') copy.backgroundActive = copy.backgroundActive ? 1 : 0;
-  if ('sandboxActive' in copy && typeof copy.sandboxActive === 'boolean') copy.sandboxActive = copy.sandboxActive ? 1 : 0;
   if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
   
   // Strip out undefined values to support partial updates correctly

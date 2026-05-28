@@ -8,9 +8,6 @@ export interface AppSettings {
   adzanDuration: number;
   iqomahDuration: number;
   prayerDuration: number;
-  displayActive: boolean;
-  displayStart: string;
-  displayEnd: string;
   backgroundImage?: string | null;
   backgroundActive?: boolean;
   sandboxActive?: boolean;
@@ -59,9 +56,6 @@ export const FALLBACK_SETTINGS: AppSettings = {
   adzanDuration: 180, // 3 minutes
   iqomahDuration: 600, // 10 minutes
   prayerDuration: 900, // 15 minutes
-  displayActive: true,
-  displayStart: "03:00",
-  displayEnd: "23:00",
   backgroundImage: null,
   backgroundActive: false,
   sandboxActive: false,

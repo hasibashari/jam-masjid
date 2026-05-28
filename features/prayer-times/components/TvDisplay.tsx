@@ -19,7 +19,6 @@ import { useAutoHideCursor } from '../hooks/useAutoHideCursor';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { useTvDisplayData } from '../hooks/useTvDisplayData';
 import { useAdzanAlarm } from '../hooks/useAdzanAlarm';
-import { useDisplaySchedule } from '../hooks/useDisplaySchedule';
 
 // Fullscreen Stage Screens
 import FullscreenAdzan from './FullscreenAdzan';
@@ -77,11 +76,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     iqomahAsr: settings.iqomahAsr,
     iqomahMaghrib: settings.iqomahMaghrib,
     iqomahIsha: settings.iqomahIsha,
-    prayerDuration: settings.prayerDuration,
-    sandboxActive: settings.sandboxActive,
-    sandboxTime: settings.sandboxTime,
-    sandboxStage: settings.sandboxStage,
-    sandboxSpeed: settings.sandboxSpeed
+    prayerDuration: settings.prayerDuration
   });
 
   // 5. Audio & alarm synthetic beeping hooks
@@ -91,13 +86,6 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     adzanAudioActive: settings.adzanAudioActive,
     adzanAudioUrl: settings.adzanAudioUrl,
     adzanAudioVolume: settings.adzanAudioVolume,
-  });
-
-  // 6. Mosque display energy saving sleep schedule
-  const shouldEnterStandby = useDisplaySchedule({
-    currentTime,
-    settings,
-    prayerStage,
   });
 
   const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
@@ -188,22 +176,6 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
       <div className="h-screen w-screen bg-[#051109] flex flex-col items-center justify-center text-emerald-500 gap-3">
         <Loader2 className="w-12 h-12 animate-spin text-emerald-500" />
         <span className="text-sm font-semibold uppercase tracking-wider font-mono">Memuat Jam Masjid...</span>
-      </div>
-    );
-  }
-
-  // Standby screen renders
-  if (shouldEnterStandby) {
-    return (
-      <div className="h-screen w-screen bg-[#020604] text-zinc-650 flex flex-col items-center justify-center select-none animate-fade-in relative">
-        <div className="flex flex-col items-center text-center gap-4">
-          <Moon className="w-16 h-16 text-zinc-800 animate-pulse mb-2" />
-          <h2 className="text-2xl font-black uppercase tracking-widest text-zinc-700">{settings.mosqueName}</h2>
-          <p className="text-sm text-zinc-800 max-w-sm">Tampilan Berada Dalam Jadwal Istirahat / Mode Hemat Energi.</p>
-        </div>
-        <div className="absolute bottom-8 right-12 text-zinc-800 font-mono text-xl tracking-wider font-bold">
-          {format(currentTime, 'HH:mm:ss')}
-        </div>
       </div>
     );
   }

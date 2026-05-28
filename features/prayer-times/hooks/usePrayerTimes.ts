@@ -16,10 +16,6 @@ interface UsePrayerTimesProps {
   iqomahMaghrib: number;
   iqomahIsha: number;
   prayerDuration: number; // in seconds
-  sandboxActive?: boolean;
-  sandboxTime?: string | null;
-  sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
-  sandboxSpeed?: number;
 }
 
 export type PrayerStage = 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
@@ -34,11 +30,7 @@ export function usePrayerTimes({
   iqomahAsr,
   iqomahMaghrib,
   iqomahIsha,
-  prayerDuration,
-  sandboxActive,
-  sandboxTime,
-  sandboxStage,
-  sandboxSpeed
+  prayerDuration
 }: UsePrayerTimesProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimesState | null>(null);
@@ -65,41 +57,10 @@ export function usePrayerTimes({
     return () => clearInterval(refreshTimer);
   }, [latitude, longitude, calculationMethod]);
 
-  // Local ref for virtual clock tracking
-  const virtualTimeBaseRef = useRef<Date | null>(null);
-  const realTimeBaseRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (sandboxActive && sandboxTime) {
-      const parsed = new Date(sandboxTime);
-      if (!isNaN(parsed.getTime())) {
-        virtualTimeBaseRef.current = parsed;
-        realTimeBaseRef.current = Date.now();
-      }
-    } else {
-      virtualTimeBaseRef.current = null;
-      realTimeBaseRef.current = null;
-    }
-  }, [sandboxActive, sandboxTime]);
-
-  // Update clock every second, taking into account timezone and sandbox settings
+  // Update clock every second, taking into account timezone
   useEffect(() => {
     const updateTime = () => {
-      const now = new Date();
-      let activeTime = now;
-
-      if (sandboxActive) {
-        if (virtualTimeBaseRef.current && realTimeBaseRef.current) {
-          const elapsedReal = Date.now() - realTimeBaseRef.current;
-          const elapsedVirtual = elapsedReal * (sandboxSpeed || 1.0);
-          activeTime = new Date(virtualTimeBaseRef.current.getTime() + elapsedVirtual);
-        } else if (sandboxTime) {
-          const parsed = new Date(sandboxTime);
-          if (!isNaN(parsed.getTime())) {
-            activeTime = parsed;
-          }
-        }
-      }
+      const activeTime = new Date();
 
       if (timezone) {
         setCurrentTime(toZonedTime(activeTime, timezone));
@@ -110,7 +71,7 @@ export function usePrayerTimes({
     updateTime();
     const clock = setInterval(updateTime, 1000);
     return () => clearInterval(clock);
-  }, [timezone, sandboxActive, sandboxTime, sandboxSpeed]);
+  }, [timezone]);
 
   // If we haven't mounted or loaded the times yet, return default loaders values
   if (!currentTime || !prayerTimes) {
@@ -157,45 +118,39 @@ export function usePrayerTimes({
   let activePrayerName: string | null = null;
   let stageSecondsLeft = 0;
 
-  if (sandboxActive && sandboxStage && sandboxStage !== 'AUTO') {
-    prayerStage = sandboxStage;
-    activePrayerName = 'Dhuhr'; // mock prayer name for sandbox visual testing
-    stageSecondsLeft = 300; // mock time left (5 mins)
-  } else {
-    for (const item of timelineValid) {
-      const prayerTime = item.time;
-      
-      // Determine active iqomah duration dynamically per sholat fardhu
-      let activeIqomahDuration = 600;
-      switch (item.name) {
-        case 'Fajr': activeIqomahDuration = iqomahFajr; break;
-        case 'Dhuhr': activeIqomahDuration = iqomahDhuhr; break;
-        case 'Asr': activeIqomahDuration = iqomahAsr; break;
-        case 'Maghrib': activeIqomahDuration = iqomahMaghrib; break;
-        case 'Isha': activeIqomahDuration = iqomahIsha; break;
-      }
+  for (const item of timelineValid) {
+    const prayerTime = item.time;
+    
+    // Determine active iqomah duration dynamically per sholat fardhu
+    let activeIqomahDuration = 600;
+    switch (item.name) {
+      case 'Fajr': activeIqomahDuration = iqomahFajr; break;
+      case 'Dhuhr': activeIqomahDuration = iqomahDhuhr; break;
+      case 'Asr': activeIqomahDuration = iqomahAsr; break;
+      case 'Maghrib': activeIqomahDuration = iqomahMaghrib; break;
+      case 'Isha': activeIqomahDuration = iqomahIsha; break;
+    }
 
-      // End times calculations relative to start
-      const adzanEndTime = addSeconds(prayerTime, adzanDuration);
-      const iqomahEndTime = addSeconds(adzanEndTime, activeIqomahDuration);
-      const prayerEndTime = addSeconds(iqomahEndTime, prayerDuration);
+    // End times calculations relative to start
+    const adzanEndTime = addSeconds(prayerTime, adzanDuration);
+    const iqomahEndTime = addSeconds(adzanEndTime, activeIqomahDuration);
+    const prayerEndTime = addSeconds(iqomahEndTime, prayerDuration);
 
-      if (currentTime >= prayerTime && currentTime < adzanEndTime) {
-        prayerStage = 'ADZAN';
-        activePrayerName = item.name;
-        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(adzanEndTime, currentTime) / 1000));
-        break;
-      } else if (currentTime >= adzanEndTime && currentTime < iqomahEndTime) {
-        prayerStage = 'IQOMAH';
-        activePrayerName = item.name;
-        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(iqomahEndTime, currentTime) / 1000));
-        break;
-      } else if (currentTime >= iqomahEndTime && currentTime < prayerEndTime) {
-        prayerStage = 'PRAYING';
-        activePrayerName = item.name;
-        stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(prayerEndTime, currentTime) / 1000));
-        break;
-      }
+    if (currentTime >= prayerTime && currentTime < adzanEndTime) {
+      prayerStage = 'ADZAN';
+      activePrayerName = item.name;
+      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(adzanEndTime, currentTime) / 1000));
+      break;
+    } else if (currentTime >= adzanEndTime && currentTime < iqomahEndTime) {
+      prayerStage = 'IQOMAH';
+      activePrayerName = item.name;
+      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(iqomahEndTime, currentTime) / 1000));
+      break;
+    } else if (currentTime >= iqomahEndTime && currentTime < prayerEndTime) {
+      prayerStage = 'PRAYING';
+      activePrayerName = item.name;
+      stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(prayerEndTime, currentTime) / 1000));
+      break;
     }
   }
 

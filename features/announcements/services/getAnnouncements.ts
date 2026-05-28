@@ -3,7 +3,7 @@ import { FALLBACK_ANNOUNCEMENTS, AnnouncementType } from '@/shared/types';
 
 export async function getAnnouncementsService(): Promise<AnnouncementType[]> {
   try {
-    // Fetch only active announcements directly from the SQLite database
+    // Fetch only active announcements directly from the PostgreSQL database
     const activeAnnouncements = await announcementsDb.findMany({
       where: { active: true },
       orderBy: { createdAt: 'desc' }
