@@ -192,69 +192,95 @@ export default function BannersTab({
             </>
           ) : (
             <>
-              {/* Gradient Preset Picker */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background (Gradasi)</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {[
-                    { id: 'emerald', class: 'bg-gradient-to-br from-[#022416] to-[#0e3321]', name: 'Emerald' },
-                    { id: 'sapphire', class: 'bg-gradient-to-br from-[#031d44] to-[#010814]', name: 'Sapphire' },
-                    { id: 'amber', class: 'bg-gradient-to-br from-[#2d1a04] to-[#1e1102]', name: 'Amber' },
-                    { id: 'purple', class: 'bg-gradient-to-br from-[#24032c] to-[#12011b]', name: 'Purple' },
-                    { id: 'charcoal', class: 'bg-gradient-to-br from-[#1c1c1c] to-[#111111]', name: 'Charcoal' }
-                  ].map((grad) => (
-                    <button
-                      key={grad.id}
-                      type="button"
-                      onClick={() => setNewBanner(prev => ({ ...prev, bgGradient: grad.id }))}
-                      className={`aspect-square rounded-xl ${grad.class} border-2 transition-all relative group flex items-center justify-center cursor-pointer ${
-                        newBanner.bgGradient === grad.id 
-                          ? 'border-[#D4AF37] scale-105 shadow-lg shadow-[#D4AF37]/20' 
-                          : 'border-zinc-800 hover:border-zinc-600'
-                      }`}
-                      title={grad.name}
-                    >
-                      {newBanner.bgGradient === grad.id && (
-                        <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
-                        </div>
-                      )}
-                    </button>
-                  ))}
+              {/* ── COLOUR PICKER ── */}
+              <div className="flex flex-col gap-3">
+                <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background</label>
+
+                {/* Gradients row */}
+                <div>
+                  <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1.5 font-bold">Gradasi</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { id: 'emerald',  cls: 'bg-gradient-to-br from-[#012a18] to-[#071f10]', name: 'Hijau Tua' },
+                      { id: 'sapphire', cls: 'bg-gradient-to-br from-[#021838] to-[#040d20]', name: 'Biru Tua' },
+                      { id: 'amber',    cls: 'bg-gradient-to-br from-[#2c1800] to-[#160d00]', name: 'Amber' },
+                      { id: 'purple',   cls: 'bg-gradient-to-br from-[#1e0230] to-[#0e0118]', name: 'Ungu' },
+                    ].map((c) => (
+                      <button key={c.id} type="button"
+                        onClick={() => setNewBanner(prev => ({ ...prev, bgGradient: c.id }))}
+                        className={`h-9 rounded-lg ${c.cls} border-2 transition-all cursor-pointer relative ${
+                          newBanner.bgGradient === c.id ? 'border-[#D4AF37] shadow-md shadow-[#D4AF37]/20 scale-105' : 'border-zinc-800 hover:border-zinc-600'
+                        }`} title={c.name}>
+                        {newBanner.bgGradient === c.id && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div></div>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Solid colours row */}
+                <div>
+                  <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1.5 font-bold">Warna Solid</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {[
+                      { id: 'solid-black',  cls: 'bg-[#0a0a0a]',  name: 'Hitam' },
+                      { id: 'solid-navy',   cls: 'bg-[#0d1b2a]',  name: 'Navy' },
+                      { id: 'solid-forest', cls: 'bg-[#071a10]',  name: 'Hutan' },
+                      { id: 'solid-slate',  cls: 'bg-[#0f172a]',  name: 'Slate' },
+                      { id: 'solid-maroon', cls: 'bg-[#1a0a00]',  name: 'Maroon' },
+                    ].map((c) => (
+                      <button key={c.id} type="button"
+                        onClick={() => setNewBanner(prev => ({ ...prev, bgGradient: c.id }))}
+                        className={`h-9 rounded-lg ${c.cls} border-2 transition-all cursor-pointer relative ${
+                          newBanner.bgGradient === c.id ? 'border-[#D4AF37] shadow-md shadow-[#D4AF37]/20 scale-105' : 'border-zinc-800 hover:border-zinc-600'
+                        }`} title={c.name}>
+                        {newBanner.bgGradient === c.id && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div></div>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Dynamic visual preview of the text banner */}
-              <div className="mt-4 flex flex-col gap-2 border-t border-zinc-800 pt-4">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">PREVIEW TAMPILAN TEKS</span>
-                <div className={`relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 flex flex-col items-center justify-between p-4 bg-gradient-to-br ${
-                  newBanner.bgGradient === 'emerald' ? 'from-[#022416] via-[#051109] to-[#0e3321]' :
-                  newBanner.bgGradient === 'sapphire' ? 'from-[#031d44] via-[#020b1e] to-[#010814]' :
-                  newBanner.bgGradient === 'amber' ? 'from-[#2d1a04] via-[#0c0902] to-[#1e1102]' :
-                  newBanner.bgGradient === 'purple' ? 'from-[#24032c] via-[#0f0214] to-[#12011b]' :
-                  'from-[#1c1c1c] via-[#0d0d0d] to-[#111111]'
+              {/* ── MINI PREVIEW (matches the new clean board layout) ── */}
+              <div className="flex flex-col gap-2 border-t border-zinc-800 pt-4">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">Preview Papan Informasi</span>
+                <div className={`relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-white/8 flex flex-col ${
+                  newBanner.bgGradient === 'emerald'      ? 'bg-gradient-to-br from-[#012a18] to-[#071f10]' :
+                  newBanner.bgGradient === 'sapphire'     ? 'bg-gradient-to-br from-[#021838] to-[#040d20]' :
+                  newBanner.bgGradient === 'amber'        ? 'bg-gradient-to-br from-[#2c1800] to-[#160d00]' :
+                  newBanner.bgGradient === 'purple'       ? 'bg-gradient-to-br from-[#1e0230] to-[#0e0118]' :
+                  newBanner.bgGradient === 'solid-black'  ? 'bg-[#0a0a0a]' :
+                  newBanner.bgGradient === 'solid-navy'   ? 'bg-[#0d1b2a]' :
+                  newBanner.bgGradient === 'solid-forest' ? 'bg-[#071a10]' :
+                  newBanner.bgGradient === 'solid-slate'  ? 'bg-[#0f172a]' :
+                  newBanner.bgGradient === 'solid-maroon' ? 'bg-[#1a0a00]' :
+                  'bg-gradient-to-br from-[#012a18] to-[#071f10]'
                 }`}>
-                  {/* Decorative mesh/light grid */}
-                  <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none"></div>
-                  
-                  <div className="w-6 h-6 rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shadow-inner relative z-10 shrink-0">
-                    <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                  {/* top accent */}
+                  <div className="w-full h-[3px] bg-[#D4AF37] shrink-0 opacity-80"></div>
+                  {/* header row */}
+                  <div className="flex items-center justify-between px-3 py-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                      <span className="text-[#D4AF37] text-[6px] font-black uppercase tracking-[0.2em]">Papan Informasi Masjid</span>
+                    </div>
                   </div>
-                  
-                  <div className="flex-1 flex flex-col justify-center items-center text-center p-2 relative z-10 w-full">
-                    <h4 className="text-[11px] font-black text-white uppercase tracking-tight leading-none text-center line-clamp-2 w-full px-1">
-                      {newBanner.title || 'JUDUL UTAMA PENGUMUMAN'}
+                  <div className="mx-3 h-px bg-white/10"></div>
+                  {/* body */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-3 py-2 text-center">
+                    <h4 className="text-[9px] font-black text-white uppercase tracking-tight leading-tight line-clamp-2">
+                      {newBanner.title || 'JUDUL PENGUMUMAN'}
                     </h4>
                     {newBanner.description && (
-                      <p className="text-[7.5px] text-zinc-300 font-medium leading-normal mt-1 text-center w-[90%] line-clamp-2">
-                        {newBanner.description}
-                      </p>
+                      <p className="text-[6px] text-white/60 mt-1 line-clamp-2 leading-normal">{newBanner.description}</p>
                     )}
                   </div>
-                  
-                  <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden relative z-10 shrink-0">
-                    <div className="bg-[#D4AF37] h-full w-[80%] rounded-full shadow-[0_0_5px_#D4AF37]"></div>
+                  <div className="mx-3 h-px bg-white/10"></div>
+                  {/* footer */}
+                  <div className="flex items-center justify-between px-3 py-1.5 shrink-0">
+                    <div className="flex items-center gap-1"><div className="w-1 h-1 rounded-full bg-emerald-400"></div><span className="text-white/30 text-[5px] font-mono uppercase">Auto</span></div>
+                    <div className="w-10 bg-white/10 h-0.5 rounded-full"><div className="bg-[#D4AF37] h-full w-4/5 rounded-full"></div></div>
                   </div>
+                  <div className="w-full h-[2px] bg-[#D4AF37] shrink-0 opacity-20"></div>
                 </div>
               </div>
             </>
@@ -513,66 +539,87 @@ export default function BannersTab({
                 </>
               ) : (
                 <>
-                  {/* Gradient Picker for edit */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background (Gradasi)</label>
-                    <div className="grid grid-cols-5 gap-2">
-                      {[
-                        { id: 'emerald', class: 'bg-gradient-to-br from-[#022416] to-[#0e3321]', name: 'Emerald' },
-                        { id: 'sapphire', class: 'bg-gradient-to-br from-[#031d44] to-[#010814]', name: 'Sapphire' },
-                        { id: 'amber', class: 'bg-gradient-to-br from-[#2d1a04] to-[#1e1102]', name: 'Amber' },
-                        { id: 'purple', class: 'bg-gradient-to-br from-[#24032c] to-[#12011b]', name: 'Purple' },
-                        { id: 'charcoal', class: 'bg-gradient-to-br from-[#1c1c1c] to-[#111111]', name: 'Charcoal' }
-                      ].map((grad) => (
-                        <button
-                          key={grad.id}
-                          type="button"
-                          onClick={() => setEditingBanner(prev => prev ? ({ ...prev, bgGradient: grad.id }) : null)}
-                          className={`aspect-square rounded-xl ${grad.class} border-2 transition-all relative group flex items-center justify-center cursor-pointer ${
-                            editingBanner.bgGradient === grad.id 
-                              ? 'border-[#D4AF37] scale-105 shadow-lg shadow-[#D4AF37]/20' 
-                              : 'border-zinc-800 hover:border-zinc-600'
-                          }`}
-                          title={grad.name}
-                        >
-                          {editingBanner.bgGradient === grad.id && (
-                            <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center">
-                              <div className="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                  {/* ── COLOUR PICKER (Edit) ── */}
+                  <div className="flex flex-col gap-3">
+                    <label className="text-xs font-black uppercase text-zinc-400 tracking-wider">Pilih Warna Background</label>
+
+                    <div>
+                      <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1.5 font-bold">Gradasi</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { id: 'emerald',  cls: 'bg-gradient-to-br from-[#012a18] to-[#071f10]', name: 'Hijau Tua' },
+                          { id: 'sapphire', cls: 'bg-gradient-to-br from-[#021838] to-[#040d20]', name: 'Biru Tua' },
+                          { id: 'amber',    cls: 'bg-gradient-to-br from-[#2c1800] to-[#160d00]', name: 'Amber' },
+                          { id: 'purple',   cls: 'bg-gradient-to-br from-[#1e0230] to-[#0e0118]', name: 'Ungu' },
+                        ].map((c) => (
+                          <button key={c.id} type="button"
+                            onClick={() => setEditingBanner(prev => prev ? ({ ...prev, bgGradient: c.id }) : null)}
+                            className={`h-9 rounded-lg ${c.cls} border-2 transition-all cursor-pointer relative ${
+                              editingBanner.bgGradient === c.id ? 'border-[#D4AF37] shadow-md shadow-[#D4AF37]/20 scale-105' : 'border-zinc-800 hover:border-zinc-600'
+                            }`} title={c.name}>
+                            {editingBanner.bgGradient === c.id && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div></div>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1.5 font-bold">Warna Solid</p>
+                      <div className="grid grid-cols-5 gap-2">
+                        {[
+                          { id: 'solid-black',  cls: 'bg-[#0a0a0a]', name: 'Hitam' },
+                          { id: 'solid-navy',   cls: 'bg-[#0d1b2a]', name: 'Navy' },
+                          { id: 'solid-forest', cls: 'bg-[#071a10]', name: 'Hutan' },
+                          { id: 'solid-slate',  cls: 'bg-[#0f172a]', name: 'Slate' },
+                          { id: 'solid-maroon', cls: 'bg-[#1a0a00]', name: 'Maroon' },
+                        ].map((c) => (
+                          <button key={c.id} type="button"
+                            onClick={() => setEditingBanner(prev => prev ? ({ ...prev, bgGradient: c.id }) : null)}
+                            className={`h-9 rounded-lg ${c.cls} border-2 transition-all cursor-pointer relative ${
+                              editingBanner.bgGradient === c.id ? 'border-[#D4AF37] shadow-md shadow-[#D4AF37]/20 scale-105' : 'border-zinc-800 hover:border-zinc-600'
+                            }`} title={c.name}>
+                            {editingBanner.bgGradient === c.id && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div></div>}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Live Modal Preview */}
-                  <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 flex flex-col items-center justify-between p-4 bg-gradient-to-br mt-2 relative overflow-hidden ${
-                    editingBanner.bgGradient === 'emerald' ? 'from-[#022416] via-[#051109] to-[#0e3321]' :
-                    editingBanner.bgGradient === 'sapphire' ? 'from-[#031d44] via-[#020b1e] to-[#010814]' :
-                    editingBanner.bgGradient === 'amber' ? 'from-[#2d1a04] via-[#0c0902] to-[#1e1102]' :
-                    editingBanner.bgGradient === 'purple' ? 'from-[#24032c] via-[#0f0214] to-[#12011b]' :
-                    'from-[#1c1c1c] via-[#0d0d0d] to-[#111111]'
-                  }">
-                    <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none"></div>
-                    
-                    <div className="w-6 h-6 rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shadow-inner relative z-10 shrink-0">
-                      <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                  {/* ── MINI PREVIEW (Edit) ── */}
+                  <div className={`relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-white/8 flex flex-col mt-2 ${
+                    editingBanner.bgGradient === 'emerald'      ? 'bg-gradient-to-br from-[#012a18] to-[#071f10]' :
+                    editingBanner.bgGradient === 'sapphire'     ? 'bg-gradient-to-br from-[#021838] to-[#040d20]' :
+                    editingBanner.bgGradient === 'amber'        ? 'bg-gradient-to-br from-[#2c1800] to-[#160d00]' :
+                    editingBanner.bgGradient === 'purple'       ? 'bg-gradient-to-br from-[#1e0230] to-[#0e0118]' :
+                    editingBanner.bgGradient === 'solid-black'  ? 'bg-[#0a0a0a]' :
+                    editingBanner.bgGradient === 'solid-navy'   ? 'bg-[#0d1b2a]' :
+                    editingBanner.bgGradient === 'solid-forest' ? 'bg-[#071a10]' :
+                    editingBanner.bgGradient === 'solid-slate'  ? 'bg-[#0f172a]' :
+                    editingBanner.bgGradient === 'solid-maroon' ? 'bg-[#1a0a00]' :
+                    'bg-gradient-to-br from-[#012a18] to-[#071f10]'
+                  }`}>
+                    <div className="w-full h-[3px] bg-[#D4AF37] shrink-0 opacity-80"></div>
+                    <div className="flex items-center justify-between px-3 py-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5">
+                        <Megaphone className="w-2.5 h-2.5 text-[#D4AF37]" />
+                        <span className="text-[#D4AF37] text-[6px] font-black uppercase tracking-[0.2em]">Papan Informasi Masjid</span>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1 flex flex-col justify-center items-center text-center p-2 relative z-10 w-full">
-                      <h4 className="text-[12px] font-black text-white uppercase tracking-tight leading-none text-center line-clamp-2 w-full px-1">
-                        {editingBanner.title || 'JUDUL UTAMA PENGUMUMAN'}
+                    <div className="mx-3 h-px bg-white/10"></div>
+                    <div className="flex-1 flex flex-col items-center justify-center px-3 py-2 text-center">
+                      <h4 className="text-[9px] font-black text-white uppercase tracking-tight leading-tight line-clamp-2">
+                        {editingBanner.title || 'JUDUL PENGUMUMAN'}
                       </h4>
                       {editingBanner.description && (
-                        <p className="text-[8px] text-zinc-300 font-medium leading-normal mt-1 text-center w-[90%] line-clamp-2">
-                          {editingBanner.description}
-                        </p>
+                        <p className="text-[6px] text-white/60 mt-1 line-clamp-2 leading-normal">{editingBanner.description}</p>
                       )}
                     </div>
-                    
-                    <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden relative z-10 shrink-0">
-                      <div className="bg-[#D4AF37] h-full w-[80%] rounded-full shadow-[0_0_5px_#D4AF37]"></div>
+                    <div className="mx-3 h-px bg-white/10"></div>
+                    <div className="flex items-center justify-between px-3 py-1.5 shrink-0">
+                      <div className="flex items-center gap-1"><div className="w-1 h-1 rounded-full bg-emerald-400"></div><span className="text-white/30 text-[5px] font-mono uppercase">Auto</span></div>
+                      <div className="w-10 bg-white/10 h-0.5 rounded-full"><div className="bg-[#D4AF37] h-full w-4/5 rounded-full"></div></div>
                     </div>
+                    <div className="w-full h-[2px] bg-[#D4AF37] shrink-0 opacity-20"></div>
                   </div>
                 </>
               )}
