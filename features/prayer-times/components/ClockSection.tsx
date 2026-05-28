@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { PRAYER_TRANSLATIONS } from '@/shared/types';
 
 const ISLAMIC_QUOTES = [
   {
@@ -41,13 +40,9 @@ const ISLAMIC_QUOTES = [
 
 interface ClockSectionProps {
   currentTime: Date;
-  nextPrayerName: string;
-  countdownStr: string;
-  timezone: string;
 }
 
-export default function ClockSection({ currentTime, nextPrayerName, countdownStr, timezone }: ClockSectionProps) {
-  const translatedNextPrayerName = PRAYER_TRANSLATIONS[nextPrayerName] || nextPrayerName;
+export default function ClockSection({ currentTime }: ClockSectionProps) {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
@@ -65,11 +60,6 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
 
   return (
     <section className="flex-grow flex flex-col items-center justify-center relative">
-      {/* Background aesthetic circular shapes */}
-      <div className="absolute inset-0 opacity-5 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[500px] border-[40px] border-white rounded-full"></div>
-      </div>
-      
       <div className="z-10 flex flex-col items-center">
         {/* Massive Digital Time Display */}
         <div className="text-[14rem] md:text-[180px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl mb-4 font-[family-name:var(--font-space)] relative">
@@ -78,22 +68,10 @@ export default function ClockSection({ currentTime, nextPrayerName, countdownStr
             {format(currentTime, 'ss')}
           </span>
         </div>
-        
-        {/* Next Prayer Countdown Widget */}
-        <div className="flex items-center gap-6 bg-emerald-900/30 border border-emerald-500/20 px-10 py-5 rounded-3xl backdrop-blur-md shadow-xl mb-4">
-          <div className="flex flex-col border-r border-emerald-500/30 pr-6 text-left">
-            <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
-            <span className="text-3xl font-bold text-white tracking-tight">{translatedNextPrayerName}</span>
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezone})</span>
-            <span className="text-4xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
-          </div>
-        </div>
 
         {/* Islamic Daily Quotes Carousel */}
         <div 
-          className={`mt-4 px-8 py-4 bg-black/25 border border-white/5 rounded-2xl max-w-2xl text-center backdrop-blur-sm transition-all duration-500 transform ${
+          className={`mt-8 px-8 py-4 bg-black/25 border border-white/5 rounded-2xl max-w-2xl text-center backdrop-blur-sm transition-all duration-500 transform ${
             isFading ? 'opacity-0 scale-98 blur-[2px]' : 'opacity-100 scale-100 blur-none'
           }`}
         >

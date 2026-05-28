@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AppSettings, AnnouncementType, BannerType, PRAYER_TRANSLATIONS } from '@/shared/types';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Settings as SettingsIcon, Loader2, Moon, Maximize, Minimize } from 'lucide-react';
+import { Loader2, Moon, Maximize, Minimize } from 'lucide-react';
 
 // Feature-Based Absolute Imports
 import LocationPickerModal from '@/features/location/components/LocationPickerModal';
@@ -507,7 +507,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[140px] flex items-center justify-between px-16 border-b border-white/5 bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[140px] flex items-center justify-between px-16 bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase">
               {settings.mosqueName}
@@ -532,12 +532,23 @@ export default function TvDisplay({ initialSettings, initialAnnouncements }: TvD
         {/* Main Content Area */}
         <main className="flex-grow flex flex-col justify-between relative z-10">
           {/* Central Display Visualizer */}
-          <ClockSection 
-            currentTime={currentTime} 
-            nextPrayerName={nextPrayer.name} 
-            countdownStr={countdownStr} 
-            timezone={timezoneLabel} 
-          />
+          <ClockSection currentTime={currentTime} />
+
+          {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
+          <div className="flex justify-start px-8 mb-2">
+            <div className="flex items-center gap-6 bg-emerald-900/30 border border-emerald-500/20 px-8 py-4 rounded-3xl backdrop-blur-md shadow-xl transition-all duration-500">
+              <div className="flex flex-col border-r border-emerald-500/30 pr-6 text-left">
+                <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
+                <span className="text-3xl font-bold text-white tracking-tight">
+                  {PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
+                </span>
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezoneLabel})</span>
+                <span className="text-4xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
+              </div>
+            </div>
+          </div>
 
           {/* Dynamic Prayer Times Grid Bottom Sheet */}
           <PrayerTimesGrid 
