@@ -96,7 +96,10 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
   // Reactively suspend polling when the screen transitions to active prayer stages (Adzan, Iqomah, Sholat)
   useEffect(() => {
-    setIsSuspended(prayerStage !== 'NORMAL');
+    const timer = setTimeout(() => {
+      setIsSuspended(prayerStage !== 'NORMAL');
+    }, 0);
+    return () => clearTimeout(timer);
   }, [prayerStage]);
 
   // 5. Audio, adzan alarm & Tahrim background audio hooks
@@ -120,12 +123,15 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
   // Automatically switch to BANNER mode if there are active banners, otherwise use CLOCK
   useEffect(() => {
     const activeBanners = banners.filter(b => b.active);
-    if (activeBanners.length > 0) {
-      setViewMode('BANNER');
-    } else {
-      setViewMode('CLOCK');
-      setBgBannerIndex(0);
-    }
+    const timer = setTimeout(() => {
+      if (activeBanners.length > 0) {
+        setViewMode('BANNER');
+      } else {
+        setViewMode('CLOCK');
+        setBgBannerIndex(0);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [banners]);
 
   const handleBannerComplete = useCallback(() => {

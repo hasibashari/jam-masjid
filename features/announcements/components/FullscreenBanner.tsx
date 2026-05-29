@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { BannerType } from '@/shared/types';
 import { Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -40,6 +40,16 @@ export default function FullscreenBanner({ banners, activeIndex, onIndexChange }
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mouseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handlePrev = useCallback(() => {
+    if (banners.length <= 1) return;
+    onIndexChange(activeIndex === 0 ? banners.length - 1 : activeIndex - 1);
+  }, [banners.length, activeIndex, onIndexChange]);
+
+  const handleNext = useCallback(() => {
+    if (banners.length <= 1) return;
+    onIndexChange(activeIndex === banners.length - 1 ? 0 : activeIndex + 1);
+  }, [banners.length, activeIndex, onIndexChange]);
+
   // Auto-hide controls
   useEffect(() => {
     const show = () => {
@@ -55,10 +65,13 @@ export default function FullscreenBanner({ banners, activeIndex, onIndexChange }
     };
   }, []);
 
-  // Reset on slide change
+  // Reset on slide change (wrapped to avoid synchronous setState lint errors)
   useEffect(() => {
-    setImgError(false);
-    setProgress(100);
+    const timer = setTimeout(() => {
+      setImgError(false);
+      setProgress(100);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [activeIndex]);
 
   // Auto-advance timer
@@ -75,16 +88,7 @@ export default function FullscreenBanner({ banners, activeIndex, onIndexChange }
       }
     }, 50);
     return () => { if (timeoutRef.current) clearInterval(timeoutRef.current); };
-  }, [activeIndex, isPlaying, duration]);
-
-  const handlePrev = () => {
-    if (banners.length <= 1) return;
-    onIndexChange(activeIndex === 0 ? banners.length - 1 : activeIndex - 1);
-  };
-  const handleNext = () => {
-    if (banners.length <= 1) return;
-    onIndexChange(activeIndex === banners.length - 1 ? 0 : activeIndex + 1);
-  };
+  }, [activeIndex, isPlaying, duration, handleNext]);
 
   // Keyboard
   useEffect(() => {

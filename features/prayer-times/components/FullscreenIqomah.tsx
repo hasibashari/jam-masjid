@@ -43,7 +43,7 @@ export default function FullscreenIqomah({
         <div className="w-full flex justify-between items-center border-b border-emerald-900/30 pb-[1.5vh]">
           <div>
             <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">{mosqueName}</span>
-            <span className="font-black text-[#D4AF37] tracking-tight text-[3vw]">KHUTBAH JUM'AT</span>
+            <span className="font-black text-[#D4AF37] tracking-tight text-[3vw]">KHUTBAH JUM&apos;AT</span>
           </div>
           <div className="text-right">
             <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Waktu Saat Ini</span>
@@ -82,7 +82,7 @@ export default function FullscreenIqomah({
           <div className="bg-emerald-950/25 border border-emerald-900/30 rounded-[1.5vw] flex flex-col text-left px-[2vw] py-[2vh] backdrop-blur">
             <span className="text-[#D4AF37] font-black tracking-widest uppercase mb-[0.7vh] text-[1.1vw]">01. DIAM & MENYIMAK</span>
             <p className="text-zinc-400 leading-relaxed text-[1.3vw]">
-              Dilarang berbicara, berbisik, atau menegur orang lain saat khatib berkhutbah agar pahala Jum'at sempurna.
+              Dilarang berbicara, berbisik, atau menegur orang lain saat khatib berkhutbah agar pahala Jum&apos;at sempurna.
             </p>
           </div>
 

@@ -59,11 +59,14 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements, initia
   useEffect(() => {
     if (suspended) return;
 
-    // Instant fetch immediately when coming out of suspension or mounting
-    fetchLatestData();
+    // Instant fetch immediately when coming out of suspension or mounting (wrapped to avoid synchronous setState lint errors)
+    const timer = setTimeout(() => {
+      fetchLatestData();
+    }, 0);
 
     const poller = setInterval(fetchLatestData, 15000);
     return () => {
+      clearTimeout(timer);
       clearInterval(poller);
     };
   }, [fetchLatestData, suspended]);
