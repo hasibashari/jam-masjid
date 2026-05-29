@@ -75,6 +75,7 @@ export default function FullscreenBanner({ banners, activeIndex, onIndexChange }
   }, [activeIndex]);
 
   // Auto-advance timer
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isPlaying) { if (timeoutRef.current) clearInterval(timeoutRef.current); return; }
     const startTime = Date.now();

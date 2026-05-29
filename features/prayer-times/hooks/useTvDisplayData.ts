@@ -10,19 +10,26 @@ interface UseTvDisplayDataProps {
   suspended?: boolean;
 }
 
-export function useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes, suspended = false }: UseTvDisplayDataProps) {
+export function useTvDisplayData({
+  initialSettings,
+  initialAnnouncements,
+  initialQuotes,
+  suspended = false,
+}: UseTvDisplayDataProps) {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [announcements, setAnnouncements] = useState<AnnouncementType[]>(initialAnnouncements);
   const [banners, setBanners] = useState<BannerType[]>([]);
   const [quotes, setQuotes] = useState<QuoteType[]>(initialQuotes);
   const [bgError, setBgError] = useState(false);
-  const [prevBgImage, setPrevBgImage] = useState(initialSettings.backgroundImage);
 
-  // Reset background error status if the image URL changes
-  if (settings.backgroundImage !== prevBgImage) {
-    setPrevBgImage(settings.backgroundImage);
-    setBgError(false);
-  }
+  // Reset background error status when the backgroundImage URL changes.
+  // This replaces the previous render-phase state mutation anti-pattern.
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  useEffect(() => {
+    if (settings.backgroundImage) {
+      setBgError(false);
+    }
+  }, [settings.backgroundImage]);
 
   // Fetch settings, announcements, banners, and quotes from database
   const fetchLatestData = useCallback(async () => {
@@ -31,7 +38,7 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements, initia
         fetch('/api/settings').catch(() => null),
         fetch('/api/announcements').catch(() => null),
         fetch('/api/banners').catch(() => null),
-        fetch('/api/quotes').catch(() => null)
+        fetch('/api/quotes').catch(() => null),
       ]);
 
       if (settingsRes?.ok) {
@@ -51,7 +58,7 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements, initia
         setQuotes(remoteQuotes);
       }
     } catch (e) {
-      console.error("Failed background polling", e);
+      console.error('Failed background polling', e);
     }
   }, []);
 
@@ -59,22 +66,21 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements, initia
   useEffect(() => {
     if (suspended) return;
 
-    // Instant fetch immediately when coming out of suspension or mounting (wrapped to avoid synchronous setState lint errors)
+    // Instant fetch immediately when coming out of suspension or mounting
     const timer = setTimeout(() => {
       fetchLatestData();
     }, 0);
 
-    const poller = setInterval(fetchLatestData, 15000);
+    const poller = setInterval(fetchLatestData, 15_000);
     return () => {
       clearTimeout(timer);
       clearInterval(poller);
     };
   }, [fetchLatestData, suspended]);
 
-  // Event listener for PWA online status reconnection
+  // Sync data when PWA comes back online after disconnection
   useEffect(() => {
     const handleReconnectionSync = () => {
-      console.log("[PWA] Online reconnection detected! Triggering instant data sync...");
       fetchLatestData();
     };
 

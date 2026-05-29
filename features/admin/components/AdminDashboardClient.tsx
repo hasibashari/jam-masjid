@@ -50,15 +50,8 @@ export default function AdminDashboardClient() {
         if (settingsRes.ok) {
           const s = await settingsRes.json();
           setSettings(s);
-          try {
-            const ptRes = await fetch(`/api/prayer-times?lat=${s.latitude}&lng=${s.longitude}&method=${s.calculationMethod}`);
-            if (ptRes.ok) {
-              const ptData = await ptRes.json();
-              setPrayerTimings(ptData.timings);
-            }
-          } catch (e) {
-            console.error("Failed to load prayer times", e);
-          }
+          // Prayer timings will be loaded by the reactive useEffect below
+          // which watches settings.latitude/longitude/calculationMethod
         }
         if (announcementsRes.ok) {
           const a = await announcementsRes.json();

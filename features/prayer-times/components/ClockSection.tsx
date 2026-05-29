@@ -3,41 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { QuoteType } from '@/shared/types';
-
-const ISLAMIC_QUOTES = [
-  {
-    text: "Sesungguhnya shalat itu mencegah dari (perbuatan) keji dan mungkar.",
-    source: "QS. Al-Ankabut: 45"
-  },
-  {
-    text: "Shalat berjamaah lebih utama daripada shalat sendirian sebanyak dua puluh tujuh derajat.",
-    source: "HR. Bukhari & Muslim"
-  },
-  {
-    text: "Jadikanlah sabar dan shalat sebagai penolongmu. Sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.",
-    source: "QS. Al-Baqarah: 45"
-  },
-  {
-    text: "Siapa yang membangun masjid karena Allah, maka Allah akan membangunkan baginya rumah di surga.",
-    source: "HR. Bukhari & Muslim"
-  },
-  {
-    text: "Amalan yang paling dicintai oleh Allah adalah shalat pada waktunya.",
-    source: "HR. Bukhari & Muslim"
-  },
-  {
-    text: "Dekatnya seorang hamba dengan Tuhannya adalah ketika dia sedang sujud, maka perbanyaklah doa.",
-    source: "HR. Muslim"
-  },
-  {
-    text: "Apabila salah seorang di antara kalian masuk masjid, maka kerjakanlah shalat dua rakaat sebelum ia duduk.",
-    source: "HR. Bukhari & Muslim"
-  },
-  {
-    text: "Terangilah rumah-rumah kalian dengan shalat dan pembacaan Al-Qur'an.",
-    source: "HR. Al-Baihaqi"
-  }
-];
+import { FALLBACK_ISLAMIC_QUOTES } from '@/shared/constants/islamic-quotes';
 
 interface ClockSectionProps {
   currentTime: Date;
@@ -50,7 +16,7 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
 
   const activeQuotes = (quotes && quotes.length > 0)
     ? quotes.filter(q => q.active)
-    : ISLAMIC_QUOTES;
+    : FALLBACK_ISLAMIC_QUOTES;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,7 +33,7 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
     return () => clearInterval(interval);
   }, [activeQuotes.length]);
 
-  const currentQuote = activeQuotes[currentQuoteIndex] || ISLAMIC_QUOTES[0];
+  const currentQuote = activeQuotes[currentQuoteIndex] || FALLBACK_ISLAMIC_QUOTES[0];
 
   return (
     <section className="flex-grow flex flex-col justify-center items-center gap-[clamp(1rem,3vh,2rem)] relative overflow-hidden w-full px-[4vw]">

@@ -169,7 +169,7 @@ function toDbData(data: any) {
   if ('backgroundImages' in copy && Array.isArray(copy.backgroundImages)) {
     copy.backgroundImages = JSON.stringify(copy.backgroundImages);
   }
-  
+
   // Strip out undefined values to support partial updates correctly
   for (const key of Object.keys(copy)) {
     if (copy[key] === undefined) {
@@ -177,6 +177,58 @@ function toDbData(data: any) {
     }
   }
   return copy;
+}
+
+// ---------------------------------------------------------------------------
+// Shared query builder for findMany operations (eliminates 4× duplication)
+// ---------------------------------------------------------------------------
+
+interface DbWhereClause {
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface DbOrderBy {
+  [key: string]: 'asc' | 'desc';
+}
+
+interface DbFindManyArgs {
+  where?: DbWhereClause;
+  orderBy?: DbOrderBy;
+}
+
+function buildFindManyQuery(
+  tableName: string,
+  args?: DbFindManyArgs,
+): { query: string; params: (string | number)[] } {
+  let query = `SELECT * FROM "${tableName}"`;
+  const params: (string | number)[] = [];
+
+  if (args?.where) {
+    const clauses: string[] = [];
+    for (const [k, v] of Object.entries(args.where)) {
+      if (v !== undefined) {
+        clauses.push(`"${k}" = $${clauses.length + 1}`);
+        params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
+      }
+    }
+    if (clauses.length > 0) {
+      query += ` WHERE ${clauses.join(' AND ')}`;
+    }
+  }
+
+  if (args?.orderBy) {
+    const orderKeys = Object.keys(args.orderBy);
+    if (orderKeys.length > 0) {
+      query += ` ORDER BY ${orderKeys
+        .map(
+          (k) =>
+            `"${k}" ${args.orderBy![k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`,
+        )
+        .join(', ')}`;
+    }
+  }
+
+  return { query, params };
 }
 
 export const settingsDb = {
@@ -205,27 +257,8 @@ export const settingsDb = {
 };
 
 export const announcementsDb = {
-  findMany: async (args?: any) => {
-    let query = 'SELECT * FROM "Announcement"';
-    const params: any[] = [];
-    if (args?.where) {
-      const clauses: string[] = [];
-      for (const [k, v] of Object.entries(args.where)) {
-        if (v !== undefined) {
-          clauses.push(`"${k}" = $${clauses.length + 1}`);
-          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
-        }
-      }
-      if (clauses.length > 0) {
-        query += ` WHERE ${clauses.join(' AND ')}`;
-      }
-    }
-    if (args?.orderBy) {
-      const orderKeys = Object.keys(args.orderBy);
-      if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
-      }
-    }
+  findMany: async (args?: DbFindManyArgs) => {
+    const { query, params } = buildFindManyQuery('Announcement', args);
     const res = await pool.query(query, params);
     return res.rows.map(fromDbRow);
   },
@@ -255,27 +288,8 @@ export const announcementsDb = {
 };
 
 export const bannersDb = {
-  findMany: async (args?: any) => {
-    let query = 'SELECT * FROM "Banner"';
-    const params: any[] = [];
-    if (args?.where) {
-      const clauses: string[] = [];
-      for (const [k, v] of Object.entries(args.where)) {
-        if (v !== undefined) {
-          clauses.push(`"${k}" = $${clauses.length + 1}`);
-          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
-        }
-      }
-      if (clauses.length > 0) {
-        query += ` WHERE ${clauses.join(' AND ')}`;
-      }
-    }
-    if (args?.orderBy) {
-      const orderKeys = Object.keys(args.orderBy);
-      if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
-      }
-    }
+  findMany: async (args?: DbFindManyArgs) => {
+    const { query, params } = buildFindManyQuery('Banner', args);
     const res = await pool.query(query, params);
     return res.rows.map(fromDbRow);
   },
@@ -330,27 +344,8 @@ export const userDb = {
 };
 
 export const quotesDb = {
-  findMany: async (args?: any) => {
-    let query = 'SELECT * FROM "Quote"';
-    const params: any[] = [];
-    if (args?.where) {
-      const clauses: string[] = [];
-      for (const [k, v] of Object.entries(args.where)) {
-        if (v !== undefined) {
-          clauses.push(`"${k}" = $${clauses.length + 1}`);
-          params.push(typeof v === 'boolean' ? (v ? 1 : 0) : v);
-        }
-      }
-      if (clauses.length > 0) {
-        query += ` WHERE ${clauses.join(' AND ')}`;
-      }
-    }
-    if (args?.orderBy) {
-      const orderKeys = Object.keys(args.orderBy);
-      if (orderKeys.length > 0) {
-        query += ` ORDER BY ${orderKeys.map(k => `"${k}" ${args.orderBy[k].toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`).join(', ')}`;
-      }
-    }
+  findMany: async (args?: DbFindManyArgs) => {
+    const { query, params } = buildFindManyQuery('Quote', args);
     const res = await pool.query(query, params);
     return res.rows.map(fromDbRow);
   },

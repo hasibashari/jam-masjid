@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { differenceInMilliseconds, parse, addSeconds, addMinutes } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PrayerTimesState, PrayerItem } from '../types';
@@ -157,6 +157,43 @@ export function usePrayerTimes({
     return () => clearInterval(clock);
   }, [timezone, sandboxSettings.active, sandboxSettings.time, sandboxSettings.speed]);
 
+  // ---------------------------------------------------------------------------
+  // Memoized timeline derivations
+  // These are declared BEFORE the early return to comply with Rules of Hooks.
+  // They safely return null/[] when inputs are not yet loaded.
+  // ---------------------------------------------------------------------------
+  const currentDateStr = currentTime?.toDateString();
+  const timelineObj = useMemo(() => {
+    if (!currentTime || !prayerTimes) return null;
+    const parse_ = (timeStr: string) => parse(timeStr.split(" ")[0], "HH:mm", currentTime);
+    return {
+      Imsak: addMinutes(parse_(prayerTimes.Imsak || "04:10"), adjustImsak || 0),
+      Fajr: addMinutes(parse_(prayerTimes.Fajr), adjustFajr || 0),
+      Sunrise: addMinutes(parse_(prayerTimes.Sunrise), adjustSunrise || 0),
+      Dhuhr: addMinutes(parse_(prayerTimes.Dhuhr), adjustDhuhr || 0),
+      Asr: addMinutes(parse_(prayerTimes.Asr), adjustAsr || 0),
+      Maghrib: addMinutes(parse_(prayerTimes.Maghrib), adjustMaghrib || 0),
+      Isha: addMinutes(parse_(prayerTimes.Isha), adjustIsha || 0),
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    prayerTimes,
+    adjustImsak, adjustFajr, adjustSunrise, adjustDhuhr,
+    adjustAsr, adjustMaghrib, adjustIsha,
+    currentDateStr,
+  ]);
+
+  const timelineValid = useMemo(() => {
+    if (!timelineObj) return [];
+    return [
+      { name: 'Fajr', time: timelineObj.Fajr },
+      { name: 'Dhuhr', time: timelineObj.Dhuhr },
+      { name: 'Asr', time: timelineObj.Asr },
+      { name: 'Maghrib', time: timelineObj.Maghrib },
+      { name: 'Isha', time: timelineObj.Isha },
+    ];
+  }, [timelineObj]);
+
   // If we haven't mounted or loaded the times yet, return default loaders values
   if (!currentTime || !prayerTimes) {
     return {
@@ -174,26 +211,9 @@ export function usePrayerTimes({
     };
   }
 
-  // Convert prayer times strings (e.g. "04:30") to correct Dates for today
-  const parseTime = (timeStr: string) => parse(timeStr.split(" ")[0], "HH:mm", currentTime);
-
-  const timelineObj = {
-    Imsak: addMinutes(parseTime(prayerTimes.Imsak || "04:10"), adjustImsak || 0),
-    Fajr: addMinutes(parseTime(prayerTimes.Fajr), adjustFajr || 0),
-    Sunrise: addMinutes(parseTime(prayerTimes.Sunrise), adjustSunrise || 0),
-    Dhuhr: addMinutes(parseTime(prayerTimes.Dhuhr), adjustDhuhr || 0),
-    Asr: addMinutes(parseTime(prayerTimes.Asr), adjustAsr || 0),
-    Maghrib: addMinutes(parseTime(prayerTimes.Maghrib), adjustMaghrib || 0),
-    Isha: addMinutes(parseTime(prayerTimes.Isha), adjustIsha || 0)
-  };
-
-  const timelineValid: PrayerItem[] = [
-    { name: 'Fajr', time: timelineObj.Fajr },
-    { name: 'Dhuhr', time: timelineObj.Dhuhr },
-    { name: 'Asr', time: timelineObj.Asr },
-    { name: 'Maghrib', time: timelineObj.Maghrib },
-    { name: 'Isha', time: timelineObj.Isha }
-  ];
+  // Below this line: currentTime, prayerTimes, and timelineObj are all guaranteed non-null.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const tl = timelineObj!;
 
   // Let's determine if we are currently in an active special stage:
   // ADZAN, IQOMAH, or PRAYING.
@@ -245,22 +265,21 @@ export function usePrayerTimes({
   }
   }
 
-  // Regular next prayer countdown logic (excluding sunrise for calculation of NEXT, or we can include Sunrise if it's there but typically we only count down to standard workflow)
-  // Let's count down to any active schedule, including Imsak
+  // Countdown to next prayer (includes Imsak, Sunrise)
   const normalCountdownTimeline = [
-    { name: 'Imsak', time: timelineObj.Imsak },
-    { name: 'Fajr', time: timelineObj.Fajr },
-    { name: 'Sunrise', time: timelineObj.Sunrise },
-    { name: 'Dhuhr', time: timelineObj.Dhuhr },
-    { name: 'Asr', time: timelineObj.Asr },
-    { name: 'Maghrib', time: timelineObj.Maghrib },
-    { name: 'Isha', time: timelineObj.Isha }
+    { name: 'Imsak', time: tl.Imsak },
+    { name: 'Fajr', time: tl.Fajr },
+    { name: 'Sunrise', time: tl.Sunrise },
+    { name: 'Dhuhr', time: tl.Dhuhr },
+    { name: 'Asr', time: tl.Asr },
+    { name: 'Maghrib', time: tl.Maghrib },
+    { name: 'Isha', time: tl.Isha },
   ];
 
   let nextPrayer = normalCountdownTimeline.find(p => p.time > currentTime);
-  
+
   if (!nextPrayer) {
-    const tomorrowImsak = new Date(timelineObj.Imsak);
+    const tomorrowImsak = new Date(tl.Imsak);
     tomorrowImsak.setDate(tomorrowImsak.getDate() + 1);
     nextPrayer = { name: 'Imsak', time: tomorrowImsak };
   }
@@ -271,11 +290,9 @@ export function usePrayerTimes({
   const secsToNext = Math.max(0, Math.floor((msToNext % (1000 * 60)) / 1000));
   const countdownStr = `${String(hoursToNext).padStart(2, '0')}:${String(minsToNext).padStart(2, '0')}:${String(secsToNext).padStart(2, '0')}`;
 
-  // Format Hijri Date (using native Intl in Indonesian)
-  // Dilakukan penyesuaian koreksi agar selaras dengan kalender Hijriah resmi Kemenag RI
-  // Sebelum Maghrib: koreksi -1 hari. Setelah Maghrib: berganti ke hari berikutnya (tanpa koreksi -1 hari)
+  // Hijri date with Kemenag RI correction: before Maghrib, subtract 1 day
   const hijriAdjustedTime = new Date(currentTime.getTime());
-  if (timelineObj && timelineObj.Maghrib && currentTime < timelineObj.Maghrib) {
+  if (tl.Maghrib && currentTime < tl.Maghrib) {
     hijriAdjustedTime.setDate(hijriAdjustedTime.getDate() - 1);
   }
 
@@ -304,11 +321,11 @@ export function usePrayerTimes({
     timezone,
     timezoneLabel: getIndonesianTimezoneLabel(timezone),
     nextPrayer,
-    timelineObj,
+    timelineObj: tl,
     countdownStr,
     hijriDate,
     prayerStage,
     activePrayerName,
-    stageSecondsLeft
+    stageSecondsLeft,
   };
 }

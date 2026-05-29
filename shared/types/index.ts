@@ -1,3 +1,11 @@
+export interface BackgroundImage {
+  id: string;
+  url: string;
+  active: boolean;
+}
+
+export type BackgroundTransitionEffect = 'fade' | 'zoom' | 'slide' | 'blur';
+
 export interface AppSettings {
   id?: string;
   mosqueName: string;
@@ -10,10 +18,10 @@ export interface AppSettings {
   prayerDuration: number;
   backgroundImage?: string | null;
   backgroundActive?: boolean;
-  backgroundImages?: Array<{ id: string; url: string; active: boolean }>;
+  backgroundImages?: BackgroundImage[];
   backgroundSlideshowActive?: boolean;
   backgroundSlideshowInterval?: number;
-  backgroundTransitionEffect?: 'fade' | 'zoom' | 'slide' | 'blur';
+  backgroundTransitionEffect?: BackgroundTransitionEffect;
   // display sleep configuration removed
   iqomahFajr: number;
   iqomahDhuhr: number;
@@ -53,6 +61,8 @@ export interface QuoteType {
   active: boolean;
 }
 
+export type BannerContentMode = 'IMAGE' | 'TEXT';
+
 export interface BannerType {
   id: string;
   title: string;
@@ -61,7 +71,7 @@ export interface BannerType {
   active: boolean;
   autoHideAfter: number; // in seconds
   createdAt?: string | Date;
-  contentMode?: 'IMAGE' | 'TEXT';
+  contentMode?: BannerContentMode;
   bgGradient?: string;
 }
 
