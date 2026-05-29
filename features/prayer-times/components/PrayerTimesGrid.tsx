@@ -59,12 +59,12 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
           <div 
             key={prayer.id}
             className={`
-              flex flex-col items-center justify-center rounded-2xl transition-all duration-1000 shadow-sm text-center backdrop-blur-md
+              flex flex-col items-center justify-center rounded-2xl transition-all duration-1000 text-center backdrop-blur-md
               ${isNext 
-                ? 'py-[clamp(0.6rem,1.2vh,1rem)] px-[clamp(0.4rem,0.8vw,1rem)] bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border-2 border-[#D4AF37]/75 shadow-[0_0_20px_rgba(212,175,55,0.2)] scale-102 z-10 text-white' 
+                ? 'py-[clamp(0.6rem,1.2vh,1rem)] px-[clamp(0.4rem,0.8vw,1rem)] bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border-2 border-[#D4AF37]/90 shadow-[0_0_20px_rgba(212,175,55,0.4)] scale-102 z-10 text-white' 
                 : isImsak
-                  ? 'py-[clamp(0.5rem,1vh,0.8rem)] px-[clamp(0.3rem,0.6vw,0.8rem)] bg-white/5 border border-white/10 scale-98 text-white' 
-                  : 'py-[clamp(0.6rem,1.2vh,1rem)] px-[clamp(0.4rem,0.8vw,1rem)] bg-emerald-950/10 border border-emerald-500/10 hover:border-emerald-500/20 text-white'}
+                  ? 'py-[clamp(0.5rem,1vh,0.8rem)] px-[clamp(0.3rem,0.6vw,0.8rem)] bg-sky-950/20 border border-sky-400/30 shadow-[0_4px_12px_rgba(0,0,0,0.15)] scale-98 text-white' 
+                  : 'py-[clamp(0.6rem,1.2vh,1rem)] px-[clamp(0.4rem,0.8vw,1rem)] bg-emerald-950/30 border border-emerald-500/30 shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:border-emerald-500/50 hover:bg-emerald-900/40 text-white'}
             `}
           >
             <span className={`text-[clamp(0.7rem,1.3vh,0.9rem)] font-extrabold uppercase tracking-[0.2em] mb-[clamp(0.2rem,0.5vh,0.4rem)]

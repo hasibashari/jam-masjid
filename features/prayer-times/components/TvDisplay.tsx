@@ -318,21 +318,21 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         {/* Header Section */}
         <header className="flex-none h-[11vh] flex items-center justify-between px-[4vw] pt-[1.5vh] bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
-            <h1 className="text-[clamp(1.25rem,2.8vh,2rem)] font-extrabold tracking-tight uppercase leading-none text-[#F7F5F0]">
+            <h1 className="text-[clamp(1.5rem,3.5vh,2.5rem)] font-extrabold tracking-tight uppercase leading-none text-[#F7F5F0]">
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-[clamp(0.65rem,1.3vh,0.9rem)] text-[#D4AF37]/95 font-extrabold tracking-wide mt-[clamp(0.2rem,0.4vh,0.4rem)] uppercase">
+              <p className="text-[clamp(0.75rem,1.6vh,1.1rem)] text-[#D4AF37]/95 font-extrabold tracking-wide mt-[clamp(0.2rem,0.4vh,0.4rem)] uppercase">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
 
           <div className="text-right flex flex-col justify-center border-r-4 border-[#D4AF37]/40 pr-[1.5vw]">
-            <div className="text-[clamp(0.95rem,2.1vh,1.4rem)] font-bold text-[#F7F5F0] tracking-tight leading-none">
+            <div className="text-[clamp(1.1rem,2.5vh,1.7rem)] font-bold text-[#F7F5F0] tracking-tight leading-none">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
-            <div className="text-[clamp(0.75rem,1.5vh,1.05rem)] text-[#D4AF37] font-serif font-black italic mt-[clamp(0.2rem,0.4vh,0.4rem)] tracking-widest leading-none">
+            <div className="text-[clamp(0.85rem,1.8vh,1.3rem)] text-[#D4AF37] font-serif font-black italic mt-[clamp(0.2rem,0.4vh,0.4rem)] tracking-widest leading-none">
               {hijriDate}
             </div>
           </div>
@@ -345,7 +345,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
           {/* Next Prayer Countdown Widget */}
           <div className="flex justify-start px-[2vw] mb-[clamp(0.4rem,1vh,0.8rem)]">
-            <div className="flex items-center gap-[clamp(1rem,1.5vw,2rem)] bg-[#11221D]/80 border border-emerald-500/20 px-[clamp(1rem,1.5vw,2rem)] py-[clamp(0.4rem,0.8vh,0.8rem)] rounded-2xl backdrop-blur-md shadow-xl transition-all duration-500">
+            <div className="flex items-center gap-[clamp(1rem,1.5vw,2rem)] bg-[#11221D]/80 border border-emerald-500/20 px-[clamp(1.5rem,2vw,2.5rem)] py-[clamp(0.8rem,1.6vh,1.2rem)] rounded-2xl backdrop-blur-md shadow-xl transition-all duration-500">
               <div className="flex flex-col border-r border-emerald-500/20 pr-[clamp(1rem,1.5vw,2rem)] text-left">
                 <span className="text-emerald-300/70 text-[clamp(0.6rem,1.1vh,0.8rem)] font-extrabold uppercase tracking-[0.2em] mb-[0.2vh]">Selanjutnya</span>
                 <span className="text-[clamp(1.1rem,2.4vh,1.8rem)] font-bold text-emerald-50 tracking-tight leading-none">
