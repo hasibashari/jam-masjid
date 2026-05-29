@@ -30,6 +30,10 @@ export interface AppSettings {
   tahrimAudioUrl: string;
   tahrimDuration: number; // in minutes before Fajr
   fastingReminderActive: boolean;
+  sandboxActive?: boolean;
+  sandboxStage?: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
+  sandboxSpeed?: number;
+  sandboxTime?: string | null;
 }
 
 export interface AnnouncementType {

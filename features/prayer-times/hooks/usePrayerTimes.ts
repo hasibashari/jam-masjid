@@ -71,10 +71,80 @@ export function usePrayerTimes({
     return () => clearInterval(refreshTimer);
   }, [latitude, longitude, calculationMethod]);
 
-  // Update clock every second, taking into account timezone
+  const [sandboxSettings, setSandboxSettings] = useState<{
+    active: boolean;
+    stage: 'AUTO' | 'NORMAL' | 'ADZAN' | 'IQOMAH' | 'PRAYING';
+    speed: number;
+    time: string | null;
+  }>({
+    active: false,
+    stage: 'AUTO',
+    speed: 1.0,
+    time: null
+  });
+
+  // Sync sandbox settings with localStorage
+  useEffect(() => {
+    const loadSandbox = () => {
+      try {
+        const active = localStorage.getItem('jam_masjid_sandbox_active') === 'true';
+        const stage = (localStorage.getItem('jam_masjid_sandbox_stage') as any) || 'AUTO';
+        const speed = parseFloat(localStorage.getItem('jam_masjid_sandbox_speed') || '1.0');
+        const time = localStorage.getItem('jam_masjid_sandbox_time');
+        
+        setSandboxSettings({ active, stage, speed, time });
+      } catch (e) {
+        console.error("Failed to load local sandbox settings", e);
+      }
+    };
+    
+    loadSandbox();
+    
+    // Sync across tabs/admin panel
+    window.addEventListener('storage', loadSandbox);
+    window.addEventListener('jam-masjid-sandbox-update', loadSandbox);
+    
+    return () => {
+      window.removeEventListener('storage', loadSandbox);
+      window.removeEventListener('jam-masjid-sandbox-update', loadSandbox);
+    };
+  }, []);
+
+  // Local refs for virtual clock tracking in sandbox mode
+  const virtualTimeBaseRef = useRef<Date | null>(null);
+  const realTimeBaseRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (sandboxSettings.active && sandboxSettings.time) {
+      const parsed = new Date(sandboxSettings.time);
+      if (!isNaN(parsed.getTime())) {
+        virtualTimeBaseRef.current = parsed;
+        realTimeBaseRef.current = Date.now();
+      }
+    } else {
+      virtualTimeBaseRef.current = null;
+      realTimeBaseRef.current = null;
+    }
+  }, [sandboxSettings.active, sandboxSettings.time]);
+
+  // Update clock every second, taking into account timezone and sandbox settings
   useEffect(() => {
     const updateTime = () => {
-      const activeTime = new Date();
+      const now = new Date();
+      let activeTime = now;
+
+      if (sandboxSettings.active) {
+        if (virtualTimeBaseRef.current && realTimeBaseRef.current) {
+          const elapsedReal = Date.now() - realTimeBaseRef.current;
+          const elapsedVirtual = elapsedReal * sandboxSettings.speed;
+          activeTime = new Date(virtualTimeBaseRef.current.getTime() + elapsedVirtual);
+        } else if (sandboxSettings.time) {
+          const parsed = new Date(sandboxSettings.time);
+          if (!isNaN(parsed.getTime())) {
+            activeTime = parsed;
+          }
+        }
+      }
 
       if (timezone) {
         setCurrentTime(toZonedTime(activeTime, timezone));
@@ -85,7 +155,7 @@ export function usePrayerTimes({
     updateTime();
     const clock = setInterval(updateTime, 1000);
     return () => clearInterval(clock);
-  }, [timezone]);
+  }, [timezone, sandboxSettings.active, sandboxSettings.time, sandboxSettings.speed]);
 
   // If we haven't mounted or loaded the times yet, return default loaders values
   if (!currentTime || !prayerTimes) {
@@ -132,6 +202,12 @@ export function usePrayerTimes({
   let activePrayerName: string | null = null;
   let stageSecondsLeft = 0;
 
+  if (sandboxSettings.active && sandboxSettings.stage && sandboxSettings.stage !== 'AUTO') {
+    prayerStage = sandboxSettings.stage;
+    activePrayerName = 'Dhuhr'; // mock prayer name for sandbox visual testing
+    stageSecondsLeft = 300; // mock time left (5 mins)
+  } else {
+
   for (const item of timelineValid) {
     const prayerTime = item.time;
     
@@ -166,6 +242,7 @@ export function usePrayerTimes({
       stageSecondsLeft = Math.max(0, Math.floor(differenceInMilliseconds(prayerEndTime, currentTime) / 1000));
       break;
     }
+  }
   }
 
   // Regular next prayer countdown logic (excluding sunrise for calculation of NEXT, or we can include Sunrise if it's there but typically we only count down to standard workflow)

@@ -70,35 +70,34 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   const currentQuote = activeQuotes[currentQuoteIndex] || ISLAMIC_QUOTES[0];
 
   return (
-    <section className="relative w-full h-full grid grid-rows-[1fr_auto_1fr] overflow-hidden">
+    <section className="flex-grow flex flex-col justify-center items-center gap-[2vh] relative overflow-hidden w-full px-[4vw]">
       {/* Clock */}
-      <div className="row-start-2 flex flex-col items-center justify-center z-10 select-none pointer-events-none -translate-y-6 md:-translate-y-14 lg:-translate-y-20">
-
+      <div className="flex flex-col items-center justify-center z-10 select-none pointer-events-none">
         {/* Time */}
         <div className="flex items-end">
-          <span className="text-[4rem] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[180px] 2xl:text-[210px] min-[1800px]:text-[240px] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)]">
+          <span className="text-[13vh] 2xl:text-[16vh] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)]">
             {format(currentTime, 'HH:mm')}
           </span>
 
-          <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl text-emerald-400/55 font-medium mb-[0.5vw] ml-3">
+          <span className="text-[3.5vh] 2xl:text-[4.5vh] text-emerald-400/55 font-medium mb-[0.8vh] lg:mb-[1.2vh] ml-3">
             {format(currentTime, 'ss')}
           </span>
         </div>
       </div>
 
-      {/* 2. Absolute Quotes Container at Bottom Center (Leaves the digital clock centered and completely stable) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl px-6 md:px-8 z-10">
+      {/* Quotes Container - Relatif di bawah jam, menyusut secara dinamis mengikuti panjang teks */}
+      <div className="w-fit max-w-[48vw] mx-auto z-10">
         <div
-          className={`px-6 md:px-10 py-4 md:py-6 bg-black/25 border border-white/5 rounded-2xl backdrop-blur-sm transition-all duration-500 text-center ${isFading
+          className={`pt-[2.4vh] pb-[1.8vh] px-[2.5vw] bg-black/35 border border-white/10 rounded-2xl backdrop-blur-sm transition-all duration-500 text-center ${isFading
             ? 'opacity-0 scale-98 blur-[2px]'
             : 'opacity-100 scale-100 blur-none'
             }`}
         >
-          <p className="text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-medium italic leading-relaxed line-clamp-3">
+          <p className="text-zinc-200 text-[1.8vh] 2xl:text-[2.2vh] font-medium italic leading-relaxed line-clamp-3">
             &ldquo;{currentQuote.text}&rdquo;
           </p>
 
-          <span className="block mt-2.5 md:mt-3.5 text-emerald-400 text-[10px] sm:text-xs lg:text-sm xl:text-base font-extrabold uppercase tracking-[0.2em] truncate">
+          <span className="block mt-[1vh] text-emerald-400 text-[1.1vh] 2xl:text-[1.3vh] font-extrabold uppercase tracking-[0.2em] truncate">
             — {currentQuote.source}
           </span>
         </div>

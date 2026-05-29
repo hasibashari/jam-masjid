@@ -19,9 +19,10 @@ import SettingsTab from '@/features/settings/components/SettingsTab';
 import AnnouncementsTab from '@/features/announcements/components/AnnouncementsTab';
 import BannersTab from '@/features/announcements/components/BannersTab';
 import QuotesTab from '@/features/quotes/components/QuotesTab';
+import SandboxTab from '@/features/settings/components/SandboxTab';
 
 export default function AdminDashboardClient() {
-  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'quotes'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'announcements' | 'banners' | 'quotes' | 'sandbox'>('settings');
   const [loading, setLoading] = useState(true);
 
   // Consolidated global settings & data states
@@ -227,6 +228,20 @@ export default function AdminDashboardClient() {
               <QuoteIcon className="w-4 h-4 shrink-0" />
               <span>Kata Motivasi / Quotes</span>
             </button>
+
+            {process.env.NODE_ENV === 'development' && (
+              <button 
+                onClick={() => setActiveTab('sandbox')}
+                className={`flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 snap-start ${
+                  activeTab === 'sandbox' 
+                    ? 'bg-emerald-900/30 text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                    : 'text-zinc-400 hover:bg-zinc-900/40 hover:text-white'
+                }`}
+              >
+                <Clock className="w-4 h-4 shrink-0" />
+                <span>Dev Sandbox Simulator</span>
+              </button>
+            )}
           </nav>
         </div>
 
@@ -260,6 +275,15 @@ export default function AdminDashboardClient() {
             <QuotesTab 
               quotes={quotes} 
               setQuotes={setQuotes} 
+              showAlert={showAlert} 
+            />
+          )}
+
+          {activeTab === 'sandbox' && process.env.NODE_ENV === 'development' && (
+            <SandboxTab 
+              settings={settings} 
+              setSettings={setSettings} 
+              prayerTimings={prayerTimings}
               showAlert={showAlert} 
             />
           )}

@@ -150,22 +150,22 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
   // --- DYNAMIC GRADIENT HELPER ---
   const getDynamicGradientClass = (prayerName: string | null) => {
-    if (!prayerName) return 'from-[#051109] via-[#020b06] to-[#010502]';
+    if (!prayerName) return 'from-[#0c2419] via-[#06120c] to-[#020604]';
     switch (prayerName) {
       case 'Imsak':
       case 'Fajr': // Subuh: Deep dawn navy blue-purple
-        return 'from-[#0a182c] via-[#051109] to-[#030814]';
+        return 'from-[#0d2347] via-[#071328] to-[#030815]';
       case 'Sunrise':
       case 'Dhuhr': // Dzuhur: Morning golden-green
-        return 'from-[#022416] via-[#051109] to-[#0e3321]';
+        return 'from-[#073623] via-[#031d12] to-[#010b07]';
       case 'Asr': // Ashar: Olive warm bronze-green
-        return 'from-[#201c0c] via-[#051109] to-[#0a140f]';
+        return 'from-[#2a230e] via-[#161307] to-[#090703]';
       case 'Maghrib': // Maghrib: Sunset orange-rose
-        return 'from-[#2c1208] via-[#051109] to-[#0d0914]';
+        return 'from-[#3c170d] via-[#1a0b06] to-[#0a0402]';
       case 'Isha': // Isya: Starry space blue-black
-        return 'from-[#030c1c] via-[#051109] to-[#010408]';
+        return 'from-[#071d3d] via-[#030d1c] to-[#01040a]';
       default:
-        return 'from-[#051109] via-[#020b06] to-[#010502]';
+        return 'from-[#0c2419] via-[#06120c] to-[#020604]';
     }
   };
 
@@ -326,10 +326,10 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
             <img 
               src={settings.backgroundImage!} 
               alt="Background" 
-              className="w-full h-full object-cover opacity-45 brightness-75"
+              className="w-full h-full object-cover opacity-55 brightness-90"
               onError={() => setBgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/65"></div>
           </div>
         ) : (
           /* Premium dynamic gradient background based on time of day / next prayer */
@@ -339,45 +339,45 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[180px] xl:h-[200px] 2xl:h-[220px] flex items-center justify-between px-16 pt-8 bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[15vh] flex items-center justify-between px-[4vw] pt-[2vh] bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight uppercase leading-none">
+            <h1 className="text-[3.5vh] 2xl:text-[4.2vh] font-extrabold tracking-tight uppercase leading-none">
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-emerald-400 font-semibold tracking-wide mt-2 uppercase opacity-85">
+              <p className="text-[1.6vh] 2xl:text-[2vh] text-emerald-400 font-semibold tracking-wide mt-[0.8vh] uppercase opacity-85">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
           
           <div className="text-right flex flex-col justify-center">
-            <div className="text-4xl lg:text-5xl xl:text-5xl font-bold text-white tracking-tight">
+            <div className="text-[2.6vh] 2xl:text-[3vh] font-bold text-white tracking-tight leading-none">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
-            <div className="text-2xl lg:text-3xl xl:text-3xl text-emerald-400 font-serif italic mt-1.5 tracking-wider">
+            <div className="text-[1.8vh] 2xl:text-[2.2vh] text-emerald-400 font-serif italic mt-[0.8vh] tracking-wider leading-none">
               {hijriDate}
             </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-grow flex flex-col justify-between relative z-10">
+        <main className="flex-grow flex flex-col justify-between relative z-10 overflow-hidden">
           {/* Central Display Visualizer */}
           <ClockSection currentTime={currentTime} quotes={quotes} />
 
           {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
-          <div className="flex justify-start px-8 mb-6 lg:mb-8">
-            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 xl:gap-10 bg-emerald-900/30 border border-emerald-500/20 px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-5 rounded-3xl backdrop-blur-md shadow-xl transition-all duration-500">
-              <div className="flex flex-col border-r border-emerald-500/30 pr-4 md:pr-6 lg:pr-8 xl:pr-10 text-left">
-                <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
-                <span className="text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-tight">
+          <div className="flex justify-start px-[2vw] mb-[2vh]">
+            <div className="flex items-center gap-[2vw] bg-emerald-900/40 border border-emerald-500/30 px-[2vw] py-[1.2vh] rounded-2xl backdrop-blur-md shadow-xl transition-all duration-500">
+              <div className="flex flex-col border-r border-emerald-500/30 pr-[2vw] text-left">
+                <span className="text-emerald-400 text-[1.2vh] 2xl:text-[1.4vh] font-black uppercase tracking-[0.2em] mb-[0.2vh]">Selanjutnya</span>
+                <span className="text-[2.8vh] 2xl:text-[3.4vh] font-bold text-white tracking-tight leading-none">
                   {nextPrayer.name === 'Dhuhr' && currentTime && currentTime.getDay() === 5 ? "Jum'at" : PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
                 </span>
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Hitung Mundur ({timezoneLabel})</span>
-                <span className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#D4AF37] tabular-nums tracking-tighter">{countdownStr}</span>
+                <span className="text-emerald-400 text-[1.2vh] 2xl:text-[1.4vh] font-black uppercase tracking-[0.2em] mb-[0.2vh]">Hitung Mundur ({timezoneLabel})</span>
+                <span className="text-[3.5vh] 2xl:text-[4.2vh] font-black text-[#D4AF37] tabular-nums tracking-tighter leading-none">{countdownStr}</span>
               </div>
             </div>
           </div>
