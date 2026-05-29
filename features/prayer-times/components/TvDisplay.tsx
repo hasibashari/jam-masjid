@@ -100,7 +100,9 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     tahrimDuration: settings.tahrimDuration,
   });
 
-  const translatedPrayerName = activePrayerName ? (PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName) : '';
+  const translatedPrayerName = activePrayerName
+    ? (activePrayerName === 'Dhuhr' && currentTime && currentTime.getDay() === 5 ? "Jum'at" : PRAYER_TRANSLATIONS[activePrayerName] || activePrayerName)
+    : '';
 
   // Automatically switch to BANNER mode if there are active banners, otherwise use CLOCK
   useEffect(() => {
@@ -197,12 +199,16 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
       case 'Isha': activeIqomahDuration = settings.iqomahIsha; break;
     }
 
+    const isFriday = currentTime && currentTime.getDay() === 5;
+
     return (
       <FullscreenIqomah 
         prayerName={translatedPrayerName} 
         currentTime={currentTime} 
         secondsLeft={stageSecondsLeft} 
         iqomahDuration={activeIqomahDuration}
+        isFriday={!!isFriday}
+        mosqueName={settings.mosqueName}
       />
     );
   }
@@ -263,9 +269,29 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
       });
     }
 
+    // Friday Sunnah reminders (Thursday evening/Malam Jum'at & Friday daytime)
+    const isMalamJumat = dayOfWeek === 4 && timelineObj?.Maghrib && currentTime >= timelineObj.Maghrib;
+    const isHariJumat = dayOfWeek === 5 && timelineObj?.Maghrib && currentTime < timelineObj.Maghrib;
+
+    if (isMalamJumat) {
+      fastingAnnouncements.push({
+        id: 'friday-sunnah-eve',
+        text: '✨ Malam Jum\'at: Disunnahkan memperbanyak sholawat kepada Rasulullah ﷺ dan membaca Surah Al-Kahfi.',
+        active: true
+      });
+    } else if (isHariJumat) {
+      fastingAnnouncements.push({
+        id: 'friday-sunnah-day',
+        text: '🕌 Hari Jum\'at Mubarak: Sunnah mandi Jum\'at, memakai wewangian, datang awal, dan menyimak khutbah dengan tenang.',
+        active: true
+      });
+    }
+
     try {
       const hijriAdjusted = new Date(currentTime.getTime());
-      hijriAdjusted.setDate(hijriAdjusted.getDate() - 1); // 1-day offset
+      if (timelineObj && timelineObj.Maghrib && currentTime < timelineObj.Maghrib) {
+        hijriAdjusted.setDate(hijriAdjusted.getDate() - 1); // 1-day offset before Maghrib
+      }
       const hijriDayFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', { day: 'numeric' });
       const formattedDay = hijriDayFormatter.format(hijriAdjusted);
       const hijriDayNum = parseInt(formattedDay.replace(/\D/g, ''), 10);
@@ -346,7 +372,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
               <div className="flex flex-col border-r border-emerald-500/30 pr-4 md:pr-6 lg:pr-8 xl:pr-10 text-left">
                 <span className="text-emerald-400 text-xs md:text-sm lg:text-base xl:text-base font-black uppercase tracking-[0.2em] mb-1">Selanjutnya</span>
                 <span className="text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-tight">
-                  {PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
+                  {nextPrayer.name === 'Dhuhr' && currentTime && currentTime.getDay() === 5 ? "Jum'at" : PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
                 </span>
               </div>
               <div className="flex flex-col text-left">

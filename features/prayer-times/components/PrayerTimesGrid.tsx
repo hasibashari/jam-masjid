@@ -37,10 +37,12 @@ export default function PrayerTimesGrid({ timelineObj, nextPrayerName, hijriDate
     prayers.push({ id: 'Imsak', label: 'Imsak', timeObj: timelineObj.Imsak });
   }
   
+  const isFriday = currentTime ? currentTime.getDay() === 5 : new Date().getDay() === 5;
+
   prayers.push(
     { id: 'Fajr', label: 'Subuh', timeObj: timelineObj.Fajr },
     { id: 'Sunrise', label: 'Syuruq', timeObj: timelineObj.Sunrise },
-    { id: 'Dhuhr', label: 'Dzuhur', timeObj: timelineObj.Dhuhr },
+    { id: 'Dhuhr', label: isFriday ? "Jum'at" : 'Dzuhur', timeObj: timelineObj.Dhuhr },
     { id: 'Asr', label: 'Ashar', timeObj: timelineObj.Asr },
     { id: 'Maghrib', label: 'Maghrib', timeObj: timelineObj.Maghrib },
     { id: 'Isha', label: 'Isya', timeObj: timelineObj.Isha }

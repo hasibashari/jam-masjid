@@ -195,9 +195,12 @@ export function usePrayerTimes({
   const countdownStr = `${String(hoursToNext).padStart(2, '0')}:${String(minsToNext).padStart(2, '0')}:${String(secsToNext).padStart(2, '0')}`;
 
   // Format Hijri Date (using native Intl in Indonesian)
-  // Dilakukan penyesuaian koreksi -1 hari agar selaras dengan kalender Hijriah resmi Kemenag RI
+  // Dilakukan penyesuaian koreksi agar selaras dengan kalender Hijriah resmi Kemenag RI
+  // Sebelum Maghrib: koreksi -1 hari. Setelah Maghrib: berganti ke hari berikutnya (tanpa koreksi -1 hari)
   const hijriAdjustedTime = new Date(currentTime.getTime());
-  hijriAdjustedTime.setDate(hijriAdjustedTime.getDate() - 1);
+  if (timelineObj && timelineObj.Maghrib && currentTime < timelineObj.Maghrib) {
+    hijriAdjustedTime.setDate(hijriAdjustedTime.getDate() - 1);
+  }
 
   const hijriFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {
     day: 'numeric',
