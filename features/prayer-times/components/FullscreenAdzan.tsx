@@ -27,12 +27,12 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
       {/* Top Header — cukup besar dibaca dari jarak 10m */}
       <div className="w-full flex justify-between items-center border-b border-emerald-500/20 pb-[1.5vh]">
         <div>
-          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Status Masjid</span>
-          <span className="font-black text-[#D4AF37] tracking-tight text-[3vw]">KUMANDANG ADZAN</span>
+          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[0.75vw]">Status Masjid</span>
+          <span className="font-black text-[#D4AF37] tracking-tight text-[1.6vw]">KUMANDANG ADZAN</span>
         </div>
         <div className="text-right">
-          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[1.4vw]">Waktu</span>
-          <span className="font-bold font-mono text-[3vw]">{format(currentTime, 'HH:mm:ss')}</span>
+          <span className="text-emerald-400 font-black tracking-[0.3em] uppercase block mb-[0.3vh] text-[0.75vw]">Waktu</span>
+          <span className="font-bold font-mono text-[1.6vw]">{format(currentTime, 'HH:mm:ss')}</span>
         </div>
       </div>
 
@@ -53,37 +53,37 @@ export default function FullscreenAdzan({ prayerName, currentTime, secondsLeft }
         </div>
 
         {/* Sub-label "ADZAN SEDANG BERKUMANDANG" */}
-        <span className="text-emerald-400 font-black tracking-[0.4em] uppercase animate-pulse text-[2vw] mb-[1.5vh]">
+        <span className="text-emerald-400 font-black tracking-[0.4em] uppercase animate-pulse text-[1.3vw] mb-[1.5vh]">
           ADZAN SEDANG BERKUMANDANG
         </span>
 
         {/* Nama Sholat — hero utama, terbaca dari 15 meter */}
         <h1
           className="font-black text-[#D4AF37] tracking-tighter uppercase leading-none mb-[2vh]"
-          style={{ fontSize: 'clamp(5rem, 14vw, 22rem)', textShadow: '0 0 6vw rgba(212,175,55,0.35)' }}
+          style={{ fontSize: 'clamp(4rem, 10vw, 15rem)', textShadow: '0 0 4vw rgba(212,175,55,0.35)' }}
         >
           {prayerName}
         </h1>
 
         {/* Hadits Quote */}
-        <p className="text-zinc-300 font-serif italic leading-relaxed border-t border-b border-white/10 py-[1.5vh] text-[1.6vw] max-w-[60vw]">
+        <p className="text-zinc-300 font-serif italic leading-relaxed border-t border-b border-white/10 py-[1.5vh] text-[1.1vw] max-w-[60vw]">
           &quot;Apabila adzan dikumandangkan, maka setan berpaling sambil bersiul-siul hingga tidak mendengar adzan.&quot;
-          <span className="block mt-[0.5vh] text-zinc-500 not-italic text-[1.2vw]">(HR. Bukhari &amp; Muslim)</span>
+          <span className="block mt-[0.5vh] text-zinc-500 not-italic text-[0.85vw]">(HR. Bukhari &amp; Muslim)</span>
         </p>
       </div>
 
       {/* Bottom Timer Card */}
-      <div className="w-full max-w-[55vw] flex flex-col items-center bg-emerald-950/40 border border-emerald-500/20 rounded-[2vw] px-[4vw] py-[2vh] backdrop-blur shadow-2xl">
-        <span className="text-emerald-400 font-black tracking-[0.3em] uppercase mb-[0.5vh] text-[1.2vw]">
+      <div className="w-full max-w-[45vw] flex flex-col items-center bg-emerald-950/40 border border-emerald-500/20 rounded-2xl px-[3vw] py-[1.5vh] backdrop-blur shadow-2xl">
+        <span className="text-emerald-400 font-black tracking-[0.3em] uppercase mb-[0.5vh] text-[0.9vw]">
           DURASI ADZAN BERLANGSUNG
         </span>
         <div
           className="font-mono font-black text-emerald-400 tracking-wider tabular-nums leading-none"
-          style={{ fontSize: 'clamp(3rem, 9vw, 14rem)' }}
+          style={{ fontSize: 'clamp(2.5rem, 6vw, 9rem)' }}
         >
           {timerStr}
         </div>
-        <div className="mt-[1vh] flex gap-[2vw] text-zinc-400 font-sans tracking-wide text-[1.1vw]">
+        <div className="mt-[1vh] flex gap-[2vw] text-zinc-400 font-sans tracking-wide text-[0.85vw]">
           <span>Harap tenang saat Adzan berkumandang</span>
           <span>•</span>
           <span>Siapkan diri untuk Sholat Berjamaah</span>
