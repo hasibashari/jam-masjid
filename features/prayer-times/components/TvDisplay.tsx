@@ -81,6 +81,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     timelineObj,
     countdownStr,
     hijriDate,
+    hijriDayNum,
     prayerStage,
     activePrayerName,
     stageSecondsLeft,
@@ -186,10 +187,10 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
   const fastingAnnouncements = useMemo(
     () => {
       if (!currentTime || !timelineObj) return [];
-      return computeFastingAnnouncements(currentTime, timelineObj, !!settings.fastingReminderActive);
+      return computeFastingAnnouncements(currentTime, timelineObj, !!settings.fastingReminderActive, hijriDayNum);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDateStr, timelineObj, settings.fastingReminderActive],
+    [currentDateStr, timelineObj, settings.fastingReminderActive, hijriDayNum],
   );
 
   if (!currentTime || !prayerTimes || !timelineObj || !nextPrayer) {

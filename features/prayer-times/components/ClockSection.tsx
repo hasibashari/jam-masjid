@@ -36,14 +36,14 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   const currentQuote = activeQuotes[currentQuoteIndex] || FALLBACK_ISLAMIC_QUOTES[0];
 
   return (
-    <section className="flex-grow flex flex-col justify-center items-center gap-[clamp(1rem,3vh,2rem)] relative overflow-hidden w-full px-[4vw]">
+    <section className="flex-grow flex flex-col relative w-full px-[4vw]">
       {/* Subtle Slow-Rotating Islamic Pattern Watermark */}
-      <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none select-none">
+      <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none select-none translate-y-[2vh]">
         <svg
-          className="w-[28vw] h-[28vw] text-[#D4AF37]/5 animate-[spin_240s_linear_infinite] max-w-[320px] max-h-[320px]"
+          className="w-[45vh] h-[45vh] text-[#D4AF37]/20 animate-[spin_120s_linear_infinite] max-w-[450px] max-h-[450px]"
           fill="none"
           stroke="currentColor"
-          strokeWidth="0.8"
+          strokeWidth="1.2"
           viewBox="0 0 100 100"
         >
           {/* Rub el Hizb / Islamic 8-Point Star */}
@@ -57,39 +57,43 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
         </svg>
       </div>
 
-      {/* Time Display (Floating Freely for Spacious Elegance) */}
-      <div className="flex flex-col items-center justify-center z-10 select-none pointer-events-none">
-        <div className="flex items-end relative">
-          <span className="text-[clamp(5.5rem,10.5vh,8.5rem)] font-black leading-none tracking-tighter tabular-nums drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] font-[family-name:var(--font-space)]">
-            {format(currentTime, 'HH:mm')}
-          </span>
+      {/* Top Half: Clock */}
+      <div className="flex-1 flex flex-col items-center justify-end pb-[clamp(1rem,3vh,2rem)]">
+        <div className="flex flex-col items-center justify-center z-10 select-none pointer-events-none">
+          <div className="flex items-end relative">
+            <span className="text-[clamp(5.5rem,10.5vh,8.5rem)] font-black leading-none tracking-tighter tabular-nums drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] font-[family-name:var(--font-space)]">
+              {format(currentTime, 'HH:mm')}
+            </span>
 
-          <span className="text-[clamp(1.5rem,2.8vh,2.2rem)] text-[#9BB1A5] font-bold mb-[clamp(0.4rem,0.8vh,0.7rem)] ml-3">
-            {format(currentTime, 'ss')}
-          </span>
+            <span className="text-[clamp(1.5rem,2.8vh,2.2rem)] text-[#9BB1A5] font-bold mb-[clamp(0.4rem,0.8vh,0.7rem)] ml-3">
+              {format(currentTime, 'ss')}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Elegant Golden Fading Divider with a Glowing Star-Dot */}
-      <div className="w-[25vw] h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent relative my-1 z-10">
+      {/* Elegant Golden Fading Divider */}
+      <div className="w-[25vw] h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent relative mx-auto z-10 flex-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#D4AF37] shadow-[0_0_8px_#D4AF37]"></div>
       </div>
 
-      {/* Quotes Container - Relatif di bawah jam, menyusut secara dinamis mengikuti panjang teks */}
-      <div className="w-fit max-w-[50vw] mx-auto z-10">
-        <div
-          className={`pt-[clamp(1rem,2vh,1.5rem)] pb-[clamp(0.8rem,1.5vh,1.1rem)] px-[clamp(1.5rem,2vw,2.5rem)] bg-emerald-950/30 border border-emerald-500/20 rounded-2xl backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 text-center ${isFading
-            ? 'opacity-0 scale-98 blur-[2px]'
-            : 'opacity-100 scale-100 blur-none'
-            }`}
-        >
-          <p className="text-emerald-50/95 text-[clamp(0.95rem,1.9vh,1.25rem)] font-medium italic leading-relaxed line-clamp-3">
-            &ldquo;{currentQuote.text}&rdquo;
-          </p>
+      {/* Bottom Half: Quote Container */}
+      <div className="flex-1 flex flex-col items-center justify-start pt-[clamp(1rem,3vh,2rem)]">
+        <div className="w-fit max-w-[50vw] mx-auto z-10">
+          <div
+            className={`pt-[clamp(1rem,2vh,1.5rem)] pb-[clamp(0.8rem,1.5vh,1.1rem)] px-[clamp(1.5rem,2vw,2.5rem)] bg-emerald-950/30 border border-emerald-500/20 rounded-2xl backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 text-center ${isFading
+              ? 'opacity-0 scale-98 blur-[2px]'
+              : 'opacity-100 scale-100 blur-none'
+              }`}
+          >
+            <p className="text-emerald-50/95 text-[clamp(0.95rem,1.9vh,1.25rem)] font-medium italic leading-relaxed line-clamp-3">
+              &ldquo;{currentQuote.text}&rdquo;
+            </p>
 
-          <span className="block mt-[clamp(0.5rem,1vh,0.8rem)] text-emerald-300/80 text-[clamp(0.65rem,1.2vh,0.8rem)] font-extrabold uppercase tracking-[0.25em] truncate">
-            — {currentQuote.source}
-          </span>
+            <span className="block mt-[clamp(0.5rem,1vh,0.8rem)] text-emerald-300/80 text-[clamp(0.65rem,1.2vh,0.8rem)] font-extrabold uppercase tracking-[0.25em] truncate">
+              — {currentQuote.source}
+            </span>
+          </div>
         </div>
       </div>
     </section>

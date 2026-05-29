@@ -48,6 +48,7 @@ export function usePrayerTimes({
 }: UsePrayerTimesProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimesState | null>(null);
+  const [apiHijriData, setApiHijriData] = useState<any>(null);
   const [timezone, setTimezone] = useState<string>('Asia/Jakarta');
 
   // Fetch prayer times for selected location
@@ -58,6 +59,7 @@ export function usePrayerTimes({
         if (res.ok) {
           const data = await res.json();
           setPrayerTimes(data.timings);
+          setApiHijriData(data.date?.hijri);
           setTimezone(data.meta.timezone);
         }
       } catch (e) {
@@ -195,7 +197,7 @@ export function usePrayerTimes({
   }, [timelineObj]);
 
   // If we haven't mounted or loaded the times yet, return default loaders values
-  if (!currentTime || !prayerTimes) {
+  if (!currentTime || !prayerTimes || !apiHijriData) {
     return {
       currentTime: null,
       prayerTimes: null,
@@ -205,6 +207,7 @@ export function usePrayerTimes({
       timelineObj: null,
       countdownStr: "00:00:00",
       hijriDate: "...",
+      hijriDayNum: 0,
       prayerStage: 'NORMAL' as PrayerStage,
       activePrayerName: null as string | null,
       stageSecondsLeft: 0
@@ -290,18 +293,34 @@ export function usePrayerTimes({
   const secsToNext = Math.max(0, Math.floor((msToNext % (1000 * 60)) / 1000));
   const countdownStr = `${String(hoursToNext).padStart(2, '0')}:${String(minsToNext).padStart(2, '0')}:${String(secsToNext).padStart(2, '0')}`;
 
-  // Hijri date with Kemenag RI correction: before Maghrib, subtract 1 day
-  const hijriAdjustedTime = new Date(currentTime.getTime());
-  if (tl.Maghrib && currentTime < tl.Maghrib) {
-    hijriAdjustedTime.setDate(hijriAdjustedTime.getDate() - 1);
+  // Calculate Hijri date manually using API data + Kemenag RI (Maghrib rollover)
+  let hDay = parseInt(apiHijriData.day, 10);
+  let hMonth = apiHijriData.month.number;
+  let hYear = parseInt(apiHijriData.year, 10);
+
+  // If it's already Maghrib or later, we enter the next Islamic day
+  if (tl.Maghrib && currentTime >= tl.Maghrib) {
+    hDay += 1;
+    // Handle month overflow (using API's reported days in month, fallback to 30)
+    const maxDays = apiHijriData.month.days || 30;
+    if (hDay > maxDays) {
+      hDay = 1;
+      hMonth += 1;
+      if (hMonth > 12) {
+        hMonth = 1;
+        hYear += 1;
+      }
+    }
   }
 
-  const hijriFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-  const hijriDate = hijriFormatter.format(hijriAdjustedTime);
+  const hMonthNames = [
+    "Muharram", "Safar", "Rabiul Awal", "Rabiul Akhir",
+    "Jumadil Awal", "Jumadil Akhir", "Rajab", "Sya'ban",
+    "Ramadhan", "Syawal", "Dzulqa'dah", "Dzulhijjah"
+  ];
+
+  const hijriDate = `${hDay} ${hMonthNames[hMonth - 1]} ${hYear} H`;
+  const hijriDayNum = hDay;
 
   const getIndonesianTimezoneLabel = (timezoneStr: string): string => {
     const tz = timezoneStr.toLowerCase();
@@ -324,6 +343,7 @@ export function usePrayerTimes({
     timelineObj: tl,
     countdownStr,
     hijriDate,
+    hijriDayNum,
     prayerStage,
     activePrayerName,
     stageSecondsLeft,

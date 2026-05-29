@@ -19,6 +19,7 @@ export function computeFastingAnnouncements(
   currentTime: Date,
   timelineObj: TimelineObj,
   active: boolean,
+  hijriDayNum?: number,
 ): AnnouncementType[] {
   if (!active) return [];
 
@@ -77,18 +78,7 @@ export function computeFastingAnnouncements(
   }
 
   // --- Ayyamul Bidh (13, 14, 15 Hijriah) reminders ---
-  try {
-    const hijriAdjusted = new Date(currentTime.getTime());
-    if (timelineObj?.Maghrib && currentTime < timelineObj.Maghrib) {
-      // Before Maghrib: Hijri day hasn't changed yet
-      hijriAdjusted.setDate(hijriAdjusted.getDate() - 1);
-    }
-    const hijriDayFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {
-      day: 'numeric',
-    });
-    const formattedDay = hijriDayFormatter.format(hijriAdjusted);
-    const hijriDayNum = parseInt(formattedDay.replace(/\D/g, ''), 10);
-
+  if (hijriDayNum !== undefined) {
     if (hijriDayNum === 12) {
       announcements.push({
         id: 'fasting-bidh-tomorrow',
@@ -102,8 +92,6 @@ export function computeFastingAnnouncements(
         active: true,
       });
     }
-  } catch (e) {
-    console.error('Fasting reminder Hijri parser error:', e);
   }
 
   return announcements;
