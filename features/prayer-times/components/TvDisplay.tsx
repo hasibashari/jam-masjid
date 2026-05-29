@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { AppSettings, AnnouncementType, BannerType, QuoteType, PRAYER_TRANSLATIONS } from '@/shared/types';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { AppSettings, AnnouncementType, QuoteType, PRAYER_TRANSLATIONS } from '@/shared/types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Loader2, Moon, Maximize, Minimize } from 'lucide-react';
+import { Loader2, Maximize, Minimize } from 'lucide-react';
 
 // Feature-Based Absolute Imports
 import LocationPickerModal from '@/features/location/components/LocationPickerModal';
@@ -51,6 +51,152 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     initialQuotes,
     suspended: isSuspended
   });
+
+  // Background Slideshow & Transition Engine
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  const [currentBgUrl, setCurrentBgUrl] = useState<string | null>(initialSettings.backgroundImage || null);
+  const [prevBgUrl, setPrevBgUrl] = useState<string | null>(null);
+  const [triggerTransition, setTriggerTransition] = useState(false);
+
+  const activeBgList = useMemo(() => {
+    return Array.isArray(settings.backgroundImages)
+      ? settings.backgroundImages.filter((img: any) => img.active)
+      : [];
+  }, [settings.backgroundImages]);
+
+  // Reset when settings or slideshow state changes
+  useEffect(() => {
+    if (!settings.backgroundActive) {
+      setCurrentBgUrl(null);
+      setPrevBgUrl(null);
+      return;
+    }
+
+    if (settings.backgroundSlideshowActive && activeBgList.length > 0) {
+      const initialBg = activeBgList[0]?.url || null;
+      setCurrentBgUrl(initialBg);
+      setCurrentBgIndex(0);
+      setPrevBgUrl(null);
+    } else {
+      setCurrentBgUrl(settings.backgroundImage || null);
+      setPrevBgUrl(null);
+    }
+  }, [settings.backgroundActive, settings.backgroundSlideshowActive, settings.backgroundImage, activeBgList.length]);
+
+  // Refs to keep track of slideshow state and avoid restarting interval on every render/poll
+  const activeBgListRef = useRef(activeBgList);
+  const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    activeBgListRef.current = activeBgList;
+  }, [activeBgList]);
+
+  // Reset bgError whenever currentBgUrl changes so that new slides have a chance to load
+  useEffect(() => {
+    if (currentBgUrl) {
+      setBgError(false);
+    }
+  }, [currentBgUrl, setBgError]);
+
+  // Cycle background slides smoothly without clearing interval on every tick or poll
+  useEffect(() => {
+    if (!settings.backgroundActive || !settings.backgroundSlideshowActive) {
+      return;
+    }
+
+    const initialList = activeBgListRef.current;
+    if (initialList.length <= 1) {
+      return;
+    }
+
+    const intervalSec = settings.backgroundSlideshowInterval || 10;
+    const timer = setInterval(() => {
+      const list = activeBgListRef.current;
+      if (list.length <= 1) return;
+
+      setCurrentBgIndex(prevIndex => {
+        const nextIndex = (prevIndex + 1) % list.length;
+        
+        setPrevBgUrl(list[prevIndex]?.url || null);
+        setCurrentBgUrl(list[nextIndex]?.url || null);
+        setTriggerTransition(true);
+        
+        if (transitionTimerRef.current) {
+          clearTimeout(transitionTimerRef.current);
+        }
+        
+        transitionTimerRef.current = setTimeout(() => {
+          setTriggerTransition(false);
+          setPrevBgUrl(null);
+          transitionTimerRef.current = null;
+        }, 1000); // 1s transition duration
+
+        return nextIndex;
+      });
+    }, intervalSec * 1000);
+
+    return () => {
+      clearInterval(timer);
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+    };
+  }, [
+    settings.backgroundActive, 
+    settings.backgroundSlideshowActive, 
+    settings.backgroundSlideshowInterval
+  ]);
+
+  const getTransitionClasses = (isIncoming: boolean) => {
+    const effect = settings.backgroundTransitionEffect || 'fade';
+    
+    if (effect === 'zoom') {
+      if (isIncoming) {
+        return triggerTransition 
+          ? 'scale-100 opacity-75 transition-all duration-[1000ms] ease-out brightness-95' 
+          : 'scale-100 opacity-75 brightness-95 transition-all duration-[1000ms]';
+      } else {
+        return triggerTransition 
+          ? 'scale-105 opacity-0 transition-all duration-[1000ms] ease-in' 
+          : 'scale-100 opacity-0 transition-none';
+      }
+    }
+    
+    if (effect === 'slide') {
+      if (isIncoming) {
+        return triggerTransition 
+          ? 'translate-x-0 opacity-75 transition-all duration-[1000ms] ease-out' 
+          : 'translate-x-0 opacity-75 brightness-95 transition-all duration-[1000ms]';
+      } else {
+        return triggerTransition 
+          ? '-translate-x-full opacity-0 transition-all duration-[1000ms] ease-in' 
+          : 'translate-x-0 opacity-0 transition-none';
+      }
+    }
+    
+    if (effect === 'blur') {
+      if (isIncoming) {
+        return triggerTransition 
+          ? 'blur-none opacity-75 transition-all duration-[1000ms] ease-out' 
+          : 'blur-none opacity-75 brightness-95 transition-all duration-[1000ms]';
+      } else {
+        return triggerTransition 
+          ? 'blur-md opacity-0 transition-all duration-[1000ms] ease-in' 
+          : 'blur-none opacity-0 transition-none';
+      }
+    }
+    
+    // Default: Fade
+    if (isIncoming) {
+      return triggerTransition 
+        ? 'opacity-75 transition-opacity duration-[1000ms] ease-out' 
+        : 'opacity-75 brightness-95 transition-all duration-[1000ms]';
+    } else {
+      return triggerTransition 
+        ? 'opacity-0 transition-opacity duration-[1000ms] ease-in' 
+        : 'opacity-0 transition-none';
+    }
+  };
 
   // 2. Kiosk system optimization hooks
   useWakeLock();
@@ -255,7 +401,9 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
   }
 
   // Otherwise, default layout
-  const hasValidBg = settings.backgroundActive && settings.backgroundImage && !bgError;
+  const hasValidBg = settings.backgroundActive && 
+    (settings.backgroundSlideshowActive && activeBgList.length > 0 ? !!currentBgUrl : !!settings.backgroundImage) && 
+    !bgError;
   const activeGradient = getDynamicGradientClass(nextPrayer?.name || null);
 
   // Calculate dynamic fasting reminders (Monday/Thursday & Ayyamul Bidh)
@@ -340,15 +488,40 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
       <div className="h-screen w-screen flex flex-col text-[#F7F5F0] overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-[#0C1814]">
         
         {hasValidBg ? (
-          <div className="absolute inset-0 -z-10 select-none pointer-events-none">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={settings.backgroundImage!} 
-              alt="Background" 
-              className="w-full h-full object-cover opacity-75 brightness-95"
-              onError={() => setBgError(true)}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40"></div>
+          <div className="absolute inset-0 -z-10 select-none pointer-events-none overflow-hidden">
+            {settings.backgroundSlideshowActive && activeBgList.length > 1 ? (
+              <>
+                {/* Outgoing Background Image */}
+                {prevBgUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img 
+                    src={prevBgUrl} 
+                    alt="Outgoing Background" 
+                    className={`absolute inset-0 w-full h-full object-cover ${getTransitionClasses(false)}`}
+                  />
+                )}
+                
+                {/* Incoming Background Image */}
+                {currentBgUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img 
+                    src={currentBgUrl} 
+                    alt="Incoming Background" 
+                    className={`absolute inset-0 w-full h-full object-cover ${getTransitionClasses(true)}`}
+                    onError={() => setBgError(true)}
+                  />
+                )}
+              </>
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img 
+                src={currentBgUrl || settings.backgroundImage!} 
+                alt="Background" 
+                className="w-full h-full object-cover opacity-75 brightness-95 transition-all duration-[1000ms]"
+                onError={() => setBgError(true)}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40 z-10"></div>
           </div>
         ) : (
           /* Premium dynamic gradient background based on time of day / next prayer */
@@ -364,13 +537,13 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-[clamp(0.65rem,1.3vh,0.9rem)] text-emerald-300/70 font-extrabold tracking-wide mt-[clamp(0.2rem,0.4vh,0.4rem)] uppercase">
+              <p className="text-[clamp(0.65rem,1.3vh,0.9rem)] text-[#D4AF37]/95 font-extrabold tracking-wide mt-[clamp(0.2rem,0.4vh,0.4rem)] uppercase">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
           
-          <div className="text-right flex flex-col justify-center">
+          <div className="text-right flex flex-col justify-center border-r-4 border-[#D4AF37]/40 pr-[1.5vw]">
             <div className="text-[clamp(0.95rem,2.1vh,1.4rem)] font-bold text-[#F7F5F0] tracking-tight leading-none">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>

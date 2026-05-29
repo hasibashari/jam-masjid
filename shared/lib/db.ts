@@ -59,6 +59,10 @@ const initDb = async () => {
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimAudioUrl" TEXT NOT NULL DEFAULT 'https://archive.org/download/tarhim-subuh/tarhim-subuh.mp3';
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "tahrimDuration" INT NOT NULL DEFAULT 10;
       ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "fastingReminderActive" INT NOT NULL DEFAULT 1;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "backgroundImages" TEXT DEFAULT '[]';
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "backgroundSlideshowActive" INT NOT NULL DEFAULT 0;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "backgroundSlideshowInterval" INT NOT NULL DEFAULT 10;
+      ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "backgroundTransitionEffect" TEXT NOT NULL DEFAULT 'fade';
 
       CREATE TABLE IF NOT EXISTS "Banner" (
         id TEXT PRIMARY KEY,
@@ -138,6 +142,18 @@ function fromDbRow(row: any) {
   if ('adzanAudioActive' in copy) copy.adzanAudioActive = Boolean(copy.adzanAudioActive);
   if ('tahrimAudioActive' in copy) copy.tahrimAudioActive = Boolean(copy.tahrimAudioActive);
   if ('fastingReminderActive' in copy) copy.fastingReminderActive = Boolean(copy.fastingReminderActive);
+  if ('backgroundSlideshowActive' in copy) copy.backgroundSlideshowActive = Boolean(copy.backgroundSlideshowActive);
+  if ('backgroundImages' in copy) {
+    if (typeof copy.backgroundImages === 'string') {
+      try {
+        copy.backgroundImages = JSON.parse(copy.backgroundImages);
+      } catch {
+        copy.backgroundImages = [];
+      }
+    } else if (!copy.backgroundImages) {
+      copy.backgroundImages = [];
+    }
+  }
   return copy;
 }
 
@@ -149,6 +165,10 @@ function toDbData(data: any) {
   if ('adzanAudioActive' in copy && typeof copy.adzanAudioActive === 'boolean') copy.adzanAudioActive = copy.adzanAudioActive ? 1 : 0;
   if ('tahrimAudioActive' in copy && typeof copy.tahrimAudioActive === 'boolean') copy.tahrimAudioActive = copy.tahrimAudioActive ? 1 : 0;
   if ('fastingReminderActive' in copy && typeof copy.fastingReminderActive === 'boolean') copy.fastingReminderActive = copy.fastingReminderActive ? 1 : 0;
+  if ('backgroundSlideshowActive' in copy && typeof copy.backgroundSlideshowActive === 'boolean') copy.backgroundSlideshowActive = copy.backgroundSlideshowActive ? 1 : 0;
+  if ('backgroundImages' in copy && Array.isArray(copy.backgroundImages)) {
+    copy.backgroundImages = JSON.stringify(copy.backgroundImages);
+  }
   
   // Strip out undefined values to support partial updates correctly
   for (const key of Object.keys(copy)) {

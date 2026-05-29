@@ -10,6 +10,10 @@ export interface AppSettings {
   prayerDuration: number;
   backgroundImage?: string | null;
   backgroundActive?: boolean;
+  backgroundImages?: Array<{ id: string; url: string; active: boolean }>;
+  backgroundSlideshowActive?: boolean;
+  backgroundSlideshowInterval?: number;
+  backgroundTransitionEffect?: 'fade' | 'zoom' | 'slide' | 'blur';
   // display sleep configuration removed
   iqomahFajr: number;
   iqomahDhuhr: number;
@@ -72,6 +76,10 @@ export const FALLBACK_SETTINGS: AppSettings = {
   prayerDuration: 900, // 15 minutes
   backgroundImage: null,
   backgroundActive: false,
+  backgroundImages: [],
+  backgroundSlideshowActive: false,
+  backgroundSlideshowInterval: 10,
+  backgroundTransitionEffect: 'fade',
   iqomahFajr: 600,
   iqomahDhuhr: 480,
   iqomahAsr: 480,

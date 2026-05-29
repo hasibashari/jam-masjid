@@ -61,7 +61,7 @@ export function useMosqueSettings({
     setMainBgUploading(true);
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('action', 'upload');
+    formData.append('action', 'upload-multiple');
 
     try {
       const res = await fetch('/api/settings/background', {
@@ -71,7 +71,7 @@ export function useMosqueSettings({
       if (res.ok) {
         const updated = await res.json();
         setSettingsExternal(updated);
-        showAlert('success', 'Background utama berhasil diperbarui!');
+        showAlert('success', 'Background berhasil ditambahkan ke daftar!');
       } else {
         const err = await res.json();
         showAlert('error', err.error || 'Gagal mengunggah background.');
@@ -81,6 +81,61 @@ export function useMosqueSettings({
     } finally {
       setMainBgUploading(false);
     }
+  };
+
+  const handleDeleteBgImage = async (id: string) => {
+    const formData = new FormData();
+    formData.append('action', 'delete-image');
+    formData.append('id', id);
+    try {
+      const res = await fetch('/api/settings/background', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSettingsExternal(updated);
+        showAlert('success', 'Gambar background berhasil dihapus!');
+      } else {
+        const err = await res.json();
+        showAlert('error', err.error || 'Gagal menghapus background.');
+      }
+    } catch {
+      showAlert('error', 'Error menghapus gambar.');
+    }
+  };
+
+  const handleToggleBgImage = (id: string) => {
+    setSettingsExternal(prev => {
+      const images = Array.isArray(prev.backgroundImages) ? prev.backgroundImages : [];
+      const updatedImages = images.map((img: any) => {
+        if (img.id === id) {
+          return { ...img, active: !img.active };
+        }
+        return img;
+      });
+      return { ...prev, backgroundImages: updatedImages };
+    });
+  };
+
+  const handleSelectBgImage = (id: string) => {
+    setSettingsExternal(prev => {
+      const images = Array.isArray(prev.backgroundImages) ? prev.backgroundImages : [];
+      const selectedImg = images.find((img: any) => img.id === id);
+      if (!selectedImg) return prev;
+      return {
+        ...prev,
+        backgroundImage: selectedImg.url,
+        backgroundActive: true
+      };
+    });
+  };
+
+  const handleToggleSlideshow = () => {
+    setSettingsExternal(prev => ({
+      ...prev,
+      backgroundSlideshowActive: !prev.backgroundSlideshowActive
+    }));
   };
 
   const handleToggleMainBg = async () => {
@@ -133,5 +188,9 @@ export function useMosqueSettings({
     handleToggleMainBg,
     handlePlaceSelect,
     handleMapClick,
+    handleDeleteBgImage,
+    handleToggleBgImage,
+    handleSelectBgImage,
+    handleToggleSlideshow,
   };
 }

@@ -71,11 +71,30 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
 
   return (
     <section className="flex-grow flex flex-col justify-center items-center gap-[clamp(1rem,3vh,2rem)] relative overflow-hidden w-full px-[4vw]">
-      {/* Clock */}
+      {/* Subtle Slow-Rotating Islamic Pattern Watermark */}
+      <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none select-none">
+        <svg
+          className="w-[28vw] h-[28vw] text-[#D4AF37]/5 animate-[spin_240s_linear_infinite] max-w-[320px] max-h-[320px]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="0.8"
+          viewBox="0 0 100 100"
+        >
+          {/* Rub el Hizb / Islamic 8-Point Star */}
+          <path d="M50 5 L63 20 L80 20 L80 37 L95 50 L80 63 L80 80 L63 80 L50 95 L37 80 L20 80 L20 63 L5 50 L20 37 L20 20 L37 20 Z" />
+          {/* Concentric Decorative Rings */}
+          <circle cx="50" cy="50" r="32" strokeDasharray="3 3" />
+          <circle cx="50" cy="50" r="22" strokeWidth="0.5" />
+          <circle cx="50" cy="50" r="12" strokeDasharray="1 2" />
+          {/* Delicate Cross Grid Lines */}
+          <path d="M50 15 L50 85 M15 50 L85 50" strokeWidth="0.4" strokeDasharray="2 4" />
+        </svg>
+      </div>
+
+      {/* Time Display (Floating Freely for Spacious Elegance) */}
       <div className="flex flex-col items-center justify-center z-10 select-none pointer-events-none">
-        {/* Time */}
-        <div className="flex items-end">
-          <span className="text-[clamp(5.5rem,10.5vh,8.5rem)] font-black leading-none tracking-tighter tabular-nums drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)] font-[family-name:var(--font-space)]">
+        <div className="flex items-end relative">
+          <span className="text-[clamp(5.5rem,10.5vh,8.5rem)] font-black leading-none tracking-tighter tabular-nums drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] font-[family-name:var(--font-space)]">
             {format(currentTime, 'HH:mm')}
           </span>
 
@@ -83,6 +102,11 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
             {format(currentTime, 'ss')}
           </span>
         </div>
+      </div>
+
+      {/* Elegant Golden Fading Divider with a Glowing Star-Dot */}
+      <div className="w-[25vw] h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent relative my-1 z-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#D4AF37] shadow-[0_0_8px_#D4AF37]"></div>
       </div>
 
       {/* Quotes Container - Relatif di bawah jam, menyusut secara dinamis mengikuti panjang teks */}
