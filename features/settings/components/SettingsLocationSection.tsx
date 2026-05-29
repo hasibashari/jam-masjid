@@ -19,7 +19,7 @@ const DynamicMapPicker = dynamic(() => import('@/features/location/components/Ma
 interface Props {
   settings: AppSettings;
   setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
-  mapCenter: [number, number];
+  mapCenter: { lat: number; lng: number };
   handlePlaceSelect: (lat: number, lon: number, name: string) => void;
   handleMapClick: (lat: number, lon: number) => void;
   saveLoading: boolean;
