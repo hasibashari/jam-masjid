@@ -7,9 +7,10 @@ interface UseTvDisplayDataProps {
   initialSettings: AppSettings;
   initialAnnouncements: AnnouncementType[];
   initialQuotes: QuoteType[];
+  suspended?: boolean;
 }
 
-export function useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes }: UseTvDisplayDataProps) {
+export function useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes, suspended = false }: UseTvDisplayDataProps) {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [announcements, setAnnouncements] = useState<AnnouncementType[]>(initialAnnouncements);
   const [banners, setBanners] = useState<BannerType[]>([]);
@@ -54,17 +55,18 @@ export function useTvDisplayData({ initialSettings, initialAnnouncements, initia
     }
   }, []);
 
-  // Poll for background data every 2 seconds
+  // Poll for background data every 15 seconds (suspended during active prayer phases)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchLatestData();
-    }, 0);
-    const poller = setInterval(fetchLatestData, 2000);
+    if (suspended) return;
+
+    // Instant fetch immediately when coming out of suspension or mounting
+    fetchLatestData();
+
+    const poller = setInterval(fetchLatestData, 15000);
     return () => {
-      clearTimeout(timer);
       clearInterval(poller);
     };
-  }, [fetchLatestData]);
+  }, [fetchLatestData, suspended]);
 
   // Event listener for PWA online status reconnection
   useEffect(() => {

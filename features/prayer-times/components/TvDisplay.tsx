@@ -33,7 +33,10 @@ interface TvDisplayProps {
 }
 
 export default function TvDisplay({ initialSettings, initialAnnouncements, initialQuotes }: TvDisplayProps) {
-  // 1. Data synchronization & polling hook (every 2s)
+  // State to suspend polling during active prayer stages
+  const [isSuspended, setIsSuspended] = useState(false);
+
+  // 1. Data synchronization & polling hook (every 15s, suspended during active prayer stages)
   const {
     settings,
     setSettings,
@@ -42,7 +45,12 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     quotes,
     bgError,
     setBgError,
-  } = useTvDisplayData({ initialSettings, initialAnnouncements, initialQuotes });
+  } = useTvDisplayData({ 
+    initialSettings, 
+    initialAnnouncements, 
+    initialQuotes,
+    suspended: isSuspended
+  });
 
   // 2. Kiosk system optimization hooks
   useWakeLock();
@@ -85,6 +93,11 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
     adjustMaghrib: settings.adjustMaghrib,
     adjustIsha: settings.adjustIsha
   });
+
+  // Reactively suspend polling when the screen transitions to active prayer stages (Adzan, Iqomah, Sholat)
+  useEffect(() => {
+    setIsSuspended(prayerStage !== 'NORMAL');
+  }, [prayerStage]);
 
   // 5. Audio, adzan alarm & Tahrim background audio hooks
   useAdzanAlarm({
