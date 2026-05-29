@@ -337,7 +337,7 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
 
   return (
     <>
-      <div className="h-screen w-screen flex flex-col text-white overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-black">
+      <div className="h-screen w-screen flex flex-col text-[#F7F5F0] overflow-hidden select-none selection:bg-transparent animate-fade-in relative z-0 bg-[#0C1814]">
         
         {hasValidBg ? (
           <div className="absolute inset-0 -z-10 select-none pointer-events-none">
@@ -345,10 +345,10 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
             <img 
               src={settings.backgroundImage!} 
               alt="Background" 
-              className="w-full h-full object-cover opacity-55 brightness-90"
+              className="w-full h-full object-cover opacity-75 brightness-95"
               onError={() => setBgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/65"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40"></div>
           </div>
         ) : (
           /* Premium dynamic gradient background based on time of day / next prayer */
@@ -358,45 +358,45 @@ export default function TvDisplay({ initialSettings, initialAnnouncements, initi
         )}
 
         {/* Header Section */}
-        <header className="flex-none h-[15vh] flex items-center justify-between px-[4vw] pt-[2vh] bg-gradient-to-b from-black/20 to-transparent">
+        <header className="flex-none h-[11vh] flex items-center justify-between px-[4vw] pt-[1.5vh] bg-gradient-to-b from-black/20 to-transparent">
           <div className="flex flex-col text-left justify-center mb-1">
-            <h1 className="text-[3.5vh] 2xl:text-[4.2vh] font-extrabold tracking-tight uppercase leading-none">
+            <h1 className="text-[clamp(1.25rem,2.8vh,2rem)] font-extrabold tracking-tight uppercase leading-none text-[#F7F5F0]">
               {settings.mosqueName}
             </h1>
             {settings.mosqueAddress && (
-              <p className="text-[1.6vh] 2xl:text-[2vh] text-emerald-400 font-semibold tracking-wide mt-[0.8vh] uppercase opacity-85">
+              <p className="text-[clamp(0.65rem,1.3vh,0.9rem)] text-emerald-300/70 font-extrabold tracking-wide mt-[clamp(0.2rem,0.4vh,0.4rem)] uppercase">
                 {settings.mosqueAddress}
               </p>
             )}
           </div>
           
           <div className="text-right flex flex-col justify-center">
-            <div className="text-[2.6vh] 2xl:text-[3vh] font-bold text-white tracking-tight leading-none">
+            <div className="text-[clamp(0.95rem,2.1vh,1.4rem)] font-bold text-[#F7F5F0] tracking-tight leading-none">
               {format(currentTime, 'EEEE, dd MMMM yyyy', { locale: id })}
             </div>
-            <div className="text-[1.8vh] 2xl:text-[2.2vh] text-emerald-400 font-serif italic mt-[0.8vh] tracking-wider leading-none">
+            <div className="text-[clamp(0.75rem,1.5vh,1.05rem)] text-[#D4AF37] font-serif font-black italic mt-[clamp(0.2rem,0.4vh,0.4rem)] tracking-widest leading-none">
               {hijriDate}
             </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-grow flex flex-col justify-between relative z-10 overflow-hidden">
+        <main className="flex-grow flex flex-col justify-between relative z-10 overflow-hidden gap-[clamp(1rem,2vh,2rem)]">
           {/* Central Display Visualizer */}
           <ClockSection currentTime={currentTime} quotes={quotes} />
 
           {/* Next Prayer Countdown Widget above PrayerTimesGrid */}
-          <div className="flex justify-start px-[2vw] mb-[2vh]">
-            <div className="flex items-center gap-[2vw] bg-emerald-900/40 border border-emerald-500/30 px-[2vw] py-[1.2vh] rounded-2xl backdrop-blur-md shadow-xl transition-all duration-500">
-              <div className="flex flex-col border-r border-emerald-500/30 pr-[2vw] text-left">
-                <span className="text-emerald-400 text-[1.2vh] 2xl:text-[1.4vh] font-black uppercase tracking-[0.2em] mb-[0.2vh]">Selanjutnya</span>
-                <span className="text-[2.8vh] 2xl:text-[3.4vh] font-bold text-white tracking-tight leading-none">
+          <div className="flex justify-start px-[2vw] mb-[clamp(0.4rem,1vh,0.8rem)]">
+            <div className="flex items-center gap-[clamp(1rem,1.5vw,2rem)] bg-[#11221D]/80 border border-emerald-500/20 px-[clamp(1rem,1.5vw,2rem)] py-[clamp(0.4rem,0.8vh,0.8rem)] rounded-2xl backdrop-blur-md shadow-xl transition-all duration-500">
+              <div className="flex flex-col border-r border-emerald-500/20 pr-[clamp(1rem,1.5vw,2rem)] text-left">
+                <span className="text-emerald-300/70 text-[clamp(0.6rem,1.1vh,0.8rem)] font-extrabold uppercase tracking-[0.2em] mb-[0.2vh]">Selanjutnya</span>
+                <span className="text-[clamp(1.1rem,2.4vh,1.8rem)] font-bold text-emerald-50 tracking-tight leading-none">
                   {nextPrayer.name === 'Dhuhr' && currentTime && currentTime.getDay() === 5 ? "Jum'at" : PRAYER_TRANSLATIONS[nextPrayer.name] || nextPrayer.name}
                 </span>
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-emerald-400 text-[1.2vh] 2xl:text-[1.4vh] font-black uppercase tracking-[0.2em] mb-[0.2vh]">Hitung Mundur ({timezoneLabel})</span>
-                <span className="text-[3.5vh] 2xl:text-[4.2vh] font-black text-[#D4AF37] tabular-nums tracking-tighter leading-none">{countdownStr}</span>
+                <span className="text-emerald-300/70 text-[clamp(0.6rem,1.1vh,0.8rem)] font-extrabold uppercase tracking-[0.2em] mb-[0.2vh]">Hitung Mundur ({timezoneLabel})</span>
+                <span className="text-[clamp(1.4rem,3.2vh,2.5rem)] font-black text-[#D4AF37] tabular-nums tracking-tighter leading-none drop-shadow-[0_0_8px_rgba(212,175,55,0.3)]">{countdownStr}</span>
               </div>
             </div>
           </div>

@@ -70,34 +70,34 @@ export default function ClockSection({ currentTime, quotes }: ClockSectionProps)
   const currentQuote = activeQuotes[currentQuoteIndex] || ISLAMIC_QUOTES[0];
 
   return (
-    <section className="flex-grow flex flex-col justify-center items-center gap-[2vh] relative overflow-hidden w-full px-[4vw]">
+    <section className="flex-grow flex flex-col justify-center items-center gap-[clamp(1rem,3vh,2rem)] relative overflow-hidden w-full px-[4vw]">
       {/* Clock */}
       <div className="flex flex-col items-center justify-center z-10 select-none pointer-events-none">
         {/* Time */}
         <div className="flex items-end">
-          <span className="text-[13vh] 2xl:text-[16vh] font-black leading-none tracking-tighter tabular-nums drop-shadow-2xl font-[family-name:var(--font-space)]">
+          <span className="text-[clamp(5.5rem,10.5vh,8.5rem)] font-black leading-none tracking-tighter tabular-nums drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)] font-[family-name:var(--font-space)]">
             {format(currentTime, 'HH:mm')}
           </span>
 
-          <span className="text-[3.5vh] 2xl:text-[4.5vh] text-emerald-400/55 font-medium mb-[0.8vh] lg:mb-[1.2vh] ml-3">
+          <span className="text-[clamp(1.5rem,2.8vh,2.2rem)] text-[#9BB1A5] font-bold mb-[clamp(0.4rem,0.8vh,0.7rem)] ml-3">
             {format(currentTime, 'ss')}
           </span>
         </div>
       </div>
 
       {/* Quotes Container - Relatif di bawah jam, menyusut secara dinamis mengikuti panjang teks */}
-      <div className="w-fit max-w-[48vw] mx-auto z-10">
+      <div className="w-fit max-w-[50vw] mx-auto z-10">
         <div
-          className={`pt-[2.4vh] pb-[1.8vh] px-[2.5vw] bg-black/35 border border-white/10 rounded-2xl backdrop-blur-sm transition-all duration-500 text-center ${isFading
+          className={`pt-[clamp(1rem,2vh,1.5rem)] pb-[clamp(0.8rem,1.5vh,1.1rem)] px-[clamp(1.5rem,2vw,2.5rem)] bg-emerald-950/30 border border-emerald-500/20 rounded-2xl backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 text-center ${isFading
             ? 'opacity-0 scale-98 blur-[2px]'
             : 'opacity-100 scale-100 blur-none'
             }`}
         >
-          <p className="text-zinc-200 text-[1.8vh] 2xl:text-[2.2vh] font-medium italic leading-relaxed line-clamp-3">
+          <p className="text-emerald-50/95 text-[clamp(0.95rem,1.9vh,1.25rem)] font-medium italic leading-relaxed line-clamp-3">
             &ldquo;{currentQuote.text}&rdquo;
           </p>
 
-          <span className="block mt-[1vh] text-emerald-400 text-[1.1vh] 2xl:text-[1.3vh] font-extrabold uppercase tracking-[0.2em] truncate">
+          <span className="block mt-[clamp(0.5rem,1vh,0.8rem)] text-emerald-300/80 text-[clamp(0.65rem,1.2vh,0.8rem)] font-extrabold uppercase tracking-[0.25em] truncate">
             — {currentQuote.source}
           </span>
         </div>
